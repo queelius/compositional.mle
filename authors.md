@@ -10,14 +10,14 @@
 Source:
 [`DESCRIPTION`](https://github.com/queelius/compositional.mle/blob/master/DESCRIPTION)
 
-Towell A (2025). *compositional.mle: Compositional Maximum Likelihood
+Towell A (2026). *compositional.mle: Compositional Maximum Likelihood
 Estimation*. R package version 0.2.0,
 <https://github.com/queelius/compositional.mle>.
 
     @Manual{,
       title = {compositional.mle: Compositional Maximum Likelihood Estimation},
       author = {Alexander Towell},
-      year = {2025},
+      year = {2026},
       note = {R package version 0.2.0},
       url = {https://github.com/queelius/compositional.mle},
     }

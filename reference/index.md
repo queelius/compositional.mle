@@ -45,7 +45,7 @@ Create solver functions
 Combine solvers into strategies
 
 - [`compose()`](https://queelius.github.io/compositional.mle/reference/compose.md)
-  : Compose multiple function transformations
+  : Compose Multiple Solvers Sequentially
 - [`` `%>>%` ``](https://queelius.github.io/compositional.mle/reference/grapes-greater-than-greater-than-grapes.md)
   : Sequential Solver Composition
 - [`` `%|%` ``](https://queelius.github.io/compositional.mle/reference/grapes-or-grapes.md)
