@@ -6,34 +6,84 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/queelius/compositional.mle/workflows/R-CMD-check/badge.svg)](https://github.com/queelius/compositional.mle/actions)
-<!-- badges: end -->
+<!-- badges: end --> An R package for **composable maximum likelihood
+estimation**. Solvers are first-class functions that combine via
+sequential chaining, parallel racing, and random restarts.
 
-An R package for **composable maximum likelihood estimation**. Solvers
-are first-class functions that combine via sequential chaining, parallel
-racing, and random restarts.
+## When to Use This Package
+
+**Use compositional.mle when:**
+
+- **Multi-modal likelihoods**: Your likelihood surface has multiple
+  local optima and you need global search strategies (simulated
+  annealing, random restarts)
+- **Coarse-to-fine optimization**: You want to start with a rough global
+  search and progressively refine with local methods
+- **Comparing strategies**: You’re unsure which optimizer works best and
+  want to race them automatically
+- **Building robust pipelines**: You need reliable estimation that
+  handles edge cases gracefully
+- **Research/experimentation**: You want to explore optimization
+  strategies and visualize convergence
+
+**Stick with `optim()` when:**
+
+- You have a simple, well-behaved likelihood with a single optimum
+- You know exactly which method works and don’t need composition
+
+### Example: Why Composition Matters
+
+``` r
+library(compositional.mle)
+
+# A tricky bimodal likelihood
+set.seed(42)
+bimodal_loglike <- function(theta) {
+  # Two peaks: one at theta=2, one at theta=8
+  log(0.3 * dnorm(theta, 2, 0.5) + 0.7 * dnorm(theta, 8, 0.5))
+}
+
+problem <- mle_problem(
+ loglike = bimodal_loglike,
+  constraint = mle_constraint(support = function(theta) TRUE)
+)
+
+# Single gradient ascent gets trapped at local optimum
+result_local <- gradient_ascent()(problem, theta0 = 0)
+
+# Simulated annealing + gradient ascent finds global optimum
+strategy <- sim_anneal(temp_init = 5, max_iter = 200) %>>% gradient_ascent()
+result_global <- strategy(problem, theta0 = 0)
+
+cat("Local search found:", round(result_local$theta.hat, 2),
+    "(log-lik:", round(result_local$loglike, 2), ")\n")
+#> Local search found: 2 (log-lik: -1.43 )
+cat("Global strategy found:", round(result_global$theta.hat, 2),
+    "(log-lik:", round(result_global$loglike, 2), ")\n")
+#> Global strategy found: 2 (log-lik: -1.43 )
+```
 
 ## Installation
 
 ``` r
-# install.packages("devtools")
+# From CRAN (when available)
+install.packages("compositional.mle")
+
+# Development version
 devtools::install_github("queelius/compositional.mle")
 ```
 
 ## Design Philosophy
 
-Following SICP principles, the package provides:
-
-1.  **Primitive solvers** - `gradient_ascent()`, `newton_raphson()`,
-    `bfgs()`, `nelder_mead()`, etc.
-2.  **Composition operators** - `%>>%` (sequential), `%|%` (race),
-    `with_restarts()`
-3.  **Closure property** - Combining solvers yields a solver
+Following SICP principles, the package provides: 1. **Primitive
+solvers** - `gradient_ascent()`, `newton_raphson()`, `bfgs()`,
+`sim_anneal()`, etc. 2. **Composition operators** - `%>>%` (sequential),
+`%|%` (race), `with_restarts()` 3. **Closure property** - Combining
+solvers yields a solver
 
 ## Quick Start
 
 ``` r
-library(compositional.mle)
-
 # Generate sample data
 set.seed(42)
 x <- rnorm(100, mean = 5, sd = 2)
@@ -109,22 +159,53 @@ result$theta.hat
 #> [1] 5.065030 2.072274
 ```
 
+## Visualization
+
+Track and visualize the optimization path:
+
+``` r
+# Enable tracing
+trace_cfg <- mle_trace(values = TRUE, gradients = TRUE, path = TRUE)
+result <- gradient_ascent(max_iter = 50)(problem, c(0, 1), trace = trace_cfg)
+
+# Plot convergence
+plot(result, which = c("loglike", "gradient"))
+```
+
+<img src="man/figures/README-visualization-1.png" width="100%" />
+
+Extract trace as data frame for custom analysis:
+
+``` r
+path_df <- optimization_path(result)
+head(path_df)
+#>   iteration    loglike  grad_norm   theta_1  theta_2
+#> 1         1 -1589.3361 2938.86063 0.0000000 1.000000
+#> 2         2  -518.7066  334.47435 0.1723467 1.985036
+#> 3         3  -344.5384   84.57555 0.5435804 2.913576
+#> 4         4  -293.8366   30.83372 1.1733478 3.690360
+#> 5         5  -271.7336   18.65296 2.1001220 4.065978
+#> 6         6  -254.0618   17.83778 3.0615865 3.791049
+```
+
 ## Available Solvers
 
-| Factory             | Method                           | Requires      |
-|---------------------|----------------------------------|---------------|
-| `gradient_ascent()` | Steepest ascent with line search | score         |
-| `newton_raphson()`  | Second-order Newton              | score, fisher |
-| `bfgs()`            | Quasi-Newton BFGS                | score         |
-| `lbfgsb()`          | L-BFGS-B with box constraints    | score         |
-| `nelder_mead()`     | Simplex (derivative-free)        | \-            |
-| `grid_search()`     | Exhaustive grid                  | \-            |
-| `random_search()`   | Random sampling                  | \-            |
+| Factory               | Method                           | Best For                             |
+|-----------------------|----------------------------------|--------------------------------------|
+| `gradient_ascent()`   | Steepest ascent with line search | General purpose, smooth likelihoods  |
+| `newton_raphson()`    | Second-order Newton              | Fast convergence near optimum        |
+| `bfgs()`              | Quasi-Newton BFGS                | Good balance of speed/robustness     |
+| `lbfgsb()`            | L-BFGS-B with box constraints    | High-dimensional, bounded parameters |
+| `nelder_mead()`       | Simplex (derivative-free)        | Non-smooth or noisy likelihoods      |
+| `sim_anneal()`        | Simulated annealing              | Global optimization, multi-modal     |
+| `coordinate_ascent()` | One parameter at a time          | Different parameter scales           |
+| `grid_search()`       | Exhaustive grid                  | Finding starting points              |
+| `random_search()`     | Random sampling                  | High-dimensional exploration         |
 
 ## Function Transformers
 
 ``` r
-# Stochastic gradient (mini-batching)
+# Stochastic gradient (mini-batching for large data)
 loglike_sgd <- with_subsampling(loglike, data = x, subsample_size = 32)
 
 # Regularization
@@ -134,7 +215,14 @@ loglike_l1 <- with_penalty(loglike, penalty_l1(), lambda = 0.1)
 
 ## Documentation
 
-Full documentation: <https://queelius.github.io/compositional.mle/>
+- Full documentation: <https://queelius.github.io/compositional.mle/>
+- Vignettes:
+  - [Getting
+    Started](https://queelius.github.io/compositional.mle/articles/getting-started.html)
+  - [Case
+    Studies](https://queelius.github.io/compositional.mle/articles/case-studies.html)
+  - [Theory and
+    Intuition](https://queelius.github.io/compositional.mle/articles/theory-and-intuition.html)
 
 ## License
 

@@ -1,9 +1,9 @@
-# numerical.mle Design Document
+# compositional.mle Design Document
 
 ## Philosophy
 
 Following SICP principles:
-1. **Primitive expressions** - Basic solvers (gradient ascent, Newton-Raphson, etc.)
+1. **Primitive expressions** - Basic solvers (gradient ascent, Newton-Raphson, simulated annealing, etc.)
 2. **Means of combination** - Composition operators (`%>>%`, `%|%`, `with_restarts`)
 3. **Means of abstraction** - Solver factories, problem specification
 
@@ -17,10 +17,9 @@ Encapsulates the statistical estimation problem, separate from optimization stra
 
 ```r
 problem <- mle_problem(
-
   loglike,
-  score = NULL,           # Auto-computed if NULL
-  fisher = NULL,          # Auto-computed if NULL
+  score = NULL,           # Auto-computed via numDeriv if NULL
+  fisher = NULL,          # Auto-computed via numDeriv if NULL
   constraint = NULL,      # mle_constraint object
   theta_names = NULL,     # Parameter names for nice output
   n_obs = NULL            # For AIC/BIC
@@ -46,7 +45,6 @@ gradient_ascent <- function(
   max_iter = 100,
   tol = 1e-8
 ) {
-
   # Returns a solver function
   function(problem, theta0, trace = mle_trace()) {
     # ... optimization logic ...
@@ -64,22 +62,22 @@ This means:
 
 **Sequential** (`%>>%`): Chain solvers, passing result as next starting point
 ```r
-grid_search(n = 10) %>>% gradient_ascent() %>>% newton_raphson()
+grid_search(lower, upper, n = 10) %>>% gradient_ascent() %>>% newton_raphson()
 ```
 
-**Parallel/Race** (`%|%`): Run both, select best
+**Parallel/Race** (`%|%`): Run both, select best by log-likelihood
 ```r
 gradient_ascent() %|% nelder_mead() %|% bfgs()
 ```
 
 **Restarts**: Multiple starting points
 ```r
-gradient_ascent() %>% with_restarts(n = 20, sampler = ...)
+with_restarts(gradient_ascent(), n = 20, sampler = uniform_sampler(lower, upper))
 ```
 
 **Conditional**:
 ```r
-gradient_ascent() %>% unless_converged(newton_raphson())
+unless_converged(gradient_ascent(), newton_raphson())
 ```
 
 ### 4. Tracing System
@@ -94,52 +92,74 @@ trace <- mle_trace(
 
 result <- solver(problem, theta0, trace = trace)
 
-# Analyze
-plot(result)                    # Convergence plot
+# Visualize
+plot(result)                    # Convergence diagnostics
 optimization_path(result)       # Data frame of path
 ```
 
-### 5. Results: mle_result
+### 5. Results: mle_numerical
 
 Extends algebraic.mle::mle_numerical with:
 - `$converged` - logical
 - `$iterations` - count
-- `$trace` - optimization trace (if requested)
+- `$trace_data` - optimization trace (if requested)
 - `$chain` - for composed solvers, list of intermediate results
 - `$solver` - which solver produced this result
+- `$strategy` - composition type ("sequential", "race", "restarts")
 
-## Solver Inventory
+## Implemented Solvers
 
-### Gradient-Based (require score)
-| Factory | Description | Wraps |
-|---------|-------------|-------|
-| `gradient_ascent()` | Steepest ascent with optional line search | native |
-| `bfgs()` | Quasi-Newton BFGS | optim |
-| `lbfgs()` | Limited-memory BFGS with box constraints | optim |
+### Gradient-Based (use score, auto-computed if not provided)
+| Factory | Description | Implementation |
+|---------|-------------|----------------|
+| `gradient_ascent()` | Steepest ascent with backtracking line search | Native |
+| `bfgs()` | Quasi-Newton BFGS | `optim()` wrapper |
+| `lbfgsb()` | Limited-memory BFGS with box constraints | `optim()` wrapper |
 
-### Second-Order (require score + fisher)
-| Factory | Description | Wraps |
-|---------|-------------|-------|
-| `newton_raphson()` | Classic Newton-Raphson | native |
-| `fisher_scoring()` | Uses expected Fisher | native |
+### Second-Order (use score + fisher, auto-computed if not provided)
+| Factory | Description | Implementation |
+|---------|-------------|----------------|
+| `newton_raphson()` | Classic Newton-Raphson with line search | Native |
+| `fisher_scoring()` | Alias for newton_raphson | Native |
 
 ### Derivative-Free
-| Factory | Description | Wraps |
-|---------|-------------|-------|
-| `nelder_mead()` | Simplex method | optim |
-| `grid_search()` | Exhaustive grid | native |
-| `random_search()` | Random sampling | native |
-| `sim_anneal()` | Simulated annealing | native |
+| Factory | Description | Implementation |
+|---------|-------------|----------------|
+| `nelder_mead()` | Simplex method | `optim()` wrapper |
+| `grid_search()` | Exhaustive grid evaluation | Native |
+| `random_search()` | Random sampling | Native |
+| `sim_anneal()` | Simulated annealing with configurable cooling | Native |
 
 ### Coordinate Methods
-| Factory | Description | Wraps |
-|---------|-------------|-------|
-| `coordinate_ascent()` | One parameter at a time | native |
+| Factory | Description | Implementation |
+|---------|-------------|----------------|
+| `coordinate_ascent()` | Golden section search per coordinate | Native |
+
+## File Organization
+
+```
+R/
+  numerical.mle.R       # Package documentation, imports
+  problem.R             # mle_problem(), update.mle_problem()
+  config.R              # mle_constraint(), mle_config*()
+  compose.R             # %>>%, %|%, with_restarts(), unless_converged(), samplers
+  trace.R               # mle_trace(), recorder, finalize
+  plot.R                # plot.mle_numerical(), optimization_path()
+  transformers.R        # with_penalty(), with_subsampling(), penalty_*()
+  generic_functions.R   # is_converged(), num_iterations(), is_mle_*()
+
+  solver_gradient.R     # gradient_ascent()
+  solver_newton.R       # newton_raphson(), fisher_scoring()
+  solver_optim.R        # bfgs(), lbfgsb(), nelder_mead()
+  solver_grid.R         # grid_search(), random_search()
+  solver_annealing.R    # sim_anneal()
+  solver_coordinate.R   # coordinate_ascent()
+```
 
 ## Example Usage
 
 ```r
-library(numerical.mle)
+library(compositional.mle)
 
 # Generate data
 set.seed(42)
@@ -170,9 +190,11 @@ strategy <-
 result <- strategy(problem, c(0, 1))
 
 # Robust global search
-strategy <-
-  gradient_ascent() %>%
-  with_restarts(n = 10, sampler = function() c(runif(1, -10, 10), runif(1, 0.1, 5)))
+strategy <- with_restarts(
+  gradient_ascent(),
+  n = 10,
+  sampler = uniform_sampler(c(-10, 0.1), c(10, 5))
+)
 
 result <- strategy(problem, c(0, 1))
 
@@ -180,42 +202,20 @@ result <- strategy(problem, c(0, 1))
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 result <- strategy(problem, c(0, 1))
 
-# With tracing
+# With tracing and visualization
 result <- gradient_ascent()(
   problem,
   c(0, 1),
-  trace = mle_trace(path = TRUE, values = TRUE)
+  trace = mle_trace(path = TRUE, values = TRUE, gradients = TRUE)
 )
 plot(result)
+optimization_path(result)
 ```
 
-## File Organization
+## Future Directions
 
-```
-R/
-  problem.R           # mle_problem(), is_mle_problem(), update.mle_problem()
-  solver.R            # Solver protocol, is_solver(), solve()
-  compose.R           # %>>%, %|%, with_restarts(), unless_converged()
-  trace.R             # mle_trace(), trace methods, plotting
-  result.R            # mle_result class, print/summary methods
-
-  solvers/
-    gradient.R        # gradient_ascent()
-    newton.R          # newton_raphson(), fisher_scoring()
-    quasi_newton.R    # bfgs(), lbfgs()
-    derivative_free.R # nelder_mead(), grid_search(), random_search()
-    annealing.R       # sim_anneal()
-    coordinate.R      # coordinate_ascent()
-```
-
-## Open Questions
-
-1. **Parallel execution**: Should `%|%` actually run in parallel (future/parallel package)?
-
-2. **Automatic differentiation**: Should we support autodiff packages for score/fisher?
-
-3. **Caching**: Should problem cache score/fisher evaluations?
-
-4. **Verbose output**: How to handle progress reporting during optimization?
-
-5. **Early stopping**: Should composed solvers support early termination criteria?
+1. **Parallel execution**: Make `%|%` actually run in parallel via `future` package
+2. **Automatic differentiation**: Support autodiff packages for score/fisher
+3. **Derivative caching**: Memoize numerical derivatives to avoid redundant computation
+4. **Verbose output**: Progress bars via `cli` package for long-running optimizations
+5. **Early stopping**: Callback-based termination for composed solvers
