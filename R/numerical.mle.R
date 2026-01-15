@@ -1,6 +1,7 @@
 #' @keywords internal
 #' @importFrom stats optim rnorm runif
 #' @importFrom utils tail
+#' @importFrom graphics par plot points abline legend
 "_PACKAGE"
 
 #' compositional.mle: Composable MLE Solvers
