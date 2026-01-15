@@ -20,9 +20,12 @@ the starting point for the second. This enables coarse-to-fine strategies.
 }
 \examples{
 # Coarse-to-fine: grid search to find good region, then gradient ascent
-strategy <- grid_search(n = 5) \%>>\% gradient_ascent()
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) \%>>\%
+  gradient_ascent()
 
 # Three-stage refinement
-strategy <- grid_search(n = 3) \%>>\% gradient_ascent() \%>>\% newton_raphson()
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 3) \%>>\%
+  gradient_ascent() \%>>\%
+  newton_raphson()
 
 }

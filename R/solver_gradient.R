@@ -19,12 +19,10 @@
 #' The solver respects constraints defined in the problem via projection.
 #'
 #' @examples
-#' \dontrun
-#' # Basic usage
+#' # Create a solver with default parameters
 #' solver <- gradient_ascent()
-#' result <- solver(problem, c(0, 1))
 #'
-#' # With custom parameters
+#' # Create a solver with custom parameters
 #' solver <- gradient_ascent(
 #'   learning_rate = 0.5,
 #'   max_iter = 500,
@@ -33,7 +31,6 @@
 #'
 #' # Without line search (fixed step size)
 #' solver <- gradient_ascent(learning_rate = 0.01, line_search = FALSE)
-#' }
 #'
 #' @export
 gradient_ascent <- function(

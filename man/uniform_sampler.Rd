@@ -20,6 +20,6 @@ generates uniformly distributed starting points.
 }
 \examples{
 sampler <- uniform_sampler(c(-10, 0.1), c(10, 5))
-strategy <- gradient_ascent() \%>\% with_restarts(n = 20, sampler = sampler)
+strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 
 }

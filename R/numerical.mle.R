@@ -1,4 +1,6 @@
 #' @keywords internal
+#' @importFrom stats optim rnorm runif
+#' @importFrom utils tail
 "_PACKAGE"
 
 #' compositional.mle: Composable MLE Solvers
@@ -52,7 +54,8 @@
 #' result <- gradient_ascent()(problem, c(0, 1))
 #'
 #' # Composed strategy: grid -> gradient -> Newton
-#' strategy <- grid_search(n = 5) %>>% gradient_ascent() %>>% newton_raphson()
+#' strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) %>>%
+#'   gradient_ascent() %>>% newton_raphson()
 #' result <- strategy(problem, c(0, 1))
 #'
 #' # Race different methods

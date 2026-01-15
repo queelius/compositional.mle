@@ -51,10 +51,13 @@ compose <- function(...) {
 #'
 #' @examples
 #' # Coarse-to-fine: grid search to find good region, then gradient ascent
-#' strategy <- grid_search(n = 5) %>>% gradient_ascent()
+#' strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) %>>%
+#'   gradient_ascent()
 #'
 #' # Three-stage refinement
-#' strategy <- grid_search(n = 3) %>>% gradient_ascent() %>>% newton_raphson()
+#' strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 3) %>>%
+#'   gradient_ascent() %>>%
+#'   newton_raphson()
 #'
 #' @export
 `%>>%` <- function(s1, s2) {
@@ -148,12 +151,11 @@ compose <- function(...) {
 #'
 #' @examples
 #' # 20 random restarts - constraint applied automatically from problem
-#' strategy <- gradient_ascent() %>%
-#'   with_restarts(n = 20, sampler = uniform_sampler(c(-10, 0), c(10, 5)))
+#' sampler <- uniform_sampler(c(-10, 0), c(10, 5))
+#' strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 #'
 #' # Can also compose with other operators
-#' strategy <- gradient_ascent() %>%
-#'   with_restarts(n = 10, sampler = uniform_sampler(c(-10, 0), c(10, 5))) %>>%
+#' strategy <- with_restarts(gradient_ascent(), n = 10, sampler = sampler) %>>%
 #'   newton_raphson()
 #'
 #' @export
@@ -229,8 +231,7 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
 #'
 #' @examples
 #' # Use Newton-Raphson to refine if gradient ascent doesn't converge
-#' strategy <- gradient_ascent(max_iter = 50) %>%
-#'   unless_converged(newton_raphson())
+#' strategy <- unless_converged(gradient_ascent(max_iter = 50), newton_raphson())
 #'
 #' @export
 unless_converged <- function(solver, refinement) {
@@ -261,7 +262,7 @@ unless_converged <- function(solver, refinement) {
 #'
 #' @examples
 #' sampler <- uniform_sampler(c(-10, 0.1), c(10, 5))
-#' strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = sampler)
+#' strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 #'
 #' @export
 uniform_sampler <- function(lower, upper) {
@@ -284,7 +285,7 @@ uniform_sampler <- function(lower, upper) {
 #'
 #' @examples
 #' sampler <- normal_sampler(c(0, 1), sd = c(5, 0.5))
-#' strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = sampler)
+#' strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 #'
 #' @export
 normal_sampler <- function(center, sd = 1) {

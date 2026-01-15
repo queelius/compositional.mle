@@ -19,7 +19,6 @@ Applies a refinement solver only if the first solver did not converge.
 }
 \examples{
 # Use Newton-Raphson to refine if gradient ascent doesn't converge
-strategy <- gradient_ascent(max_iter = 50) \%>\%
-  unless_converged(newton_raphson())
+strategy <- unless_converged(gradient_ascent(max_iter = 50), newton_raphson())
 
 }

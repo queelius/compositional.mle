@@ -12,3 +12,6 @@
 ^fixing$
 ^cran-comments\.md$
 ^\.Rcheck$
+^\.claude$
+^AGENTS\.md$
+^DESIGN\.md$

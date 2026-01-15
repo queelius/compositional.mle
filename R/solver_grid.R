@@ -115,14 +115,11 @@ grid_search <- function(lower, upper, n = 10L) {
 #' outside the problem's constraint support are skipped.
 #'
 #' @examples
-#' \dontrun
-#' # Random search with uniform sampling
+#' # Create a random search solver with uniform sampling
 #' solver <- random_search(
 #'   sampler = uniform_sampler(c(-10, 0.1), c(10, 5)),
-#'   n = 1000
+#'   n = 100
 #' )
-#' result <- solver(problem, c(0, 1))
-#' }
 #'
 #' @export
 random_search <- function(sampler, n = 100L) {

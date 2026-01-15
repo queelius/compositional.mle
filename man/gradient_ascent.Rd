@@ -40,3 +40,18 @@ chosen to ensure the log-likelihood increases.
 
 The solver respects constraints defined in the problem via projection.
 }
+\examples{
+# Create a solver with default parameters
+solver <- gradient_ascent()
+
+# Create a solver with custom parameters
+solver <- gradient_ascent(
+  learning_rate = 0.5,
+  max_iter = 500,
+  tol = 1e-10
+)
+
+# Without line search (fixed step size)
+solver <- gradient_ascent(learning_rate = 0.01, line_search = FALSE)
+
+}

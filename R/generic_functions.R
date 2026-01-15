@@ -53,6 +53,6 @@ num_iterations.default <- function(x, ...) {
   x$iterations %||% x$iter %||% NA_integer_
 }
 
-#' Null coalescing operator
-#' @keywords internal
+# Null coalescing operator (internal)
+# @noRd
 `%||%` <- function(x, y) if (is.null(x)) y else x

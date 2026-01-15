@@ -20,6 +20,6 @@ generates normally distributed starting points around a center.
 }
 \examples{
 sampler <- normal_sampler(c(0, 1), sd = c(5, 0.5))
-strategy <- gradient_ascent() \%>\% with_restarts(n = 20, sampler = sampler)
+strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 
 }
