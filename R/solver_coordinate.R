@@ -8,6 +8,8 @@
 #' @param tol Convergence tolerance on log-likelihood change
 #' @param line_search Use line search for each coordinate (slower but more robust)
 #' @param cycle_order Order of cycling: "sequential" (1,2,...,p) or "random"
+#' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
+#'   display progress during optimization. Default is FALSE.
 #' @return A solver function with signature (problem, theta0, trace) -> mle_result
 #'
 #' @details
@@ -39,12 +41,14 @@ coordinate_ascent <- function(
   max_cycles = 50L,
   tol = 1e-8,
   line_search = TRUE,
-  cycle_order = c("sequential", "random")
+  cycle_order = c("sequential", "random"),
+  verbose = FALSE
 ) {
   # Validate parameters
   stopifnot(max_cycles > 0)
   stopifnot(tol > 0)
   stopifnot(is.logical(line_search))
+  stopifnot(is.logical(verbose), length(verbose) == 1)
 
   max_cycles <- as.integer(max_cycles)
   cycle_order <- match.arg(cycle_order)
@@ -69,6 +73,14 @@ coordinate_ascent <- function(
     # Initialize tracing
     recorder <- new_trace_recorder(trace, n_params)
 
+    # Initialize progress handler (track cycles, not individual iterations)
+    progress <- .progress_handler(
+      verbose = verbose,
+      solver_name = "Coordinate Ascent",
+      max_iter = max_cycles
+    )
+    progress$start()
+
     # Initialize state
     theta <- theta0
     ll_current <- loglike(theta)
@@ -83,6 +95,9 @@ coordinate_ascent <- function(
     # Coordinate ascent cycles
     for (cycle in seq_len(max_cycles)) {
       ll_start <- ll_current
+
+      # Update progress at start of each cycle
+      progress$update(cycle, ll_current)
 
       # Determine coordinate order for this cycle
       coord_order <- if (cycle_order == "random") {
@@ -149,6 +164,9 @@ coordinate_ascent <- function(
         break
       }
     }
+
+    # Report completion
+    progress$finish(converged, cycle, ll_current)
 
     # Compute Fisher information numerically
     fisher <- tryCatch(

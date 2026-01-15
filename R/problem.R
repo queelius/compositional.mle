@@ -11,12 +11,22 @@
 #' @param constraint Domain constraints as mle_constraint object
 #' @param theta_names Character vector of parameter names for nice output
 #' @param n_obs Number of observations (for AIC/BIC computation)
+#' @param cache_derivatives Logical; if TRUE and score/fisher are computed
+#'   numerically, cache the most recent result to avoid redundant computation.
+#'   This is particularly useful during line search where the same point may
+#'   be evaluated multiple times. Default is FALSE.
 #' @return An mle_problem object
 #'
 #' @details
 #' The problem object provides lazy evaluation of derivatives. If you don't
 #' provide analytic score or fisher functions, they will be computed
-#' numerically when first requested and cached.
+#' numerically when requested.
+#'
+#' When \code{cache_derivatives = TRUE}, numerical derivatives are cached
+#' using a single-value cache (stores the most recent theta and result).
+#' This is efficient for optimization where consecutive calls often evaluate
+#' at the same point (e.g., during line search or convergence checking).
+#' Use \code{\link{clear_cache}} to manually clear the cache if needed.
 #'
 #' @examples
 #' # With analytic derivatives
@@ -47,9 +57,9 @@ mle_problem <- function(
   score = NULL,
   fisher = NULL,
   constraint = NULL,
-
   theta_names = NULL,
-  n_obs = NULL
+  n_obs = NULL,
+  cache_derivatives = FALSE
 ) {
   stopifnot(is.function(loglike))
   if (!is.null(score)) stopifnot(is.function(score))
@@ -57,10 +67,10 @@ mle_problem <- function(
   if (!is.null(constraint)) stopifnot(inherits(constraint, "mle_constraint"))
   if (!is.null(theta_names)) stopifnot(is.character(theta_names))
   if (!is.null(n_obs)) stopifnot(is.numeric(n_obs), n_obs > 0)
+  stopifnot(is.logical(cache_derivatives), length(cache_derivatives) == 1)
 
   # Default constraint: no constraints
-
-if (is.null(constraint)) {
+  if (is.null(constraint)) {
     constraint <- mle_constraint()
   }
 
@@ -72,6 +82,7 @@ if (is.null(constraint)) {
       constraint = constraint,
       theta_names = theta_names,
       n_obs = n_obs,
+      cache_derivatives = cache_derivatives,
       .cache = new.env(parent = emptyenv())
     ),
     class = "mle_problem"
@@ -82,8 +93,14 @@ if (is.null(constraint)) {
 print.mle_problem <- function(x, ...) {
   cat("MLE Problem\n")
   cat("  Parameters:", if (!is.null(x$theta_names)) paste(x$theta_names, collapse = ", ") else "unnamed", "\n")
-  cat("  Score:", if (!is.null(x$.score)) "analytic" else "numerical", "\n")
-  cat("  Fisher:", if (!is.null(x$.fisher)) "analytic" else "numerical", "\n")
+  score_type <- if (!is.null(x$.score)) "analytic" else "numerical"
+  fisher_type <- if (!is.null(x$.fisher)) "analytic" else "numerical"
+  if (isTRUE(x$cache_derivatives)) {
+    if (is.null(x$.score)) score_type <- paste0(score_type, " (cached)")
+    if (is.null(x$.fisher)) fisher_type <- paste0(fisher_type, " (cached)")
+  }
+  cat("  Score:", score_type, "\n")
+  cat("  Fisher:", fisher_type, "\n")
   cat("  Constraints:", if (!identical(x$constraint, mle_constraint())) "yes" else "none", "\n")
   if (!is.null(x$n_obs)) cat("  Observations:", x$n_obs, "\n")
   invisible(x)
@@ -92,6 +109,8 @@ print.mle_problem <- function(x, ...) {
 #' Get score function from problem
 #'
 #' Returns the score (gradient) function, computing numerically if not provided.
+#' If \code{cache_derivatives = TRUE} was set in the problem and score is
+#' computed numerically, results are cached using a single-value cache.
 #'
 #' @param problem An mle_problem object
 #' @return Score function
@@ -100,9 +119,26 @@ get_score <- function(problem) {
   if (!is.null(problem$.score)) {
     problem$.score
   } else {
-    # Return numerical score function
+    # Return numerical score function with optional caching
     function(theta) {
-      numDeriv::grad(problem$loglike, theta)
+      if (isTRUE(problem$cache_derivatives)) {
+        # Check cache
+        cached_theta <- problem$.cache$score_theta
+        if (!is.null(cached_theta) && identical(theta, cached_theta)) {
+          return(problem$.cache$score_value)
+        }
+      }
+
+      # Compute numerical gradient
+      result <- numDeriv::grad(problem$loglike, theta)
+
+      # Cache if enabled
+      if (isTRUE(problem$cache_derivatives)) {
+        problem$.cache$score_theta <- theta
+        problem$.cache$score_value <- result
+      }
+
+      result
     }
   }
 }
@@ -110,6 +146,8 @@ get_score <- function(problem) {
 #' Get Fisher information function from problem
 #'
 #' Returns the Fisher information matrix function, computing numerically if not provided.
+#' If \code{cache_derivatives = TRUE} was set in the problem and Fisher is
+#' computed numerically, results are cached using a single-value cache.
 #'
 #' @param problem An mle_problem object
 #' @return Fisher information function
@@ -118,9 +156,26 @@ get_fisher <- function(problem) {
   if (!is.null(problem$.fisher)) {
     problem$.fisher
   } else {
-    # Return numerical Fisher (negative Hessian)
+    # Return numerical Fisher (negative Hessian) with optional caching
     function(theta) {
-      -numDeriv::hessian(problem$loglike, theta)
+      if (isTRUE(problem$cache_derivatives)) {
+        # Check cache
+        cached_theta <- problem$.cache$fisher_theta
+        if (!is.null(cached_theta) && identical(theta, cached_theta)) {
+          return(problem$.cache$fisher_value)
+        }
+      }
+
+      # Compute numerical Hessian (negative for Fisher)
+      result <- -numDeriv::hessian(problem$loglike, theta)
+
+      # Cache if enabled
+      if (isTRUE(problem$cache_derivatives)) {
+        problem$.cache$fisher_theta <- theta
+        problem$.cache$fisher_value <- result
+      }
+
+      result
     }
   }
 }
@@ -132,6 +187,27 @@ get_fisher <- function(problem) {
 #' @export
 is_mle_problem <- function(x) {
   inherits(x, "mle_problem")
+}
+
+#' Clear derivative cache
+#'
+#' Clears the cached numerical derivatives (score and Fisher) from an mle_problem.
+#' This is useful when you want to force recomputation, for example after
+#' modifying data that the log-likelihood depends on.
+#'
+#' @param problem An mle_problem object
+#' @return The problem object (invisibly), modified in place
+#' @examples
+#' \dontrun{
+#' problem <- mle_problem(loglike, cache_derivatives = TRUE)
+#' # ... run some optimization ...
+#' clear_cache(problem)  # Force fresh derivative computation
+#' }
+#' @export
+clear_cache <- function(problem) {
+  stopifnot(is_mle_problem(problem))
+  rm(list = ls(problem$.cache), envir = problem$.cache)
+  invisible(problem)
 }
 
 #' Update an mle_problem
@@ -150,7 +226,8 @@ update.mle_problem <- function(object, ...) {
     fisher = object$.fisher,
     constraint = object$constraint,
     theta_names = object$theta_names,
-    n_obs = object$n_obs
+    n_obs = object$n_obs,
+    cache_derivatives = object$cache_derivatives
   )
   current[names(args)] <- args
   do.call(mle_problem, current)

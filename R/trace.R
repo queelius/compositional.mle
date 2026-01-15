@@ -170,5 +170,71 @@ print.mle_trace_data <- function(x, ...) {
   if (!is.null(x$gradients)) {
     cat("  Gradient norm: ", round(x$gradients[1], 4), " -> ", round(tail(x$gradients, 1), 4), "\n", sep = "")
   }
+  if (!is.null(x$stages)) {
+    cat("  Stages:", length(x$stages), "(composed trace)\n")
+  }
   invisible(x)
+}
+
+#' Merge trace data from multiple results
+#'
+#' Concatenates trace data from a sequence of results (e.g., from composed solvers).
+#' The merged trace preserves stage boundaries for later analysis.
+#'
+#' @param results List of mle_numerical results with trace_data
+#' @return A merged mle_trace_data object with stage information
+#' @keywords internal
+merge_traces <- function(results) {
+  # Filter to results with trace data
+  traces <- lapply(results, function(r) r$trace_data)
+  traces <- Filter(Negate(is.null), traces)
+
+  if (length(traces) == 0) return(NULL)
+  if (length(traces) == 1) return(traces[[1]])
+
+  # Merge values
+  all_values <- unlist(lapply(traces, function(t) t$values))
+
+  # Merge paths
+  all_paths <- lapply(traces, function(t) t$path)
+  all_paths <- Filter(Negate(is.null), all_paths)
+  merged_path <- if (length(all_paths) > 0) {
+    do.call(rbind, all_paths)
+  } else NULL
+
+  # Merge gradients
+  all_gradients <- unlist(lapply(traces, function(t) t$gradients))
+
+  # Merge times (cumulative)
+  all_times <- NULL
+  if (!is.null(traces[[1]]$times)) {
+    cumulative_offset <- 0
+    for (t in traces) {
+      if (!is.null(t$times)) {
+        all_times <- c(all_times, t$times + cumulative_offset)
+        cumulative_offset <- cumulative_offset + t$total_time
+      }
+    }
+  }
+
+  # Stage boundaries (cumulative iteration counts)
+  stage_ends <- cumsum(sapply(traces, function(t) {
+    if (!is.null(t$values)) length(t$values)
+    else if (!is.null(t$path)) nrow(t$path)
+    else t$total_iterations
+  }))
+
+  # Build merged result
+  merged <- list()
+  if (length(all_values) > 0) merged$values <- all_values
+  if (!is.null(merged_path)) merged$path <- merged_path
+  if (length(all_gradients) > 0) merged$gradients <- all_gradients
+  if (!is.null(all_times)) merged$times <- all_times
+
+  merged$total_iterations <- sum(sapply(traces, function(t) t$total_iterations))
+  merged$total_time <- sum(sapply(traces, function(t) t$total_time))
+  merged$stages <- stage_ends
+
+  class(merged) <- "mle_trace_data"
+  merged
 }

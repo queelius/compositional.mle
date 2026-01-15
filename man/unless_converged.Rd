@@ -16,6 +16,7 @@ A new solver function with conditional refinement
 }
 \description{
 Applies a refinement solver only if the first solver did not converge.
+If refinement is applied, trace data from both solvers is merged.
 }
 \examples{
 # Use Newton-Raphson to refine if gradient ascent doesn't converge

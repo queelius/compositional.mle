@@ -9,6 +9,8 @@
 #' @param tol Convergence tolerance (on parameter change)
 #' @param backtrack_ratio Step size reduction factor for line search (0 < r < 1)
 #' @param min_step Minimum step size before giving up
+#' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
+#'   display progress during optimization. Default is FALSE.
 #' @return A solver function with signature (problem, theta0, trace) -> mle_result
 #'
 #' @details
@@ -39,7 +41,8 @@ gradient_ascent <- function(
   max_iter = 100L,
   tol = 1e-8,
   backtrack_ratio = 0.5,
-  min_step = 1e-12
+  min_step = 1e-12,
+  verbose = FALSE
 ) {
   # Validate parameters
   stopifnot(learning_rate > 0)
@@ -48,6 +51,7 @@ gradient_ascent <- function(
   stopifnot(tol > 0)
   stopifnot(backtrack_ratio > 0, backtrack_ratio < 1)
   stopifnot(min_step > 0)
+  stopifnot(is.logical(verbose), length(verbose) == 1)
 
   max_iter <- as.integer(max_iter)
 
@@ -72,6 +76,14 @@ gradient_ascent <- function(
     # Initialize tracing
     recorder <- new_trace_recorder(trace, length(theta0))
 
+    # Initialize progress handler
+    progress <- .progress_handler(
+      verbose = verbose,
+      solver_name = "Gradient Ascent",
+      max_iter = max_iter
+    )
+    progress$start()
+
     # Optimization loop
     theta <- theta0
     converged <- FALSE
@@ -79,13 +91,18 @@ gradient_ascent <- function(
     for (iter in seq_len(max_iter)) {
       # Compute gradient
       grad <- score(theta)
+      grad_norm <- sqrt(sum(grad^2))
+      ll_current <- loglike(theta)
 
       # Record iteration
       if (!is.null(recorder)) {
         record_iteration(recorder, theta,
-                        value = loglike(theta),
+                        value = ll_current,
                         gradient = grad)
       }
+
+      # Update progress
+      progress$update(iter, ll_current, grad_norm)
 
       # Compute step
       if (line_search) {
@@ -101,7 +118,7 @@ gradient_ascent <- function(
 
         if (!step_result$success) {
           # Line search failed - check if we're at optimum
-          if (sqrt(sum(grad^2)) < tol) {
+          if (grad_norm < tol) {
             converged <- TRUE
           }
           break
@@ -128,6 +145,9 @@ gradient_ascent <- function(
 
     # Final log-likelihood and info
     ll_final <- loglike(theta)
+
+    # Report completion
+    progress$finish(converged, iter, ll_final)
 
     # Compute Fisher information numerically
     fisher <- tryCatch(

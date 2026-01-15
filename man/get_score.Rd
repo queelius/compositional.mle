@@ -14,4 +14,6 @@ Score function
 }
 \description{
 Returns the score (gradient) function, computing numerically if not provided.
+If \code{cache_derivatives = TRUE} was set in the problem and score is
+computed numerically, results are cached using a single-value cache.
 }

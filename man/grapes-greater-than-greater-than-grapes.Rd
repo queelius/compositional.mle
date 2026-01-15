@@ -18,6 +18,10 @@ A new solver function that runs s1 then s2
 Chains two solvers sequentially. The result of the first solver becomes
 the starting point for the second. This enables coarse-to-fine strategies.
 }
+\details{
+Trace data from all solvers in the chain is merged into a single trace
+with stage boundaries preserved.
+}
 \examples{
 # Coarse-to-fine: grid search to find good region, then gradient ascent
 strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) \%>>\%

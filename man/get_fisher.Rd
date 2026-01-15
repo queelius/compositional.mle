@@ -14,4 +14,6 @@ Fisher information function
 }
 \description{
 Returns the Fisher information matrix function, computing numerically if not provided.
+If \code{cache_derivatives = TRUE} was set in the problem and Fisher is
+computed numerically, results are cached using a single-value cache.
 }

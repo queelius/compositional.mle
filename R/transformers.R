@@ -210,17 +210,19 @@ penalty_elastic_net <- function(alpha = 0.5, weights = NULL) {
   }
 }
 
-#' Compose multiple function transformations
+#' Compose Multiple Function Transformations
 #'
 #' Applies transformations right-to-left (like mathematical composition).
-#' This allows building complex transformations from simple ones.
+#' This allows building complex log-likelihood transformations from simple ones.
+#'
+#' Note: For composing solvers, use \code{\link{compose}} instead.
 #'
 #' @param ... Transformer functions
 #' @return Composed transformer function
 #' @examples
 #' \dontrun{
 #' # Create a composition
-#' transform <- compose(
+#' transform <- compose_transforms(
 #'   function(f) with_penalty(f, penalty_l1(), lambda = 0.01),
 #'   function(f) with_subsampling(f, data, 50)
 #' )
@@ -234,7 +236,7 @@ penalty_elastic_net <- function(alpha = 0.5, weights = NULL) {
 #'   with_penalty(penalty_l1(), lambda = 0.01)
 #' }
 #' @export
-compose <- function(...) {
+compose_transforms <- function(...) {
   transforms <- list(...)
 
   if (length(transforms) == 0) {

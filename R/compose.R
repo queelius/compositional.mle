@@ -3,6 +3,9 @@
 #' Chains any number of solvers sequentially. Each solver's result becomes
 #' the starting point for the next. Alternative to using \code{\%>>\%} operator.
 #'
+#' Trace data from all solvers is merged into a single trace with stage
+#' boundaries preserved.
+#'
 #' @param ... Solver functions to compose
 #' @return A new solver function that runs all solvers in sequence
 #'
@@ -36,6 +39,10 @@ compose <- function(...) {
 
     result$chain <- chain
     result$strategy <- "sequential"
+
+    # Merge trace data from all stages
+    result$trace_data <- merge_traces(chain)
+
     result
   }
 }
@@ -44,6 +51,9 @@ compose <- function(...) {
 #'
 #' Chains two solvers sequentially. The result of the first solver becomes
 #' the starting point for the second. This enables coarse-to-fine strategies.
+#'
+#' Trace data from all solvers in the chain is merged into a single trace
+#' with stage boundaries preserved.
 #'
 #' @param s1 First solver function
 #' @param s2 Second solver function
@@ -61,7 +71,7 @@ compose <- function(...) {
 #'
 #' @export
 `%>>%` <- function(s1, s2) {
- stopifnot(is.function(s1), is.function(s2))
+  stopifnot(is.function(s1), is.function(s2))
 
   function(problem, theta0, trace = mle_trace()) {
     # Run first solver
@@ -71,20 +81,103 @@ compose <- function(...) {
     result2 <- s2(problem, result1$theta.hat, trace)
 
     # Combine chain information
-    result2$chain <- c(
+    chain <- c(
       if (!is.null(result1$chain)) result1$chain else list(result1),
       list(result2)
     )
+    result2$chain <- chain
     result2$strategy <- "sequential"
+
+    # Merge trace data from all stages
+    result2$trace_data <- merge_traces(chain)
 
     result2
   }
 }
 
-#' Parallel Solver Racing
+#' Race Multiple Solvers
+#'
+#' Runs multiple solvers (optionally in parallel) and returns the best result
+#' (highest log-likelihood). More flexible than \code{\%|\%} operator.
+#'
+#' @param ... Solver functions to race
+#' @param parallel Logical; if TRUE and the \pkg{future} package is installed,
+#'   solvers are run in parallel using the current future plan. Default is FALSE.
+#' @return A new solver function that races all solvers and picks the best
+#'
+#' @details
+#' When \code{parallel = TRUE}, solvers are executed using \code{future::future()}
+#' and results collected with \code{future::value()}. The current future plan
+#' determines how parallelization happens (e.g., \code{plan(multisession)} for
+#' multi-process execution).
+#'
+#' Failed solvers (those that throw errors) are ignored. If all solvers fail,
+#' an error is thrown.
+#'
+#' @examples
+#' # Race three methods sequentially
+#' strategy <- race(gradient_ascent(), bfgs(), nelder_mead())
+#'
+#' # Race with parallel execution (requires future package)
+#' \dontrun{
+#' future::plan(future::multisession)
+#' strategy <- race(gradient_ascent(), bfgs(), nelder_mead(), parallel = TRUE)
+#' }
+#'
+#' @export
+race <- function(..., parallel = FALSE) {
+  solvers <- list(...)
+  stopifnot(length(solvers) >= 2)
+  for (s in solvers) stopifnot(is.function(s))
+  stopifnot(is.logical(parallel), length(parallel) == 1)
+
+  function(problem, theta0, trace = mle_trace()) {
+    results <- vector("list", length(solvers))
+
+    if (parallel && requireNamespace("future", quietly = TRUE)) {
+      # Parallel execution via future
+      futures <- lapply(solvers, function(s) {
+        future::future(
+          tryCatch(s(problem, theta0, trace), error = function(e) NULL),
+          seed = TRUE
+        )
+      })
+      results <- lapply(futures, future::value)
+    } else {
+      # Sequential execution
+      for (i in seq_along(solvers)) {
+        results[[i]] <- tryCatch(
+          solvers[[i]](problem, theta0, trace),
+          error = function(e) NULL
+        )
+      }
+    }
+
+    # Find best result by log-likelihood
+    loglikes <- sapply(results, function(r) {
+      if (!is.null(r) && !is.null(r$loglike)) r$loglike else -Inf
+    })
+
+    if (all(loglikes == -Inf)) {
+      stop("All solvers in race failed")
+    }
+
+    best_idx <- which.max(loglikes)
+    winner <- results[[best_idx]]
+    winner$alternatives <- results
+    winner$strategy <- "race"
+    winner$winner_index <- best_idx
+
+    winner
+  }
+}
+
+#' Parallel Solver Racing (Operator)
 #'
 #' Runs multiple solvers and returns the best result (highest log-likelihood).
 #' Useful when unsure which method will work best for a given problem.
+#'
+#' For parallel execution or more than 2 solvers, use \code{\link{race}}.
 #'
 #' @param s1 First solver function
 #' @param s2 Second solver function
@@ -97,6 +190,7 @@ compose <- function(...) {
 #' # Race multiple methods
 #' strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 #'
+#' @seealso \code{\link{race}} for parallel execution
 #' @export
 `%|%` <- function(s1, s2) {
   stopifnot(is.function(s1), is.function(s2))
@@ -224,6 +318,7 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
 #' Conditional Refinement
 #'
 #' Applies a refinement solver only if the first solver did not converge.
+#' If refinement is applied, trace data from both solvers is merged.
 #'
 #' @param solver Primary solver function
 #' @param refinement Solver to use if primary doesn't converge
@@ -242,10 +337,92 @@ unless_converged <- function(solver, refinement) {
 
     if (!isTRUE(result$converged)) {
       result2 <- refinement(problem, result$theta.hat, trace)
-      result2$chain <- c(list(result), list(result2))
+      chain <- c(list(result), list(result2))
+      result2$chain <- chain
       result2$strategy <- "conditional"
+      result2$trace_data <- merge_traces(chain)
       return(result2)
     }
+
+    result
+  }
+}
+
+#' Chain Solvers with Early Stopping
+#'
+#' Chains multiple solvers sequentially with optional early stopping.
+#' More flexible than \code{\%>>\%} operator.
+#'
+#' @param ... Solver functions to chain
+#' @param early_stop Optional function that takes a result and returns TRUE
+#'   to stop the chain early. Default is NULL (no early stopping).
+#' @return A new solver function that runs solvers in sequence
+#'
+#' @details
+#' The chain runs solvers in order, passing each result's \code{theta.hat}
+#' to the next solver. If \code{early_stop} is provided and returns TRUE
+#' for any intermediate result, the chain stops early.
+#'
+#' Common early stopping conditions:
+#' \itemize{
+#'   \item Stop when converged: \code{function(r) r$converged}
+#'   \item Stop when gradient is small: \code{function(r) sqrt(sum(score^2)) < 1e-6}
+#'   \item Stop after reaching target: \code{function(r) r$loglike > -100}
+#' }
+#'
+#' @examples
+#' # Chain with early stopping when converged
+#' strategy <- chain(
+#'   grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5),
+#'   gradient_ascent(max_iter = 50),
+#'   newton_raphson(max_iter = 20),
+#'   early_stop = function(r) isTRUE(r$converged)
+#' )
+#'
+#' # Standard chain (no early stopping)
+#' strategy <- chain(gradient_ascent(), newton_raphson())
+#'
+#' @export
+chain <- function(..., early_stop = NULL) {
+  solvers <- list(...)
+  stopifnot(length(solvers) >= 1)
+  for (s in solvers) stopifnot(is.function(s))
+  if (!is.null(early_stop)) stopifnot(is.function(early_stop))
+
+  if (length(solvers) == 1 && is.null(early_stop)) return(solvers[[1]])
+
+  function(problem, theta0, trace = mle_trace()) {
+    result <- solvers[[1]](problem, theta0, trace)
+    chain_results <- list(result)
+
+    # Check early stop after first solver
+    if (!is.null(early_stop) && early_stop(result)) {
+      result$chain <- chain_results
+      result$strategy <- "chain"
+      result$stopped_early <- TRUE
+      result$trace_data <- merge_traces(chain_results)
+      return(result)
+    }
+
+    # Run remaining solvers
+    for (i in seq_len(length(solvers) - 1) + 1) {
+      result <- solvers[[i]](problem, result$theta.hat, trace)
+      chain_results <- c(chain_results, list(result))
+
+      # Check early stop
+      if (!is.null(early_stop) && early_stop(result)) {
+        result$chain <- chain_results
+        result$strategy <- "chain"
+        result$stopped_early <- TRUE
+        result$trace_data <- merge_traces(chain_results)
+        return(result)
+      }
+    }
+
+    result$chain <- chain_results
+    result$strategy <- "chain"
+    result$stopped_early <- FALSE
+    result$trace_data <- merge_traces(chain_results)
 
     result
   }

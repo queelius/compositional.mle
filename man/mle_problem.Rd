@@ -10,7 +10,8 @@ mle_problem(
   fisher = NULL,
   constraint = NULL,
   theta_names = NULL,
-  n_obs = NULL
+  n_obs = NULL,
+  cache_derivatives = FALSE
 )
 }
 \arguments{
@@ -27,6 +28,11 @@ numerically via numDeriv::hessian when needed.}
 \item{theta_names}{Character vector of parameter names for nice output}
 
 \item{n_obs}{Number of observations (for AIC/BIC computation)}
+
+\item{cache_derivatives}{Logical; if TRUE and score/fisher are computed
+numerically, cache the most recent result to avoid redundant computation.
+This is particularly useful during line search where the same point may
+be evaluated multiple times. Default is FALSE.}
 }
 \value{
 An mle_problem object
@@ -38,7 +44,13 @@ statistical specification from the optimization strategy.
 \details{
 The problem object provides lazy evaluation of derivatives. If you don't
 provide analytic score or fisher functions, they will be computed
-numerically when first requested and cached.
+numerically when requested.
+
+When \code{cache_derivatives = TRUE}, numerical derivatives are cached
+using a single-value cache (stores the most recent theta and result).
+This is efficient for optimization where consecutive calls often evaluate
+at the same point (e.g., during line search or convergence checking).
+Use \code{\link{clear_cache}} to manually clear the cache if needed.
 }
 \examples{
 # With analytic derivatives

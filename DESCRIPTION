@@ -26,7 +26,9 @@ Suggests:
     knitr,
     ggplot2,
     tibble,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    cli,
+    future
 URL: https://github.com/queelius/compositional.mle,
     https://queelius.github.io/compositional.mle/
 BugReports: https://github.com/queelius/compositional.mle/issues

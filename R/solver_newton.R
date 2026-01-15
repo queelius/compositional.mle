@@ -9,6 +9,8 @@
 #' @param tol Convergence tolerance (on parameter change)
 #' @param backtrack_ratio Step size reduction factor for line search
 #' @param min_step Minimum step size before giving up
+#' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
+#'   display progress during optimization. Default is FALSE.
 #' @return A solver function with signature (problem, theta0, trace) -> mle_result
 #'
 #' @details
@@ -32,17 +34,19 @@
 #'
 #' @export
 newton_raphson <- function(
- line_search = TRUE,
+  line_search = TRUE,
   max_iter = 50L,
   tol = 1e-8,
   backtrack_ratio = 0.5,
-  min_step = 1e-12
+  min_step = 1e-12,
+  verbose = FALSE
 ) {
   stopifnot(is.logical(line_search))
   stopifnot(max_iter > 0)
   stopifnot(tol > 0)
   stopifnot(backtrack_ratio > 0, backtrack_ratio < 1)
   stopifnot(min_step > 0)
+  stopifnot(is.logical(verbose), length(verbose) == 1)
 
   max_iter <- as.integer(max_iter)
 
@@ -64,6 +68,14 @@ newton_raphson <- function(
     # Initialize tracing
     recorder <- new_trace_recorder(trace, length(theta0))
 
+    # Initialize progress handler
+    progress <- .progress_handler(
+      verbose = verbose,
+      solver_name = "Newton-Raphson",
+      max_iter = max_iter
+    )
+    progress$start()
+
     # Optimization loop
     theta <- theta0
     converged <- FALSE
@@ -72,6 +84,8 @@ newton_raphson <- function(
       # Compute score and Fisher information
       grad <- score(theta)
       fim <- fisher(theta)
+      grad_norm <- sqrt(sum(grad^2))
+      ll_current <- loglike(theta)
 
       # Newton direction: I^{-1} * score
       direction <- tryCatch(
@@ -85,9 +99,12 @@ newton_raphson <- function(
       # Record iteration
       if (!is.null(recorder)) {
         record_iteration(recorder, theta,
-                        value = loglike(theta),
+                        value = ll_current,
                         gradient = grad)
       }
+
+      # Update progress
+      progress$update(iter, ll_current, grad_norm)
 
       # Compute step
       if (line_search) {
@@ -102,7 +119,7 @@ newton_raphson <- function(
         )
 
         if (!step_result$success) {
-          if (sqrt(sum(grad^2)) < tol) {
+          if (grad_norm < tol) {
             converged <- TRUE
           }
           break
@@ -129,6 +146,9 @@ newton_raphson <- function(
     # Final values
     ll_final <- loglike(theta)
     fim_final <- fisher(theta)
+
+    # Report completion
+    progress$finish(converged, iter, ll_final)
 
     # Build result
     sol <- list(

@@ -8,7 +8,8 @@ coordinate_ascent(
   max_cycles = 50L,
   tol = 1e-08,
   line_search = TRUE,
-  cycle_order = c("sequential", "random")
+  cycle_order = c("sequential", "random"),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -19,6 +20,9 @@ coordinate_ascent(
 \item{line_search}{Use line search for each coordinate (slower but more robust)}
 
 \item{cycle_order}{Order of cycling: "sequential" (1,2,...,p) or "random"}
+
+\item{verbose}{Logical; if TRUE and the \pkg{cli} package is installed,
+display progress during optimization. Default is FALSE.}
 }
 \value{
 A solver function with signature (problem, theta0, trace) -> mle_result

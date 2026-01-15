@@ -2,7 +2,7 @@
 % Please edit documentation in R/compose.R
 \name{\%|\%}
 \alias{\%|\%}
-\title{Parallel Solver Racing}
+\title{Parallel Solver Racing (Operator)}
 \usage{
 s1 \%|\% s2
 }
@@ -18,6 +18,9 @@ A new solver function that runs both and picks the best
 Runs multiple solvers and returns the best result (highest log-likelihood).
 Useful when unsure which method will work best for a given problem.
 }
+\details{
+For parallel execution or more than 2 solvers, use \code{\link{race}}.
+}
 \examples{
 # Race gradient-based vs derivative-free
 strategy <- gradient_ascent() \%|\% nelder_mead()
@@ -25,4 +28,7 @@ strategy <- gradient_ascent() \%|\% nelder_mead()
 # Race multiple methods
 strategy <- gradient_ascent() \%|\% bfgs() \%|\% nelder_mead()
 
+}
+\seealso{
+\code{\link{race}} for parallel execution
 }

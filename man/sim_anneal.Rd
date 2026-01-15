@@ -9,7 +9,8 @@ sim_anneal(
   cooling_rate = 0.95,
   max_iter = 1000L,
   neighbor_sd = 1,
-  min_temp = 1e-10
+  min_temp = 1e-10,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ sim_anneal(
 \item{neighbor_sd}{Standard deviation for generating neighbor proposals}
 
 \item{min_temp}{Minimum temperature before stopping}
+
+\item{verbose}{Logical; if TRUE and the \pkg{cli} package is installed,
+display progress during optimization. Default is FALSE.}
 }
 \value{
 A solver function with signature (problem, theta0, trace) -> mle_result

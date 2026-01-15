@@ -10,13 +10,14 @@
 #' @param max_iter Maximum number of iterations
 #' @param neighbor_sd Standard deviation for generating neighbor proposals
 #' @param min_temp Minimum temperature before stopping
+#' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
+#'   display progress during optimization. Default is FALSE.
 #' @return A solver function with signature (problem, theta0, trace) -> mle_result
 #'
 #' @details
 #' At each iteration:
 #' 1. Generate a neighbor by adding Gaussian noise to current parameters
 #' 2. If the neighbor improves the objective, accept it
-
 #' 3. If the neighbor is worse, accept with probability exp(delta / temp)
 #' 4. Reduce temperature: temp = temp * cooling_rate
 #'
@@ -40,7 +41,8 @@ sim_anneal <- function(
   cooling_rate = 0.95,
   max_iter = 1000L,
   neighbor_sd = 1.0,
-  min_temp = 1e-10
+  min_temp = 1e-10,
+  verbose = FALSE
 ) {
   # Validate parameters
   stopifnot(temp_init > 0)
@@ -48,6 +50,7 @@ sim_anneal <- function(
   stopifnot(max_iter > 0)
   stopifnot(neighbor_sd > 0)
   stopifnot(min_temp >= 0)
+  stopifnot(is.logical(verbose), length(verbose) == 1)
 
   max_iter <- as.integer(max_iter)
 
@@ -71,6 +74,15 @@ sim_anneal <- function(
     # Initialize tracing
     recorder <- new_trace_recorder(trace, n_params)
 
+    # Initialize progress handler
+    progress <- .progress_handler(
+      verbose = verbose,
+      solver_name = "Simulated Annealing",
+      max_iter = max_iter,
+      show_every = max(1L, max_iter %/% 100L)  # Show ~100 updates max
+    )
+    progress$start()
+
     # Initialize state
     theta <- theta0
     ll_current <- loglike(theta)
@@ -90,6 +102,9 @@ sim_anneal <- function(
       if (!is.null(recorder)) {
         record_iteration(recorder, theta, value = ll_current)
       }
+
+      # Update progress (show best LL found so far)
+      progress$update(iter, best_ll)
 
       # Check temperature
       if (temp < min_temp) break
@@ -145,6 +160,9 @@ sim_anneal <- function(
       # Cool down
       temp <- temp * cooling_rate
     }
+
+    # Report completion (SA doesn't have traditional convergence)
+    progress$finish(TRUE, iter, best_ll)
 
     # Compute Fisher information numerically at best point
     fisher <- tryCatch(

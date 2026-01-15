@@ -9,7 +9,8 @@ newton_raphson(
   max_iter = 50L,
   tol = 1e-08,
   backtrack_ratio = 0.5,
-  min_step = 1e-12
+  min_step = 1e-12,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ newton_raphson(
 \item{backtrack_ratio}{Step size reduction factor for line search}
 
 \item{min_step}{Minimum step size before giving up}
+
+\item{verbose}{Logical; if TRUE and the \pkg{cli} package is installed,
+display progress during optimization. Default is FALSE.}
 }
 \value{
 A solver function with signature (problem, theta0, trace) -> mle_result
