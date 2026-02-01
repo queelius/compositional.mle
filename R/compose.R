@@ -191,6 +191,8 @@ race <- function(..., parallel = FALSE) {
 #' strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 #'
 #' @seealso \code{\link{race}} for parallel execution
+#' @name race_operator
+#' @rdname race_operator
 #' @export
 `%|%` <- function(s1, s2) {
   stopifnot(is.function(s1), is.function(s2))

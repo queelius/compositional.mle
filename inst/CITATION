@@ -1,0 +1,10 @@
+bibentry(
+  bibtype  = "Manual",
+  title    = "compositional.mle: Compositional Maximum Likelihood Estimation",
+  author   = person("Alexander", "Towell",
+                     email = "lex@metafunctor.com",
+                     comment = c(ORCID = "0000-0001-6443-9897")),
+  year     = "2025",
+  note     = "R package version 0.2.0",
+  url      = "https://github.com/queelius/compositional.mle"
+)
