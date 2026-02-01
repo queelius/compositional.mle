@@ -8,18 +8,16 @@
 ## Citation
 
 Source:
-[`DESCRIPTION`](https://github.com/queelius/compositional.mle/blob/HEAD/DESCRIPTION)
+[`inst/CITATION`](https://github.com/queelius/compositional.mle/blob/HEAD/inst/CITATION)
 
 Towell A (2025). *compositional.mle: Compositional Maximum Likelihood
 Estimation*. R package version 0.2.0,
-https://queelius.github.io/compositional.mle/,
 <https://github.com/queelius/compositional.mle>.
 
     @Manual{,
       title = {compositional.mle: Compositional Maximum Likelihood Estimation},
       author = {Alexander Towell},
       year = {2025},
-      note = {R package version 0.2.0,
-        https://queelius.github.io/compositional.mle/},
+      note = {R package version 0.2.0},
       url = {https://github.com/queelius/compositional.mle},
     }

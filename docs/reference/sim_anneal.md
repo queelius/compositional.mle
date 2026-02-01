@@ -1,96 +1,75 @@
-# sim_anneal
+# Simulated Annealing Solver
 
-This function implements the simulated annealing algorithm, which is a
-global optimization algorithm that is useful for finding a good starting
-point for a local optimization algorithm. We do not return this as an
-MLE object because, to be a good estimate of the MLE, the gradient of
-\`f\` evaluated at its solution should be close to zero, assuming the
-MLE is interior to the domain of \`f\`. However, since this algorithm is
-not guided by gradient information, it is not sensitive to the gradient
-of \`f\` and instead only seeks to maximize \`f\`.
+Creates a solver using simulated annealing for global optimization.
+Simulated annealing can escape local optima by probabilistically
+accepting worse solutions, with the acceptance probability decreasing
+over time (controlled by a "temperature" parameter).
 
 ## Usage
 
 ``` r
-sim_anneal(x0 = NULL, obj_fn = NULL, options = list(), ...)
+sim_anneal(
+  temp_init = 10,
+  cooling_rate = 0.95,
+  max_iter = 1000L,
+  neighbor_sd = 1,
+  min_temp = 1e-10,
+  verbose = FALSE
+)
 ```
 
 ## Arguments
 
-- x0:
+- temp_init:
 
-  Initial guess, default is NULL (must be specified in options)
+  Initial temperature (higher = more exploration)
 
-- obj_fn:
+- cooling_rate:
 
-  Objective function to maximize, default is NULL (must be specified in
-  options)
+  Temperature reduction factor per iteration (0 \< r \< 1)
 
-- options:
+- max_iter:
 
-  List of optional arguments
+  Maximum number of iterations
 
-- ...:
+- neighbor_sd:
 
-  Additional arguments that may be passed to \`options\$neigh\`
+  Standard deviation for generating neighbor proposals
+
+- min_temp:
+
+  Minimum temperature before stopping
+
+- verbose:
+
+  Logical; if TRUE and the cli package is installed, display progress
+  during optimization. Default is FALSE.
 
 ## Value
 
-list with best solution (argmax) and its corresponding objective
-function value (max), and optionally path
+A solver function with signature (problem, theta0, trace) -\> mle_result
 
-## Functions
+## Details
 
-- `sim_anneal()`: options
+At each iteration: 1. Generate a neighbor by adding Gaussian noise to
+current parameters 2. If the neighbor improves the objective, accept it
+3. If the neighbor is worse, accept with probability exp(delta / temp)
+4. Reduce temperature: temp = temp \* cooling_rate
 
-## Fields
+The algorithm is stochastic and may find different solutions on
+different runs. For best results, use with
+[`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
+or combine with a local optimizer via `%>>%`.
 
-- `t_init`:
+## Examples
 
-  Initial temperature
+``` r
+# Basic simulated annealing
+solver <- sim_anneal()
 
-- `t_end`:
+# More exploration (higher initial temp, slower cooling)
+solver <- sim_anneal(temp_init = 100, cooling_rate = 0.999)
 
-  Final temperature
-
-- `alpha`:
-
-  Cooling factor
-
-- `iter_per_temp`:
-
-  Number of iterations per temperature
-
-- `max_iter`:
-
-  Maximum number of iterations, used instead of t_end if not NULL,
-  defaults to NULL
-
-- `debug`:
-
-  If TRUE, print debugging information to the console
-
-- `trace`:
-
-  If TRUE, track the history of positions and values
-
-- `sup`:
-
-  Support function, returns TRUE if x is in the domain of f
-
-- `neigh`:
-
-  Neighborhood function, returns a random neighbor of x
-
-- `debug_freq`:
-
-  Frequency of debug output, defaults to 10
-
-- `obj_fn`:
-
-  Objective function to maximize, if not specified in formal parameter
-  \`obj_fn\`
-
-- `x0`:
-
-  Initial guess, if not specified in formal parameter \`x0\`
+# Coarse global search, then local refinement
+strategy <- sim_anneal(max_iter = 500) %>>% gradient_ascent()
+```

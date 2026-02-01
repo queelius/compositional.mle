@@ -36,6 +36,8 @@
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/theory-and-intuition.html">Theory and Intuition</a></li>
     <li><a class="dropdown-item" href="../articles/case-studies.html">Case Studies</a></li>
+    <li><a class="dropdown-item" href="../articles/strategy-design.html">Strategy Design</a></li>
+    <li><a class="dropdown-item" href="../articles/automatic-differentiation.html">Automatic Differentiation</a></li>
   </ul>
 </li>
       </ul>
@@ -61,7 +63,7 @@
                         <h4 data-toc-skip class="author">Alexander
 Towell</h4>
             
-            <h4 data-toc-skip class="date">2025-12-17</h4>
+            <h4 data-toc-skip class="date">2026-01-31</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/vignettes/theory-and-intuition.Rmd" class="external-link"><code>vignettes/theory-and-intuition.Rmd</code></a></small>
       <div class="d-none name"><code>theory-and-intuition.Rmd</code></div>
@@ -190,7 +192,7 @@ we can increase the likelihood by moving in the direction of
 <span></span>
 <span><span class="co"># At a point away from the MLE, the score points toward the MLE</span></span>
 <span><span class="va">theta_start</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.8</span><span class="op">)</span></span>
-<span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu">score</span><span class="op">(</span><span class="va">theta_start</span><span class="op">)</span></span>
+<span><span class="va">s</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/dualr/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="va">theta_start</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Score at (1, 0.8):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">s</span>, <span class="fl">2</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Score at (1, 0.8): 152.07 593.01</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Direction: move"</span>, <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">s</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="st">"right"</span>, <span class="st">"left"</span><span class="op">)</span>, <span class="st">"in mu,"</span>,</span>
@@ -231,7 +233,7 @@ steps in this direction guarantees improvement (for small enough
 <span>  <span class="va">path</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">theta</span></span>
 <span></span>
 <span>  <span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span><span class="va">max_iter</span><span class="op">)</span> <span class="op">{</span></span>
-<span>    <span class="va">theta</span> <span class="op">&lt;-</span> <span class="va">theta</span> <span class="op">+</span> <span class="va">eta</span> <span class="op">*</span> <span class="fu">score</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span></span>
+<span>    <span class="va">theta</span> <span class="op">&lt;-</span> <span class="va">theta</span> <span class="op">+</span> <span class="va">eta</span> <span class="op">*</span> <span class="fu"><a href="https://rdrr.io/pkg/dualr/man/score.html" class="external-link">score</a></span><span class="op">(</span><span class="va">theta</span><span class="op">)</span></span>
 <span>    <span class="kw">if</span> <span class="op">(</span><span class="va">theta</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;=</span> <span class="fl">0</span><span class="op">)</span> <span class="va">theta</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0.01</span>  <span class="co"># Enforce constraint</span></span>
 <span>    <span class="va">path</span><span class="op">[</span><span class="va">i</span> <span class="op">+</span> <span class="fl">1</span>, <span class="op">]</span> <span class="op">&lt;-</span> <span class="va">theta</span></span>
 <span>  <span class="op">}</span></span>
@@ -410,7 +412,7 @@ optimum where its quadratic convergence kicks in.</p>
 <span><span class="co">#&gt; Result: 2.9465 1.7099</span></span>
 <span></span>
 <span><span class="co"># Race different methods, pick the best</span></span>
-<span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/grapes-or-grapes.html">%|%</a></span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/grapes-or-grapes.html">%|%</a></span> <span class="fu"><a href="../reference/nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/race_operator.html">%|%</a></span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/race_operator.html">%|%</a></span> <span class="fu"><a href="../reference/nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">strategy</span><span class="op">(</span><span class="va">problem</span>, theta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Winner:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">solver</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Winner: gradient_ascent</span></span></code></pre></div>

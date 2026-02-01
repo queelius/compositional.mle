@@ -29,3 +29,13 @@ A solver function
 Unlike grid search, random search scales better to high dimensions. The
 sampler should generate points in a reasonable region; points outside
 the problem's constraint support are skipped.
+
+## Examples
+
+``` r
+# Create a random search solver with uniform sampling
+solver <- random_search(
+  sampler = uniform_sampler(c(-10, 0.1), c(10, 5)),
+  n = 100
+)
+```

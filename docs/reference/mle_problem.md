@@ -12,7 +12,8 @@ mle_problem(
   fisher = NULL,
   constraint = NULL,
   theta_names = NULL,
-  n_obs = NULL
+  n_obs = NULL,
+  cache_derivatives = FALSE
 )
 ```
 
@@ -44,6 +45,13 @@ mle_problem(
 
   Number of observations (for AIC/BIC computation)
 
+- cache_derivatives:
+
+  Logical; if TRUE and score/fisher are computed numerically, cache the
+  most recent result to avoid redundant computation. This is
+  particularly useful during line search where the same point may be
+  evaluated multiple times. Default is FALSE.
+
 ## Value
 
 An mle_problem object
@@ -52,7 +60,14 @@ An mle_problem object
 
 The problem object provides lazy evaluation of derivatives. If you don't
 provide analytic score or fisher functions, they will be computed
-numerically when first requested and cached.
+numerically when requested.
+
+When `cache_derivatives = TRUE`, numerical derivatives are cached using
+a single-value cache (stores the most recent theta and result). This is
+efficient for optimization where consecutive calls often evaluate at the
+same point (e.g., during line search or convergence checking). Use
+[`clear_cache`](https://queelius.github.io/compositional.mle/reference/clear_cache.md)
+to manually clear the cache if needed.
 
 ## Examples
 

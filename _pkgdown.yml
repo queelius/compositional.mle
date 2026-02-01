@@ -18,6 +18,10 @@ navbar:
         href: articles/theory-and-intuition.html
       - text: Case Studies
         href: articles/case-studies.html
+      - text: Strategy Design
+        href: articles/strategy-design.html
+      - text: Automatic Differentiation
+        href: articles/automatic-differentiation.html
 
 reference:
 - title: Problem Specification
@@ -28,6 +32,7 @@ reference:
   - is_mle_problem
   - get_score
   - get_fisher
+  - clear_cache
   - mle_constraint
   - is_mle_constraint
 
@@ -42,13 +47,17 @@ reference:
   - nelder_mead
   - grid_search
   - random_search
+  - sim_anneal
+  - coordinate_ascent
 
 - title: Composition Operators
   desc: Combine solvers into strategies
   contents:
   - compose
+  - chain
+  - race
   - "%>>%"
-  - "%|%"
+  - race_operator
   - with_restarts
   - unless_converged
 
@@ -67,6 +76,7 @@ reference:
   - penalty_l1
   - penalty_l2
   - penalty_elastic_net
+  - compose_transforms
 
 - title: Configuration
   desc: Type-safe configuration objects
@@ -82,12 +92,15 @@ reference:
   - mle_trace
   - is_tracing
 
-- title: Results
-  desc: Work with optimization results
+- title: Results & Visualization
+  desc: Work with and visualize optimization results
   contents:
   - is_converged
   - is_mle_numerical
   - num_iterations
+  - optimization_path
+  - plot.mle_numerical
+  - plot.mle_trace_data
 
 articles:
 - title: Getting Started
@@ -99,3 +112,8 @@ articles:
   contents:
   - theory-and-intuition
   - case-studies
+
+- title: Advanced Topics
+  contents:
+  - strategy-design
+  - automatic-differentiation

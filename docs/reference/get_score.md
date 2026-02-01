@@ -1,7 +1,8 @@
 # Get score function from problem
 
 Returns the score (gradient) function, computing numerically if not
-provided.
+provided. If `cache_derivatives = TRUE` was set in the problem and score
+is computed numerically, results are cached using a single-value cache.
 
 ## Usage
 

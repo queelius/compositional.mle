@@ -53,7 +53,7 @@ Combine solvers to build complex strategies:
 
 - `%>>%`: Sequential chaining (coarse-to-fine)
 
-- [`%|%`](https://queelius.github.io/compositional.mle/reference/grapes-or-grapes.md):
+- [`%|%`](https://queelius.github.io/compositional.mle/reference/race_operator.md):
   Parallel racing (try multiple, pick best)
 
 - [`with_restarts`](https://queelius.github.io/compositional.mle/reference/with_restarts.md):
@@ -94,7 +94,8 @@ problem <- mle_problem(
 result <- gradient_ascent()(problem, c(0, 1))
 
 # Composed strategy: grid -> gradient -> Newton
-strategy <- grid_search(n = 5) %>>% gradient_ascent() %>>% newton_raphson()
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) %>>%
+  gradient_ascent() %>>% newton_raphson()
 result <- strategy(problem, c(0, 1))
 
 # Race different methods

@@ -24,14 +24,20 @@ s1 %>>% s2
 
 A new solver function that runs s1 then s2
 
+## Details
+
+Trace data from all solvers in the chain is merged into a single trace
+with stage boundaries preserved.
+
 ## Examples
 
 ``` r
 # Coarse-to-fine: grid search to find good region, then gradient ascent
-strategy <- grid_search(n = 5) %>>% gradient_ascent()
-#> Error in grid_search(n = 5): argument "lower" is missing, with no default
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) %>>%
+  gradient_ascent()
 
 # Three-stage refinement
-strategy <- grid_search(n = 3) %>>% gradient_ascent() %>>% newton_raphson()
-#> Error in grid_search(n = 3): argument "lower" is missing, with no default
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 3) %>>%
+  gradient_ascent() %>>%
+  newton_raphson()
 ```

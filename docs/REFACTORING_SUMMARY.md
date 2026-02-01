@@ -119,12 +119,9 @@ loglike_transformed <- loglike %>%
 
 ### Convenience Wrappers (`R/convenience.R`)
 
-- [`mle_grad()`](https://rdrr.io/pkg/numerical.mle/man/mle_grad.html) -
-  Quick gradient ascent with defaults
-- [`mle_nr()`](https://rdrr.io/pkg/numerical.mle/man/mle_nr.html) -
-  Quick Newton-Raphson with defaults
-- [`with_constraint()`](https://rdrr.io/pkg/numerical.mle/man/with_constraint.html) -
-  Simplified constrained optimization
+- `mle_grad()` - Quick gradient ascent with defaults
+- `mle_nr()` - Quick Newton-Raphson with defaults
+- `with_constraint()` - Simplified constrained optimization
 
 ## Files Refactored
 

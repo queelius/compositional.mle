@@ -11,3 +11,10 @@
   MLE](https://queelius.github.io/compositional.mle/articles/theory-and-intuition.md):
 - [Case Studies: MLE for Common
   Distributions](https://queelius.github.io/compositional.mle/articles/case-studies.md):
+
+### Advanced Topics
+
+- [Designing Optimization
+  Strategies](https://queelius.github.io/compositional.mle/articles/strategy-design.md):
+- [Automatic Differentiation with
+  dualr](https://queelius.github.io/compositional.mle/articles/automatic-differentiation.md):

@@ -11,7 +11,8 @@ fisher_scoring(
   max_iter = 50L,
   tol = 1e-08,
   backtrack_ratio = 0.5,
-  min_step = 1e-12
+  min_step = 1e-12,
+  verbose = FALSE
 )
 ```
 
@@ -36,6 +37,11 @@ fisher_scoring(
 - min_step:
 
   Minimum step size before giving up
+
+- verbose:
+
+  Logical; if TRUE and the cli package is installed, display progress
+  during optimization. Default is FALSE.
 
 ## Value
 

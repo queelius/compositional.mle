@@ -14,6 +14,8 @@ Define the statistical estimation problem
   : Get score function from problem
 - [`get_fisher()`](https://queelius.github.io/compositional.mle/reference/get_fisher.md)
   : Get Fisher information function from problem
+- [`clear_cache()`](https://queelius.github.io/compositional.mle/reference/clear_cache.md)
+  : Clear derivative cache
 - [`mle_constraint()`](https://queelius.github.io/compositional.mle/reference/mle_constraint.md)
   : Create domain constraint specification
 - [`is_mle_constraint()`](https://queelius.github.io/compositional.mle/reference/is_mle_constraint.md)
@@ -39,17 +41,25 @@ Create solver functions
   : Grid Search Solver
 - [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)
   : Random Search Solver
+- [`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md)
+  : Simulated Annealing Solver
+- [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md)
+  : Coordinate Ascent Solver
 
 ## Composition Operators
 
 Combine solvers into strategies
 
 - [`compose()`](https://queelius.github.io/compositional.mle/reference/compose.md)
-  : Compose multiple function transformations
+  : Compose Multiple Solvers Sequentially
+- [`chain()`](https://queelius.github.io/compositional.mle/reference/chain.md)
+  : Chain Solvers with Early Stopping
+- [`race()`](https://queelius.github.io/compositional.mle/reference/race.md)
+  : Race Multiple Solvers
 - [`` `%>>%` ``](https://queelius.github.io/compositional.mle/reference/grapes-greater-than-greater-than-grapes.md)
   : Sequential Solver Composition
-- [`` `%|%` ``](https://queelius.github.io/compositional.mle/reference/grapes-or-grapes.md)
-  : Parallel Solver Racing
+- [`` `%|%` ``](https://queelius.github.io/compositional.mle/reference/race_operator.md)
+  : Parallel Solver Racing (Operator)
 - [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
   : Multiple Random Restarts
 - [`unless_converged()`](https://queelius.github.io/compositional.mle/reference/unless_converged.md)
@@ -78,6 +88,8 @@ Transform log-likelihood functions
   : L2 penalty function (Ridge)
 - [`penalty_elastic_net()`](https://queelius.github.io/compositional.mle/reference/penalty_elastic_net.md)
   : Elastic net penalty (combination of L1 and L2)
+- [`compose_transforms()`](https://queelius.github.io/compositional.mle/reference/compose_transforms.md)
+  : Compose Multiple Function Transformations
 
 ## Configuration
 
@@ -101,9 +113,9 @@ Track optimization progress
 - [`is_tracing()`](https://queelius.github.io/compositional.mle/reference/is_tracing.md)
   : Check if tracing is enabled
 
-## Results
+## Results & Visualization
 
-Work with optimization results
+Work with and visualize optimization results
 
 - [`is_converged()`](https://queelius.github.io/compositional.mle/reference/is_converged.md)
   : Check if solver converged
@@ -111,3 +123,9 @@ Work with optimization results
   : Check if object is an mle_numerical
 - [`num_iterations()`](https://queelius.github.io/compositional.mle/reference/num_iterations.md)
   : Get number of iterations
+- [`optimization_path()`](https://queelius.github.io/compositional.mle/reference/optimization_path.md)
+  : Extract Optimization Path as Data Frame
+- [`plot(`*`<mle_numerical>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_numerical.md)
+  : Plot Optimization Convergence
+- [`plot(`*`<mle_trace_data>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.md)
+  : Plot Trace Data Directly
