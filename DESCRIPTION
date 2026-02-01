@@ -28,8 +28,7 @@ Suggests:
     tibble,
     testthat (>= 3.0.0),
     cli,
-    future,
-    dualr
+    future
 URL: https://github.com/queelius/compositional.mle,
     https://queelius.github.io/compositional.mle/
 BugReports: https://github.com/queelius/compositional.mle/issues

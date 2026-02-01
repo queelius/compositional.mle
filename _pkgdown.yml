@@ -20,8 +20,8 @@ navbar:
         href: articles/case-studies.html
       - text: Strategy Design
         href: articles/strategy-design.html
-      - text: Automatic Differentiation
-        href: articles/automatic-differentiation.html
+      - text: The MLE Ecosystem
+        href: articles/mle-ecosystem.html
 
 reference:
 - title: Problem Specification
@@ -116,4 +116,4 @@ articles:
 - title: Advanced Topics
   contents:
   - strategy-design
-  - automatic-differentiation
+  - mle-ecosystem
