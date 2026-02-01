@@ -16,3 +16,5 @@
 ^AGENTS\.md$
 ^DESIGN\.md$
 ^README\.html$
+^CITATION\.cff$
+^\.zenodo\.json$

@@ -1,0 +1,27 @@
+{
+  "title": "compositional.mle: Compositional Maximum Likelihood Estimation",
+  "description": "Composable optimization strategies for maximum likelihood estimation (MLE). Solvers are first-class functions that combine via sequential chaining, parallel racing, and random restarts. Implements gradient ascent, Newton-Raphson, quasi-Newton (BFGS), and derivative-free methods with support for constrained optimization and tracing.",
+  "creators": [
+    {
+      "name": "Towell, Alexander",
+      "orcid": "0000-0001-6443-9897"
+    }
+  ],
+  "upload_type": "software",
+  "license": "MIT",
+  "keywords": [
+    "maximum-likelihood",
+    "optimization",
+    "R",
+    "composable-solvers",
+    "statistics"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/queelius/algebraic.mle",
+      "relation": "requires",
+      "scheme": "url",
+      "resource_type": "software"
+    }
+  ]
+}

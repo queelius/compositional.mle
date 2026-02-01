@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "compositional.mle: Compositional Maximum Likelihood Estimation"
+version: 0.2.0
+license: MIT
+repository-code: https://github.com/queelius/compositional.mle
+url: https://queelius.github.io/compositional.mle/
+authors:
+  - family-names: Towell
+    given-names: Alexander
+    email: lex@metafunctor.com
+    orcid: https://orcid.org/0000-0001-6443-9897
+keywords:
+  - maximum-likelihood
+  - optimization
+  - R
+  - composable-solvers
+  - statistics
+abstract: >-
+  Composable optimization strategies for maximum likelihood estimation (MLE).
+  Solvers are first-class functions that combine via sequential chaining,
+  parallel racing, and random restarts. Implements gradient ascent,
+  Newton-Raphson, quasi-Newton (BFGS), and derivative-free methods with
+  support for constrained optimization and tracing.
