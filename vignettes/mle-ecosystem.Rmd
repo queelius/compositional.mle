@@ -38,7 +38,7 @@ This principle appears at three levels:
 | **Tests** | `hypothesize` | Combining hypothesis tests yields a test |
 
 This vignette walks through that story. All packages referenced below
-are available on CRAN (except `dualr`, which is on GitHub).
+are available on CRAN.
 
 ## Composing Solvers
 
@@ -327,12 +327,13 @@ p2 <- mle_problem(
   }
 )
 
-# Strategy 3: automatic differentiation via dualr
-# (requires dualr from GitHub: remotes::install_github("queelius/dualr"))
+# Strategy 3: automatic differentiation
+# Any AD package that provides score(f, theta) and hessian(f, theta)
+# can be plugged in here, e.g.:
 # p3 <- mle_problem(
 #   loglike = ll,
-#   score   = function(theta) dualr::score(ll, theta),
-#   fisher  = function(theta) dualr::observed_information(ll, theta)
+#   score   = function(theta) ad_pkg::score(ll, theta),
+#   fisher  = function(theta) ad_pkg::hessian(ll, theta)
 # )
 ```
 
@@ -342,18 +343,18 @@ Each strategy has trade-offs:
 |----------|----------|--------|-------|
 | Numerical (`numDeriv`) | $O(h^2)$ truncation error | None (default) | Slow (extra evaluations) |
 | Hand-coded analytic | Exact | High (error-prone) | Fast |
-| Automatic differentiation (`dualr`) | Exact (machine precision) | Low | Moderate |
+| Automatic differentiation (AD package) | Exact (machine precision) | Low | Moderate |
 
 The general recommendation: **start with the default** (no explicit
-derivatives) during model development, then **switch to `dualr`** or
-hand-coded derivatives when you need accuracy or performance. For
+derivatives) during model development, then **switch to an AD package**
+or hand-coded derivatives when you need accuracy or performance. For
 derivative-free problems, use `nelder_mead()`.
 
 | Situation | Recommended | Reason |
 |-----------|-------------|--------|
 | Quick prototyping | `numDeriv` (default) | Zero effort, just write the log-likelihood |
-| Production / accuracy-critical | `dualr` or hand-coded | Exact derivatives |
-| Complex models (mixtures, hierarchical) | `dualr` | Hand-coding is error-prone and tedious |
+| Production / accuracy-critical | AD package or hand-coded | Exact derivatives |
+| Complex models (mixtures, hierarchical) | AD package | Hand-coding is error-prone and tedious |
 | Non-differentiable objective | `nelder_mead()` | Derivative-free simplex method |
 
 ## The Ecosystem at a Glance
@@ -368,7 +369,6 @@ level.
 | [`algebraic.dist`](https://CRAN.R-project.org/package=algebraic.dist) | Yes | Distribution algebra: convolution, mixture, truncation |
 | [`compositional.mle`](https://github.com/queelius/compositional.mle) | --- | Solver composition: `%>>%`, `%|%`, `with_restarts()` |
 | [`hypothesize`](https://CRAN.R-project.org/package=hypothesize) | Yes | Test composition: `wald_test()`, `lrt()`, `fisher_combine()` |
-| [`dualr`](https://github.com/queelius/dualr) | --- | Automatic differentiation via dual numbers |
 | [`dfr.dist`](https://github.com/queelius/dfr.dist) | --- | Distribution-free reliability methods |
 
 The typical workflow:
