@@ -88,7 +88,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Alexander Towell \email{lex@metafunctor.com} (\href{https://orcid.org/0000-0001-6443-9897}{ORCID})
+\strong{Maintainer}: Alexander Towell \email{queelius@gmail.com} (\href{https://orcid.org/0000-0001-6443-9897}{ORCID})
 
 }
 \keyword{internal}

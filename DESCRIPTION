@@ -3,7 +3,7 @@ Type: Package
 Title: Compositional Maximum Likelihood Estimation
 Version: 1.0.0
 Authors@R:
-    person("Alexander", "Towell", , "lex@metafunctor.com", role = c("aut", "cre"),
+    person("Alexander", "Towell", , "queelius@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6443-9897"))
 Description: Provides composable optimization strategies for maximum likelihood
     estimation (MLE). Solvers are first-class functions that combine via
