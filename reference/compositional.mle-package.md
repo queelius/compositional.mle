@@ -77,7 +77,7 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Alexander Towell <lex@metafunctor.com>
+**Maintainer**: Alexander Towell <queelius@gmail.com>
 ([ORCID](https://orcid.org/0000-0001-6443-9897))
 
 ## Examples
