@@ -30,9 +30,16 @@ The solver automatically uses the score function from the problem if
 available, otherwise computes gradients numerically.
 }
 \examples{
-\dontrun{
+\donttest{
+set.seed(42)
+x <- rnorm(50, 5, 2)
+problem <- mle_problem(
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+)
 # Basic usage
-result <- bfgs()(problem, c(0, 1))
+result <- bfgs()(problem, c(4, 1.5))
 
 # Race BFGS against gradient ascent
 strategy <- bfgs() \%|\% gradient_ascent()

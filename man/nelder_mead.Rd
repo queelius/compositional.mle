@@ -25,9 +25,16 @@ potentially slower. It's useful as a fallback when gradient-based
 methods fail, or for problems with non-smooth likelihoods.
 }
 \examples{
-\dontrun{
+\donttest{
+set.seed(42)
+x <- rnorm(50, 5, 2)
+problem <- mle_problem(
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+)
 # Use when gradients are problematic
-result <- nelder_mead()(problem, c(0, 1))
+result <- nelder_mead()(problem, c(4, 1.5))
 
 # Race against gradient methods
 strategy <- gradient_ascent() \%|\% nelder_mead()

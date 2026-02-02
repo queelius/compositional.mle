@@ -45,10 +45,17 @@ Requires the problem to have a Fisher information function (either analytic
 or computed numerically).
 }
 \examples{
-\dontrun{
+\donttest{
+set.seed(42)
+x <- rnorm(50, 5, 2)
+problem <- mle_problem(
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+)
 # Basic usage
 solver <- newton_raphson()
-result <- solver(problem, c(0, 1))
+result <- solver(problem, c(4, 1.5))
 
 # Often used after gradient ascent for refinement
 strategy <- gradient_ascent(max_iter = 50) \%>>\% newton_raphson(max_iter = 20)

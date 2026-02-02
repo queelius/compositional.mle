@@ -1,7 +1,7 @@
 Package: compositional.mle
 Type: Package
 Title: Compositional Maximum Likelihood Estimation
-Version: 0.2.0
+Version: 1.0.0
 Authors@R:
     person("Alexander", "Towell", , "lex@metafunctor.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6443-9897"))
@@ -15,9 +15,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 ByteCompile: true
 Depends:
-    R (>= 3.5.0)
+    R (>= 3.5.0),
+    algebraic.mle
 Imports:
-    algebraic.mle,
     MASS,
     numDeriv
 Suggests:
@@ -28,7 +28,8 @@ Suggests:
     tibble,
     testthat (>= 3.0.0),
     cli,
-    future
+    future,
+    hypothesize
 URL: https://github.com/queelius/compositional.mle,
     https://queelius.github.io/compositional.mle/
 BugReports: https://github.com/queelius/compositional.mle/issues

@@ -1,3 +1,15 @@
+# compositional.mle 1.0.0
+
+## CRAN Release
+
+- First CRAN release
+- Moved `algebraic.mle` from Imports to Depends so that generics
+  (`params()`, `se()`, `confint()`, `loglik_val()`, `aic()`, `nparams()`,
+  `vcov()`) are available immediately when the package is loaded
+- Converted `\dontrun{}` to `\donttest{}` in examples (CRAN policy)
+- Added `hypothesize` to Suggests
+- Added CI via GitHub Actions
+
 # compositional.mle 0.2.0
 
 ## New Features

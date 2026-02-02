@@ -9,7 +9,7 @@
 #' @param replace Sample with replacement (logical, default: FALSE)
 #' @return Transformed log-likelihood function
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Original likelihood uses all data
 #' data <- rnorm(10000, mean = 5, sd = 2)
 #'

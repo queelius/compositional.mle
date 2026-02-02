@@ -39,9 +39,16 @@
 #' available, otherwise computes gradients numerically.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' set.seed(42)
+#' x <- rnorm(50, 5, 2)
+#' problem <- mle_problem(
+#'   loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+#'   constraint = mle_constraint(support = function(theta) theta[2] > 0,
+#'                               project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+#' )
 #' # Basic usage
-#' result <- bfgs()(problem, c(0, 1))
+#' result <- bfgs()(problem, c(4, 1.5))
 #'
 #' # Race BFGS against gradient ascent
 #' strategy <- bfgs() %|% gradient_ascent()
@@ -109,10 +116,15 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
 #' Use this when you have simple bound constraints.
 #'
 #' @examples
-#' \dontrun{
-#' # Positive parameters only
-#' solver <- lbfgsb(lower = c(-Inf, 0), upper = c(Inf, Inf))
-#' result <- solver(problem, c(0, 1))
+#' \donttest{
+#' set.seed(42)
+#' x <- rnorm(50, 5, 2)
+#' problem <- mle_problem(
+#'   loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE))
+#' )
+#' # Positive sigma via box constraint
+#' solver <- lbfgsb(lower = c(-Inf, 0.01), upper = c(Inf, Inf))
+#' result <- solver(problem, c(4, 1.5))
 #' }
 #'
 #' @export
@@ -163,9 +175,16 @@ lbfgsb <- function(lower = -Inf, upper = Inf, max_iter = 100L, tol = 1e-8) {
 #' methods fail, or for problems with non-smooth likelihoods.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' set.seed(42)
+#' x <- rnorm(50, 5, 2)
+#' problem <- mle_problem(
+#'   loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+#'   constraint = mle_constraint(support = function(theta) theta[2] > 0,
+#'                               project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+#' )
 #' # Use when gradients are problematic
-#' result <- nelder_mead()(problem, c(0, 1))
+#' result <- nelder_mead()(problem, c(4, 1.5))
 #'
 #' # Race against gradient methods
 #' strategy <- gradient_ascent() %|% nelder_mead()

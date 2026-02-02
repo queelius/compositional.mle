@@ -11,3 +11,4 @@
 ^AGENTS\.md$
 ^CITATION\.cff$
 ^\.zenodo\.json$
+^cran-comments\.md$

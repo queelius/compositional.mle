@@ -54,11 +54,14 @@ Combine solvers to build complex strategies:
 }
 
 \examples{
-\dontrun{
+\donttest{
 # Define problem
+set.seed(42)
+x <- rnorm(100, mean = 5, sd = 2)
 problem <- mle_problem(
-  loglike = function(theta) sum(dnorm(data, theta[1], theta[2], log = TRUE)),
-  constraint = mle_constraint(support = function(theta) theta[2] > 0)
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
 )
 
 # Simple solve

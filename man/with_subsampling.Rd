@@ -23,7 +23,7 @@ Transforms a log-likelihood function to use only a random subsample of
 observations. Useful for stochastic gradient ascent on large datasets.
 }
 \examples{
-\dontrun{
+\donttest{
 # Original likelihood uses all data
 data <- rnorm(10000, mean = 5, sd = 2)
 
