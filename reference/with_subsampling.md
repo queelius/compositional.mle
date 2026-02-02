@@ -34,7 +34,7 @@ Transformed log-likelihood function
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Original likelihood uses all data
 data <- rnorm(10000, mean = 5, sd = 2)
 
@@ -51,6 +51,8 @@ loglike_stoch <- with_subsampling(
 
 # Each call uses different random subsample
 loglike_stoch(c(5, 2))
+#> [1] -207.7651
 loglike_stoch(c(5, 2))  # Different value
-} # }
+#> [1] -216.0809
+# }
 ```

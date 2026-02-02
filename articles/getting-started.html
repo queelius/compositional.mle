@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">compositional.mle</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,8 @@
 <li><a class="dropdown-item" href="../articles/getting-started.html">Getting Started</a></li>
     <li><a class="dropdown-item" href="../articles/theory-and-intuition.html">Theory and Intuition</a></li>
     <li><a class="dropdown-item" href="../articles/case-studies.html">Case Studies</a></li>
+    <li><a class="dropdown-item" href="../articles/strategy-design.html">Strategy Design</a></li>
+    <li><a class="dropdown-item" href="../articles/mle-ecosystem.html">The MLE Ecosystem</a></li>
   </ul>
 </li>
       </ul>
@@ -61,7 +63,7 @@
                         <h4 data-toc-skip class="author">Alexander
 Towell</h4>
             
-            <h4 data-toc-skip class="date">2026-01-13</h4>
+            <h4 data-toc-skip class="date">2026-02-02</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/vignettes/getting-started.Rmd" class="external-link"><code>vignettes/getting-started.Rmd</code></a></small>
       <div class="d-none name"><code>getting-started.Rmd</code></div>
@@ -95,7 +97,8 @@ solver</li>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"queelius/compositional.mle"</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/queelius/compositional.mle" class="external-link">compositional.mle</a></span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/queelius/compositional.mle" class="external-link">compositional.mle</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: algebraic.mle</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="quick-start-normal-distribution-mle">Quick Start: Normal Distribution MLE<a class="anchor" aria-label="anchor" href="#quick-start-normal-distribution-mle"></a>
@@ -199,7 +202,7 @@ estimating from <strong>how</strong> you estimate it:</p>
 <p>Race multiple methods and keep the best result:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Try gradient-based and derivative-free methods</span></span>
-<span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/grapes-or-grapes.html">%|%</a></span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/grapes-or-grapes.html">%|%</a></span> <span class="fu"><a href="../reference/nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/race_operator.html">%|%</a></span> <span class="fu"><a href="../reference/bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/race_operator.html">%|%</a></span> <span class="fu"><a href="../reference/nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">strategy</span><span class="op">(</span><span class="va">problem</span>, theta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Winner:"</span>, <span class="va">result</span><span class="op">$</span><span class="va">solver</span>, <span class="st">"\n"</span><span class="op">)</span></span>

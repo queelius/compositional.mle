@@ -1,6 +1,7 @@
 # Conditional Refinement
 
 Applies a refinement solver only if the first solver did not converge.
+If refinement is applied, trace data from both solvers is merged.
 
 ## Usage
 
@@ -26,7 +27,5 @@ A new solver function with conditional refinement
 
 ``` r
 # Use Newton-Raphson to refine if gradient ascent doesn't converge
-strategy <- gradient_ascent(max_iter = 50) %>%
-  unless_converged(newton_raphson())
-#> Error in gradient_ascent(max_iter = 50) %>% unless_converged(newton_raphson()): could not find function "%>%"
+strategy <- unless_converged(gradient_ascent(max_iter = 50), newton_raphson())
 ```

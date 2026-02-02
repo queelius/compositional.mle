@@ -43,13 +43,10 @@ can be simple distributions without constraint awareness.
 
 ``` r
 # 20 random restarts - constraint applied automatically from problem
-strategy <- gradient_ascent() %>%
-  with_restarts(n = 20, sampler = uniform_sampler(c(-10, 0), c(10, 5)))
-#> Error in gradient_ascent() %>% with_restarts(n = 20, sampler = uniform_sampler(c(-10,     0), c(10, 5))): could not find function "%>%"
+sampler <- uniform_sampler(c(-10, 0), c(10, 5))
+strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 
 # Can also compose with other operators
-strategy <- gradient_ascent() %>%
-  with_restarts(n = 10, sampler = uniform_sampler(c(-10, 0), c(10, 5))) %>>%
+strategy <- with_restarts(gradient_ascent(), n = 10, sampler = sampler) %>>%
   newton_raphson()
-#> Error in gradient_ascent() %>% with_restarts(n = 10, sampler = uniform_sampler(c(-10,     0), c(10, 5))): could not find function "%>%"
 ```

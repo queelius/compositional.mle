@@ -1,4 +1,4 @@
 # License
 
     YEAR: 2022
-    COPYRIGHT HOLDER: algebraic.mle authors
+    COPYRIGHT HOLDER: Alexander Towell

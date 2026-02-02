@@ -27,6 +27,5 @@ A sampler function
 
 ``` r
 sampler <- uniform_sampler(c(-10, 0.1), c(10, 5))
-strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = sampler)
-#> Error in gradient_ascent() %>% with_restarts(n = 20, sampler = sampler): could not find function "%>%"
+strategy <- with_restarts(gradient_ascent(), n = 20, sampler = sampler)
 ```

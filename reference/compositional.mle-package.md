@@ -53,7 +53,7 @@ Combine solvers to build complex strategies:
 
 - `%>>%`: Sequential chaining (coarse-to-fine)
 
-- [`%|%`](https://queelius.github.io/compositional.mle/reference/grapes-or-grapes.md):
+- [`%|%`](https://queelius.github.io/compositional.mle/reference/race_operator.md):
   Parallel racing (try multiple, pick best)
 
 - [`with_restarts`](https://queelius.github.io/compositional.mle/reference/with_restarts.md):
@@ -83,22 +83,26 @@ Useful links:
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Define problem
+set.seed(42)
+x <- rnorm(100, mean = 5, sd = 2)
 problem <- mle_problem(
-  loglike = function(theta) sum(dnorm(data, theta[1], theta[2], log = TRUE)),
-  constraint = mle_constraint(support = function(theta) theta[2] > 0)
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
 )
 
 # Simple solve
 result <- gradient_ascent()(problem, c(0, 1))
 
 # Composed strategy: grid -> gradient -> Newton
-strategy <- grid_search(n = 5) %>>% gradient_ascent() %>>% newton_raphson()
+strategy <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5) %>>%
+  gradient_ascent() %>>% newton_raphson()
 result <- strategy(problem, c(0, 1))
 
 # Race different methods
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 result <- strategy(problem, c(0, 1))
-} # }
+# }
 ```

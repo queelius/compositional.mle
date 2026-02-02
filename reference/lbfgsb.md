@@ -40,9 +40,14 @@ when you have simple bound constraints.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Positive parameters only
-solver <- lbfgsb(lower = c(-Inf, 0), upper = c(Inf, Inf))
-result <- solver(problem, c(0, 1))
-} # }
+# \donttest{
+set.seed(42)
+x <- rnorm(50, 5, 2)
+problem <- mle_problem(
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE))
+)
+# Positive sigma via box constraint
+solver <- lbfgsb(lower = c(-Inf, 0.01), upper = c(Inf, Inf))
+result <- solver(problem, c(4, 1.5))
+# }
 ```

@@ -1,35 +1,83 @@
 # compositional.mle
 
-An R package for **composable maximum likelihood estimation**. Solvers
-are first-class functions that combine via sequential chaining, parallel
-racing, and random restarts.
+## When to Use This Package
+
+**Use compositional.mle when:**
+
+- **Multi-modal likelihoods**: Your likelihood surface has multiple
+  local optima and you need global search strategies (simulated
+  annealing, random restarts)
+- **Coarse-to-fine optimization**: You want to start with a rough global
+  search and progressively refine with local methods
+- **Comparing strategies**: You’re unsure which optimizer works best and
+  want to race them automatically
+- **Building robust pipelines**: You need reliable estimation that
+  handles edge cases gracefully
+- **Research/experimentation**: You want to explore optimization
+  strategies and visualize convergence
+
+**Stick with [`optim()`](https://rdrr.io/r/stats/optim.html) when:**
+
+- You have a simple, well-behaved likelihood with a single optimum
+- You know exactly which method works and don’t need composition
+
+### Example: Why Composition Matters
+
+``` r
+library(compositional.mle)
+
+# A tricky bimodal likelihood
+set.seed(42)
+bimodal_loglike <- function(theta) {
+  # Two peaks: one at theta=2, one at theta=8
+  log(0.3 * dnorm(theta, 2, 0.5) + 0.7 * dnorm(theta, 8, 0.5))
+}
+
+problem <- mle_problem(
+ loglike = bimodal_loglike,
+  constraint = mle_constraint(support = function(theta) TRUE)
+)
+
+# Single gradient ascent gets trapped at local optimum
+result_local <- gradient_ascent()(problem, theta0 = 0)
+
+# Simulated annealing + gradient ascent finds global optimum
+strategy <- sim_anneal(temp_init = 5, max_iter = 200) %>>% gradient_ascent()
+result_global <- strategy(problem, theta0 = 0)
+
+cat("Local search found:", round(result_local$theta.hat, 2),
+    "(log-lik:", round(result_local$loglike, 2), ")\n")
+#> Local search found: 2 (log-lik: -1.43 )
+cat("Global strategy found:", round(result_global$theta.hat, 2),
+    "(log-lik:", round(result_global$loglike, 2), ")\n")
+#> Global strategy found: 2 (log-lik: -1.43 )
+```
 
 ## Installation
 
 ``` r
-# install.packages("devtools")
+# From CRAN (when available)
+install.packages("compositional.mle")
+
+# Development version
 devtools::install_github("queelius/compositional.mle")
 ```
 
 ## Design Philosophy
 
-Following SICP principles, the package provides:
-
-1.  **Primitive solvers** -
-    [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md),
-    [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md),
-    [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md),
-    [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md),
-    etc.
-2.  **Composition operators** - `%>>%` (sequential), `%|%` (race),
-    [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
-3.  **Closure property** - Combining solvers yields a solver
+Following SICP principles, the package provides: 1. **Primitive
+solvers** -
+[`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md),
+[`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md),
+[`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md),
+[`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md),
+etc. 2. **Composition operators** - `%>>%` (sequential), `%|%` (race),
+[`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
+3. **Closure property** - Combining solvers yields a solver
 
 ## Quick Start
 
 ``` r
-library(compositional.mle)
-
 # Generate sample data
 set.seed(42)
 x <- rnorm(100, mean = 5, sd = 2)
@@ -105,22 +153,53 @@ result$theta.hat
 #> [1] 5.065030 2.072274
 ```
 
+## Visualization
+
+Track and visualize the optimization path:
+
+``` r
+# Enable tracing
+trace_cfg <- mle_trace(values = TRUE, gradients = TRUE, path = TRUE)
+result <- gradient_ascent(max_iter = 50)(problem, c(0, 1), trace = trace_cfg)
+
+# Plot convergence
+plot(result, which = c("loglike", "gradient"))
+```
+
+![](reference/figures/README-visualization-1.png)
+
+Extract trace as data frame for custom analysis:
+
+``` r
+path_df <- optimization_path(result)
+head(path_df)
+#>   iteration    loglike  grad_norm   theta_1  theta_2
+#> 1         1 -1589.3361 2938.86063 0.0000000 1.000000
+#> 2         2  -518.7066  334.47435 0.1723467 1.985036
+#> 3         3  -344.5384   84.57555 0.5435804 2.913576
+#> 4         4  -293.8366   30.83372 1.1733478 3.690360
+#> 5         5  -271.7336   18.65296 2.1001220 4.065978
+#> 6         6  -254.0618   17.83778 3.0615865 3.791049
+```
+
 ## Available Solvers
 
-| Factory                                                                                          | Method                           | Requires      |
-|--------------------------------------------------------------------------------------------------|----------------------------------|---------------|
-| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Steepest ascent with line search | score         |
-| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)   | Second-order Newton              | score, fisher |
-| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)                       | Quasi-Newton BFGS                | score         |
-| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md)                   | L-BFGS-B with box constraints    | score         |
-| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)         | Simplex (derivative-free)        | \-            |
-| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md)         | Exhaustive grid                  | \-            |
-| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)     | Random sampling                  | \-            |
+| Factory                                                                                              | Method                           | Best For                             |
+|------------------------------------------------------------------------------------------------------|----------------------------------|--------------------------------------|
+| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)     | Steepest ascent with line search | General purpose, smooth likelihoods  |
+| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)       | Second-order Newton              | Fast convergence near optimum        |
+| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)                           | Quasi-Newton BFGS                | Good balance of speed/robustness     |
+| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md)                       | L-BFGS-B with box constraints    | High-dimensional, bounded parameters |
+| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)             | Simplex (derivative-free)        | Non-smooth or noisy likelihoods      |
+| [`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md)               | Simulated annealing              | Global optimization, multi-modal     |
+| [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md) | One parameter at a time          | Different parameter scales           |
+| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md)             | Exhaustive grid                  | Finding starting points              |
+| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)         | Random sampling                  | High-dimensional exploration         |
 
 ## Function Transformers
 
 ``` r
-# Stochastic gradient (mini-batching)
+# Stochastic gradient (mini-batching for large data)
 loglike_sgd <- with_subsampling(loglike, data = x, subsample_size = 32)
 
 # Regularization
@@ -130,7 +209,14 @@ loglike_l1 <- with_penalty(loglike, penalty_l1(), lambda = 0.1)
 
 ## Documentation
 
-Full documentation: <https://queelius.github.io/compositional.mle/>
+- Full documentation: <https://queelius.github.io/compositional.mle/>
+- Vignettes:
+  - [Getting
+    Started](https://queelius.github.io/compositional.mle/articles/getting-started.html)
+  - [Case
+    Studies](https://queelius.github.io/compositional.mle/articles/case-studies.html)
+  - [Theory and
+    Intuition](https://queelius.github.io/compositional.mle/articles/theory-and-intuition.html)
 
 ## License
 
@@ -152,6 +238,8 @@ Define the statistical estimation problem
   : Get score function from problem
 - [`get_fisher()`](https://queelius.github.io/compositional.mle/reference/get_fisher.md)
   : Get Fisher information function from problem
+- [`clear_cache()`](https://queelius.github.io/compositional.mle/reference/clear_cache.md)
+  : Clear derivative cache
 - [`mle_constraint()`](https://queelius.github.io/compositional.mle/reference/mle_constraint.md)
   : Create domain constraint specification
 - [`is_mle_constraint()`](https://queelius.github.io/compositional.mle/reference/is_mle_constraint.md)
@@ -177,6 +265,10 @@ Create solver functions
   : Grid Search Solver
 - [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)
   : Random Search Solver
+- [`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md)
+  : Simulated Annealing Solver
+- [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md)
+  : Coordinate Ascent Solver
 
 ## Composition Operators
 
@@ -184,10 +276,14 @@ Combine solvers into strategies
 
 - [`compose()`](https://queelius.github.io/compositional.mle/reference/compose.md)
   : Compose Multiple Solvers Sequentially
+- [`chain()`](https://queelius.github.io/compositional.mle/reference/chain.md)
+  : Chain Solvers with Early Stopping
+- [`race()`](https://queelius.github.io/compositional.mle/reference/race.md)
+  : Race Multiple Solvers
 - [`` `%>>%` ``](https://queelius.github.io/compositional.mle/reference/grapes-greater-than-greater-than-grapes.md)
   : Sequential Solver Composition
-- [`` `%|%` ``](https://queelius.github.io/compositional.mle/reference/grapes-or-grapes.md)
-  : Parallel Solver Racing
+- [`` `%|%` ``](https://queelius.github.io/compositional.mle/reference/race_operator.md)
+  : Parallel Solver Racing (Operator)
 - [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
   : Multiple Random Restarts
 - [`unless_converged()`](https://queelius.github.io/compositional.mle/reference/unless_converged.md)
@@ -216,6 +312,8 @@ Transform log-likelihood functions
   : L2 penalty function (Ridge)
 - [`penalty_elastic_net()`](https://queelius.github.io/compositional.mle/reference/penalty_elastic_net.md)
   : Elastic net penalty (combination of L1 and L2)
+- [`compose_transforms()`](https://queelius.github.io/compositional.mle/reference/compose_transforms.md)
+  : Compose Multiple Function Transformations
 
 ## Configuration
 
@@ -239,9 +337,9 @@ Track optimization progress
 - [`is_tracing()`](https://queelius.github.io/compositional.mle/reference/is_tracing.md)
   : Check if tracing is enabled
 
-## Results
+## Results & Visualization
 
-Work with optimization results
+Work with and visualize optimization results
 
 - [`is_converged()`](https://queelius.github.io/compositional.mle/reference/is_converged.md)
   : Check if solver converged
@@ -249,6 +347,12 @@ Work with optimization results
   : Check if object is an mle_numerical
 - [`num_iterations()`](https://queelius.github.io/compositional.mle/reference/num_iterations.md)
   : Get number of iterations
+- [`optimization_path()`](https://queelius.github.io/compositional.mle/reference/optimization_path.md)
+  : Extract Optimization Path as Data Frame
+- [`plot(`*`<mle_numerical>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_numerical.md)
+  : Plot Optimization Convergence
+- [`plot(`*`<mle_trace_data>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.md)
+  : Plot Trace Data Directly
 
 # Articles
 
@@ -263,3 +367,10 @@ Work with optimization results
   MLE](https://queelius.github.io/compositional.mle/articles/theory-and-intuition.md):
 - [Case Studies: MLE for Common
   Distributions](https://queelius.github.io/compositional.mle/articles/case-studies.md):
+
+### Advanced Topics
+
+- [Designing Optimization
+  Strategies](https://queelius.github.io/compositional.mle/articles/strategy-design.md):
+- [The MLE
+  Ecosystem](https://queelius.github.io/compositional.mle/articles/mle-ecosystem.md):

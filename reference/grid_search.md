@@ -40,12 +40,19 @@ Points outside the problem's constraint support are skipped.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
+set.seed(42)
+x <- rnorm(50, 5, 2)
+problem <- mle_problem(
+  loglike = function(theta) sum(dnorm(x, theta[1], theta[2], log = TRUE)),
+  constraint = mle_constraint(support = function(theta) theta[2] > 0,
+                              project = function(theta) c(theta[1], max(theta[2], 1e-8)))
+)
 # Simple grid search
 solver <- grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 20)
 result <- solver(problem, c(0, 1))
 
 # Coarse-to-fine: grid then gradient
 strategy <- grid_search(c(-10, 0.1), c(10, 5), n = 5) %>>% gradient_ascent()
-} # }
+# }
 ```
