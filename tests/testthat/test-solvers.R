@@ -1,32 +1,5 @@
 # Tests for solver factories
 
-# Helper to create standard normal MLE problem
-make_normal_problem <- function(n = 100, true_mu = 5, true_sigma = 2) {
-  set.seed(42)
-  data <- rnorm(n, mean = true_mu, sd = true_sigma)
-
-  mle_problem(
-    loglike = function(theta) {
-      if (theta[2] <= 0) return(-Inf)
-      sum(dnorm(data, theta[1], theta[2], log = TRUE))
-    },
-    score = function(theta) {
-      mu <- theta[1]
-      sigma <- theta[2]
-      n <- length(data)
-      d_mu <- sum(data - mu) / sigma^2
-      d_sigma <- -n / sigma + sum((data - mu)^2) / sigma^3
-      c(d_mu, d_sigma)
-    },
-    constraint = mle_constraint(
-      support = function(theta) theta[2] > 0,
-      project = function(theta) c(theta[1], max(theta[2], 1e-8))
-    ),
-    theta_names = c("mu", "sigma"),
-    n_obs = n
-  )
-}
-
 test_that("gradient_ascent solves normal MLE", {
   problem <- make_normal_problem()
   solver <- gradient_ascent(max_iter = 200)

@@ -41,31 +41,17 @@ with_subsampling <- function(
     is.logical(replace)
   )
 
-  n_obs <- if (is.matrix(data) || is.data.frame(data)) {
-    nrow(data)
-  } else {
-    length(data)
-  }
+  is_tabular <- is.matrix(data) || is.data.frame(data)
+  n_obs <- if (is_tabular) nrow(data) else length(data)
 
   if (subsample_size > n_obs && !replace) {
     stop("subsample_size cannot exceed data size when replace=FALSE")
   }
 
-  # Return a function with the same signature as loglike
-  # but that uses subsampled data
   structure(
     function(theta) {
-      # Sample data indices
       idx <- sample.int(n_obs, size = subsample_size, replace = replace)
-
-      # Subset data appropriately
-      if (is.matrix(data) || is.data.frame(data)) {
-        subset_data <- data[idx, , drop = FALSE]
-      } else {
-        subset_data <- data[idx]
-      }
-
-      # Call original loglike with subsampled data
+      subset_data <- if (is_tabular) data[idx, , drop = FALSE] else data[idx]
       loglike(theta, subset_data)
     },
     class = c("loglike_subsampled", "function"),
@@ -244,11 +230,6 @@ compose_transforms <- function(...) {
   }
 
   function(f) {
-    result <- f
-    # Apply right-to-left
-    for (i in rev(seq_along(transforms))) {
-      result <- transforms[[i]](result)
-    }
-    result
+    Reduce(function(acc, t) t(acc), rev(transforms), init = f)
   }
 }

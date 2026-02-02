@@ -31,10 +31,8 @@ NULL
     ))
   }
 
-  # Track state
   last_ll <- -Inf
   start_time <- NULL
-  pb <- NULL
 
   start <- function() {
     start_time <<- Sys.time()
@@ -64,38 +62,23 @@ NULL
   update <- function(iter, loglike, grad_norm = NULL) {
     if (iter %% show_every != 0) return(invisible(NULL))
 
-    improvement <- loglike - last_ll
     last_ll <<- loglike
+    grad_str <- if (!is.null(grad_norm)) sprintf(" |grad|=%.2e", grad_norm) else ""
 
     if (.has_cli() && !is.null(max_iter)) {
-      # Update progress bar
       ll <- loglike
       cli::cli_progress_update(set = iter)
     } else if (.has_cli()) {
-      # Inline status
-      grad_str <- if (!is.null(grad_norm)) {
-        sprintf(" |grad|=%.2e", grad_norm)
-      } else ""
       cli::cli_status(
         "{solver_name} iter {iter}: LL={format(loglike, digits=4)}{grad_str}"
       )
-    } else {
-      # Base R message
-      grad_str <- if (!is.null(grad_norm)) {
-        sprintf(" |grad|=%.2e", grad_norm)
-      } else ""
-      if (iter %% 10 == 0 || iter == 1) {
-        message(sprintf("%s iter %d: LL=%.4f%s",
-                       solver_name, iter, loglike, grad_str))
-      }
+    } else if (iter %% 10 == 0 || iter == 1) {
+      message(sprintf("%s iter %d: LL=%.4f%s",
+                     solver_name, iter, loglike, grad_str))
     }
   }
 
   finish <- function(converged, iterations, final_ll) {
-    elapsed <- if (!is.null(start_time)) {
-      difftime(Sys.time(), start_time, units = "secs")
-    } else NA
-
     if (.has_cli() && !is.null(max_iter)) {
       ll <- final_ll
       cli::cli_progress_done()
@@ -120,4 +103,46 @@ NULL
   }
 
   list(start = start, update = update, finish = finish)
+}
+
+# Ensure theta0 is in the constraint support, projecting if needed.
+# Stops with an error if projection also fails.
+.ensure_support <- function(theta0, constraint) {
+  if (!constraint$support(theta0)) {
+    theta0 <- constraint$project(theta0)
+    if (!constraint$support(theta0)) {
+      stop("Initial point not in support and projection failed")
+    }
+  }
+  theta0
+}
+
+# Compute Fisher information numerically, returning NULL on failure
+.numerical_fisher <- function(loglike, theta) {
+  tryCatch(
+    -numDeriv::hessian(loglike, theta),
+    error = function(e) NULL
+  )
+}
+
+# Build an mle_numerical result from iterative solver output
+.build_result <- function(theta, ll, converged, hessian,
+                          solver_name, superclass, iterations, recorder) {
+  sol <- list(
+    par = theta,
+    value = ll,
+    convergence = if (converged) 0L else 1L,
+    hessian = hessian
+  )
+
+  result <- algebraic.mle::mle_numerical(
+    sol = sol,
+    superclasses = superclass
+  )
+
+  result$iterations <- iterations
+  result$solver <- solver_name
+  result$trace_data <- finalize_trace(recorder)
+
+  result
 }

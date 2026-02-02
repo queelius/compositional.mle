@@ -1,20 +1,5 @@
 # Tests for generic functions
 
-# Helper function to create mle_numerical object using optim-style output
-# This uses algebraic.mle::mle_numerical() which takes optim()-style input
-create_test_mle_numerical <- function(par, value, convergence = 0L,
-                                       iterations = 50L, hessian = NULL) {
-  sol <- list(
-    par = par,
-    value = value,
-    convergence = convergence,
-    hessian = hessian
-  )
-  result <- algebraic.mle::mle_numerical(sol = sol)
-  result$iterations <- iterations
-  result
-}
-
 test_that("mle_numerical objects from algebraic.mle work correctly", {
   # Create a simple mle_numerical object using optim-style output
   sol <- list(

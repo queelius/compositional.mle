@@ -44,11 +44,6 @@ num_iterations <- function(x, ...) {
 }
 
 #' @export
-num_iterations.mle_numerical <- function(x, ...) {
-  x$iterations %||% x$iter %||% NA_integer_
-}
-
-#' @export
 num_iterations.default <- function(x, ...) {
   x$iterations %||% x$iter %||% NA_integer_
 }

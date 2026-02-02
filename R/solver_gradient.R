@@ -55,28 +55,17 @@ gradient_ascent <- function(
 
   max_iter <- as.integer(max_iter)
 
-  # Return solver function
   function(problem, theta0, trace = mle_trace()) {
     stopifnot(is_mle_problem(problem))
     stopifnot(is.numeric(theta0))
 
-    # Get functions from problem
     loglike <- problem$loglike
     score <- get_score(problem)
     constraint <- problem$constraint
 
-    # Check initial point is in support
-    if (!constraint$support(theta0)) {
-      theta0 <- constraint$project(theta0)
-      if (!constraint$support(theta0)) {
-        stop("Initial point not in support and projection failed")
-      }
-    }
-
-    # Initialize tracing
+    theta0 <- .ensure_support(theta0, constraint)
     recorder <- new_trace_recorder(trace, length(theta0))
 
-    # Initialize progress handler
     progress <- .progress_handler(
       verbose = verbose,
       solver_name = "Gradient Ascent",
@@ -84,27 +73,22 @@ gradient_ascent <- function(
     )
     progress$start()
 
-    # Optimization loop
     theta <- theta0
     converged <- FALSE
 
     for (iter in seq_len(max_iter)) {
-      # Compute gradient
       grad <- score(theta)
       grad_norm <- sqrt(sum(grad^2))
       ll_current <- loglike(theta)
 
-      # Record iteration
       if (!is.null(recorder)) {
         record_iteration(recorder, theta,
                         value = ll_current,
                         gradient = grad)
       }
 
-      # Update progress
       progress$update(iter, ll_current, grad_norm)
 
-      # Compute step
       if (line_search) {
         step_result <- .backtracking_line_search(
           loglike = loglike,
@@ -117,23 +101,18 @@ gradient_ascent <- function(
         )
 
         if (!step_result$success) {
-          # Line search failed - check if we're at optimum
-          if (grad_norm < tol) {
-            converged <- TRUE
-          }
+          if (grad_norm < tol) converged <- TRUE
           break
         }
 
         theta_new <- step_result$theta
       } else {
-        # Fixed step size
         theta_new <- theta + learning_rate * grad
         if (!constraint$support(theta_new)) {
           theta_new <- constraint$project(theta_new)
         }
       }
 
-      # Check convergence
       if (sqrt(sum((theta_new - theta)^2)) < tol) {
         converged <- TRUE
         theta <- theta_new
@@ -143,36 +122,14 @@ gradient_ascent <- function(
       theta <- theta_new
     }
 
-    # Final log-likelihood and info
     ll_final <- loglike(theta)
-
-    # Report completion
     progress$finish(converged, iter, ll_final)
 
-    # Compute Fisher information numerically
-    fisher <- tryCatch(
-      -numDeriv::hessian(loglike, theta),
-      error = function(e) NULL
-    )
+    fisher <- .numerical_fisher(loglike, theta)
+    hessian <- if (!is.null(fisher)) -fisher else NULL
 
-    # Build result using algebraic.mle
-    sol <- list(
-      par = theta,
-      value = ll_final,
-      convergence = if (converged) 0L else 1L,
-      hessian = if (!is.null(fisher)) -fisher else NULL
-    )
-
-    result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_gradient_ascent"
-    )
-
-    result$iterations <- iter
-    result$solver <- "gradient_ascent"
-    result$trace_data <- finalize_trace(recorder)
-
-    result
+    .build_result(theta, ll_final, converged, hessian,
+                  "gradient_ascent", "mle_gradient_ascent", iter, recorder)
   }
 }
 

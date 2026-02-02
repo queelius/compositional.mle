@@ -39,8 +39,6 @@ compose <- function(...) {
 
     result$chain <- chain
     result$strategy <- "sequential"
-
-    # Merge trace data from all stages
     result$trace_data <- merge_traces(chain)
 
     result
@@ -74,13 +72,9 @@ compose <- function(...) {
   stopifnot(is.function(s1), is.function(s2))
 
   function(problem, theta0, trace = mle_trace()) {
-    # Run first solver
     result1 <- s1(problem, theta0, trace)
-
-    # Run second solver starting from first result
     result2 <- s2(problem, result1$theta.hat, trace)
 
-    # Combine chain information
     chain <- c(
       if (!is.null(result1$chain)) result1$chain else list(result1),
       list(result2)
@@ -88,9 +82,7 @@ compose <- function(...) {
     result2$chain <- chain
     result2$strategy <- "sequential"
 
-    # Merge trace data from all stages
     result2$trace_data <- merge_traces(chain)
-
     result2
   }
 }
@@ -135,7 +127,6 @@ race <- function(..., parallel = FALSE) {
     results <- vector("list", length(solvers))
 
     if (parallel && requireNamespace("future", quietly = TRUE)) {
-      # Parallel execution via future
       futures <- lapply(solvers, function(s) {
         future::future(
           tryCatch(s(problem, theta0, trace), error = function(e) NULL),
@@ -144,7 +135,6 @@ race <- function(..., parallel = FALSE) {
       })
       results <- lapply(futures, future::value)
     } else {
-      # Sequential execution
       for (i in seq_along(solvers)) {
         results[[i]] <- tryCatch(
           solvers[[i]](problem, theta0, trace),
@@ -153,7 +143,6 @@ race <- function(..., parallel = FALSE) {
       }
     }
 
-    # Find best result by log-likelihood
     loglikes <- sapply(results, function(r) {
       if (!is.null(r) && !is.null(r$loglike)) r$loglike else -Inf
     })
@@ -198,25 +187,15 @@ race <- function(..., parallel = FALSE) {
   stopifnot(is.function(s1), is.function(s2))
 
   function(problem, theta0, trace = mle_trace()) {
-    # Run both solvers
-    result1 <- tryCatch(
-      s1(problem, theta0, trace),
-      error = function(e) NULL
-    )
+    result1 <- tryCatch(s1(problem, theta0, trace), error = function(e) NULL)
+    result2 <- tryCatch(s2(problem, theta0, trace), error = function(e) NULL)
 
-    result2 <- tryCatch(
-      s2(problem, theta0, trace),
-      error = function(e) NULL
-    )
-
-    # Handle failures
     if (is.null(result1) && is.null(result2)) {
       stop("All solvers in parallel race failed")
     }
     if (is.null(result1)) return(result2)
     if (is.null(result2)) return(result1)
 
-    # Pick best by log-likelihood
     ll1 <- if (!is.null(result1$loglike)) result1$loglike else -Inf
     ll2 <- if (!is.null(result2$loglike)) result2$loglike else -Inf
 
@@ -266,26 +245,20 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
   function(problem, theta0, trace = mle_trace()) {
     constraint <- problem$constraint
 
-    # Helper to generate a valid starting point
     sample_valid <- function() {
       for (attempt in seq_len(max_reject)) {
         theta <- sampler()
-        if (constraint$support(theta)) {
-          return(theta)
-        }
+        if (constraint$support(theta)) return(theta)
       }
-      # Fallback: project onto support
       constraint$project(sampler())
     }
 
-    # Generate starting points: theta0 plus n-1 random samples
     starts <- vector("list", n)
     starts[[1]] <- theta0
     for (i in seq_len(n - 1) + 1) {
       starts[[i]] <- sample_valid()
     }
 
-    # Run solver from each starting point
     results <- vector("list", n)
     loglikes <- rep(-Inf, n)
 
@@ -294,13 +267,11 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
         solver(problem, starts[[i]], trace),
         error = function(e) NULL
       )
-
       if (!is.null(results[[i]]) && !is.null(results[[i]]$loglike)) {
         loglikes[i] <- results[[i]]$loglike
       }
     }
 
-    # Find best
     if (all(loglikes == -Inf)) {
       stop("All restart attempts failed")
     }
@@ -339,10 +310,9 @@ unless_converged <- function(solver, refinement) {
 
     if (!isTRUE(result$converged)) {
       result2 <- refinement(problem, result$theta.hat, trace)
-      chain <- c(list(result), list(result2))
-      result2$chain <- chain
+      result2$chain <- list(result, result2)
       result2$strategy <- "conditional"
-      result2$trace_data <- merge_traces(chain)
+      result2$trace_data <- merge_traces(result2$chain)
       return(result2)
     }
 
@@ -394,39 +364,30 @@ chain <- function(..., early_stop = NULL) {
   if (length(solvers) == 1 && is.null(early_stop)) return(solvers[[1]])
 
   function(problem, theta0, trace = mle_trace()) {
+    finalize <- function(result, chain_results, stopped_early) {
+      result$chain <- chain_results
+      result$strategy <- "chain"
+      result$stopped_early <- stopped_early
+      result$trace_data <- merge_traces(chain_results)
+      result
+    }
+
     result <- solvers[[1]](problem, theta0, trace)
     chain_results <- list(result)
 
-    # Check early stop after first solver
-    if (!is.null(early_stop) && early_stop(result)) {
-      result$chain <- chain_results
-      result$strategy <- "chain"
-      result$stopped_early <- TRUE
-      result$trace_data <- merge_traces(chain_results)
-      return(result)
-    }
-
-    # Run remaining solvers
     for (i in seq_len(length(solvers) - 1) + 1) {
+      if (!is.null(early_stop) && early_stop(result)) {
+        return(finalize(result, chain_results, stopped_early = TRUE))
+      }
       result <- solvers[[i]](problem, result$theta.hat, trace)
       chain_results <- c(chain_results, list(result))
-
-      # Check early stop
-      if (!is.null(early_stop) && early_stop(result)) {
-        result$chain <- chain_results
-        result$strategy <- "chain"
-        result$stopped_early <- TRUE
-        result$trace_data <- merge_traces(chain_results)
-        return(result)
-      }
     }
 
-    result$chain <- chain_results
-    result$strategy <- "chain"
-    result$stopped_early <- FALSE
-    result$trace_data <- merge_traces(chain_results)
+    if (!is.null(early_stop) && early_stop(result)) {
+      return(finalize(result, chain_results, stopped_early = TRUE))
+    }
 
-    result
+    finalize(result, chain_results, stopped_early = FALSE)
   }
 }
 

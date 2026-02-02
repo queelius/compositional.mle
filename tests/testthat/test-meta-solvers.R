@@ -47,8 +47,8 @@ test_that("grid_search records metadata", {
   solver <- grid_search(lower = c(-1, -1), upper = c(1, 1), n = 3)
   result <- solver(problem, c(0, 0))
 
-  expect_true(!is.null(result$grid_points))
-  expect_true(!is.null(result$grid_evaluated))
+  expect_false(is.null(result$grid_points))
+  expect_false(is.null(result$grid_evaluated))
 })
 
 ## Random Search Tests
@@ -63,8 +63,8 @@ test_that("random_search basic functionality", {
   result <- solver(problem, c(0, 0))
 
   expect_s3_class(result, "mle_random_search")
-  expect_true(!is.null(result$n_samples))
-  expect_true(!is.null(result$n_evaluated))
+  expect_false(is.null(result$n_samples))
+  expect_false(is.null(result$n_evaluated))
 })
 
 test_that("random_search validates inputs", {
@@ -102,7 +102,7 @@ test_that("with_restarts basic functionality", {
   result <- solver(problem, c(0, 0))
 
   expect_true(is_mle_numerical(result))
-  expect_true(!is.null(result$n_restarts))
+  expect_false(is.null(result$n_restarts))
 })
 
 test_that("with_restarts respects problem constraints", {

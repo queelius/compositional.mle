@@ -192,48 +192,37 @@ merge_traces <- function(results) {
   if (length(traces) == 0) return(NULL)
   if (length(traces) == 1) return(traces[[1]])
 
-  # Merge values
-  all_values <- unlist(lapply(traces, function(t) t$values))
+  all_values <- unlist(lapply(traces, `[[`, "values"))
 
-  # Merge paths
-  all_paths <- lapply(traces, function(t) t$path)
-  all_paths <- Filter(Negate(is.null), all_paths)
-  merged_path <- if (length(all_paths) > 0) {
-    do.call(rbind, all_paths)
-  } else NULL
+  paths <- Filter(Negate(is.null), lapply(traces, `[[`, "path"))
+  merged_path <- if (length(paths) > 0) do.call(rbind, paths) else NULL
 
-  # Merge gradients
-  all_gradients <- unlist(lapply(traces, function(t) t$gradients))
+  all_gradients <- unlist(lapply(traces, `[[`, "gradients"))
 
-  # Merge times (cumulative)
   all_times <- NULL
-  if (!is.null(traces[[1]]$times)) {
-    cumulative_offset <- 0
-    for (t in traces) {
-      if (!is.null(t$times)) {
-        all_times <- c(all_times, t$times + cumulative_offset)
-        cumulative_offset <- cumulative_offset + t$total_time
-      }
+  cumulative_offset <- 0
+  for (t in traces) {
+    if (!is.null(t$times)) {
+      all_times <- c(all_times, t$times + cumulative_offset)
+      cumulative_offset <- cumulative_offset + t$total_time
     }
   }
 
-  # Stage boundaries (cumulative iteration counts)
-  stage_ends <- cumsum(sapply(traces, function(t) {
+  stage_sizes <- vapply(traces, function(t) {
     if (!is.null(t$values)) length(t$values)
     else if (!is.null(t$path)) nrow(t$path)
     else t$total_iterations
-  }))
+  }, integer(1))
 
-  # Build merged result
   merged <- list()
   if (length(all_values) > 0) merged$values <- all_values
   if (!is.null(merged_path)) merged$path <- merged_path
   if (length(all_gradients) > 0) merged$gradients <- all_gradients
   if (!is.null(all_times)) merged$times <- all_times
 
-  merged$total_iterations <- sum(sapply(traces, function(t) t$total_iterations))
-  merged$total_time <- sum(sapply(traces, function(t) t$total_time))
-  merged$stages <- stage_ends
+  merged$total_iterations <- sum(vapply(traces, `[[`, 0L, "total_iterations"))
+  merged$total_time <- sum(vapply(traces, `[[`, 0, "total_time"))
+  merged$stages <- cumsum(stage_sizes)
 
   class(merged) <- "mle_trace_data"
   merged

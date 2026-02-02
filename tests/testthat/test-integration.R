@@ -1,41 +1,7 @@
 ## Integration tests for complete MLE workflows
 
-# Helper to create standard normal MLE problem
-make_normal_problem <- function(n = 100, true_mu = 5, true_sigma = 2, seed = 123) {
-  set.seed(seed)
-  data <- rnorm(n, mean = true_mu, sd = true_sigma)
-
-  mle_problem(
-    loglike = function(theta) {
-      mu <- theta[1]
-      sigma <- theta[2]
-      if (sigma <= 0) return(-Inf)
-      sum(dnorm(data, mu, sigma, log = TRUE))
-    },
-    score = function(theta) {
-      mu <- theta[1]
-      sigma <- theta[2]
-      n <- length(data)
-      d_mu <- sum(data - mu) / sigma^2
-      d_sigma <- -n / sigma + sum((data - mu)^2) / sigma^3
-      c(d_mu, d_sigma)
-    },
-    fisher = function(theta) {
-      sigma <- theta[2]
-      n <- length(data)
-      matrix(c(n / sigma^2, 0, 0, 2 * n / sigma^2), nrow = 2)
-    },
-    constraint = mle_constraint(
-      support = function(theta) theta[2] > 0,
-      project = function(theta) c(theta[1], max(theta[2], 1e-6))
-    ),
-    theta_names = c("mu", "sigma"),
-    n_obs = n
-  )
-}
-
 test_that("Normal distribution MLE with gradient ascent", {
-  problem <- make_normal_problem()
+  problem <- make_normal_problem(seed = 123, fisher = TRUE)
 
   solver <- gradient_ascent(max_iter = 200)
   result <- solver(problem, c(0, 1))
@@ -46,7 +12,7 @@ test_that("Normal distribution MLE with gradient ascent", {
 })
 
 test_that("Normal distribution MLE with Newton-Raphson", {
-  problem <- make_normal_problem(seed = 456, true_mu = 10, true_sigma = 3)
+  problem <- make_normal_problem(seed = 456, true_mu = 10, true_sigma = 3, fisher = TRUE)
 
   solver <- newton_raphson(max_iter = 50)
   result <- solver(problem, c(5, 1))
@@ -70,7 +36,7 @@ test_that("Grid search finds approximate solution", {
 })
 
 test_that("Sequential composition works", {
-  problem <- make_normal_problem()
+  problem <- make_normal_problem(seed = 123, fisher = TRUE)
 
   # Grid search then gradient ascent
   solver <- grid_search(c(0, 0.5), c(10, 4), n = 5) %>>% gradient_ascent(max_iter = 100)
@@ -82,7 +48,7 @@ test_that("Sequential composition works", {
 })
 
 test_that("with_restarts improves robustness", {
-  problem <- make_normal_problem()
+  problem <- make_normal_problem(seed = 123, fisher = TRUE)
 
   sampler <- uniform_sampler(c(-5, 0.5), c(15, 5))
   solver <- with_restarts(gradient_ascent(max_iter = 100), n = 5, sampler = sampler)

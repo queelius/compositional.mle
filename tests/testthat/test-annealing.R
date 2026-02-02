@@ -3,8 +3,7 @@ test_that("sim_anneal finds global optimum for simple problem", {
 
   # Simple quadratic - global optimum at (3, 2)
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(3, 2))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
 
   result <- sim_anneal(max_iter = 500, temp_init = 10)(problem, theta0 = c(0, 0))
@@ -43,8 +42,7 @@ test_that("sim_anneal returns proper result structure", {
   set.seed(789)
 
   problem <- mle_problem(
-    loglike = function(theta) -sum(theta^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum(theta^2)
   )
 
   result <- sim_anneal(max_iter = 100)(problem, theta0 = c(1, 1))
@@ -62,16 +60,15 @@ test_that("sim_anneal with tracing records values", {
   set.seed(101)
 
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(1, 1))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(1, 1))^2)
   )
 
   trace_cfg <- mle_trace(values = TRUE, path = TRUE)
   result <- sim_anneal(max_iter = 100)(problem, theta0 = c(0, 0), trace = trace_cfg)
 
   expect_false(is.null(result$trace_data))
-  expect_true(!is.null(result$trace_data$values))
-  expect_true(!is.null(result$trace_data$path))
+  expect_false(is.null(result$trace_data$values))
+  expect_false(is.null(result$trace_data$path))
 })
 
 test_that("sim_anneal can compose with other solvers", {
@@ -79,8 +76,7 @@ test_that("sim_anneal can compose with other solvers", {
 
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
-    score = function(theta) -2 * (theta - c(3, 2)),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    score = function(theta) -2 * (theta - c(3, 2))
   )
 
   # SA for global exploration, then gradient for local refinement
@@ -97,8 +93,7 @@ test_that("sim_anneal cooling affects exploration", {
   set.seed(303)
 
   problem <- mle_problem(
-    loglike = function(theta) -sum(theta^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum(theta^2)
   )
 
   # Fast cooling = less exploration

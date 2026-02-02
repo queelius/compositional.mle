@@ -3,7 +3,6 @@
 S3method(is_converged,default)
 S3method(is_converged,mle_numerical)
 S3method(num_iterations,default)
-S3method(num_iterations,mle_numerical)
 S3method(optimization_path,mle_numerical)
 S3method(optimization_path,mle_trace_data)
 S3method(plot,mle_numerical)

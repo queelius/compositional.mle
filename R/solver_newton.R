@@ -54,21 +54,17 @@ newton_raphson <- function(
     stopifnot(is_mle_problem(problem))
     stopifnot(is.numeric(theta0))
 
-    # Get functions from problem
     loglike <- problem$loglike
     score <- get_score(problem)
     fisher <- get_fisher(problem)
     constraint <- problem$constraint
 
-    # Check initial point
     if (!constraint$support(theta0)) {
       theta0 <- constraint$project(theta0)
     }
 
-    # Initialize tracing
     recorder <- new_trace_recorder(trace, length(theta0))
 
-    # Initialize progress handler
     progress <- .progress_handler(
       verbose = verbose,
       solver_name = "Newton-Raphson",
@@ -76,52 +72,43 @@ newton_raphson <- function(
     )
     progress$start()
 
-    # Optimization loop
     theta <- theta0
     converged <- FALSE
 
     for (iter in seq_len(max_iter)) {
-      # Compute score and Fisher information
       grad <- score(theta)
       fim <- fisher(theta)
       grad_norm <- sqrt(sum(grad^2))
       ll_current <- loglike(theta)
 
-      # Newton direction: I^{-1} * score
       direction <- tryCatch(
         as.vector(solve(fim, grad)),
         error = function(e) {
-          # Fall back to pseudoinverse if singular
           as.vector(MASS::ginv(fim) %*% grad)
         }
       )
 
-      # Record iteration
       if (!is.null(recorder)) {
         record_iteration(recorder, theta,
                         value = ll_current,
                         gradient = grad)
       }
 
-      # Update progress
       progress$update(iter, ll_current, grad_norm)
 
-      # Compute step
       if (line_search) {
         step_result <- .backtracking_line_search(
           loglike = loglike,
           theta = theta,
           direction = direction,
-          max_step = 1.0,  # Newton step is naturally scaled
+          max_step = 1.0,
           backtrack_ratio = backtrack_ratio,
           min_step = min_step,
           constraint = constraint
         )
 
         if (!step_result$success) {
-          if (grad_norm < tol) {
-            converged <- TRUE
-          }
+          if (grad_norm < tol) converged <- TRUE
           break
         }
 
@@ -133,7 +120,6 @@ newton_raphson <- function(
         }
       }
 
-      # Check convergence
       if (sqrt(sum((theta_new - theta)^2)) < tol) {
         converged <- TRUE
         theta <- theta_new
@@ -143,31 +129,12 @@ newton_raphson <- function(
       theta <- theta_new
     }
 
-    # Final values
     ll_final <- loglike(theta)
     fim_final <- fisher(theta)
-
-    # Report completion
     progress$finish(converged, iter, ll_final)
 
-    # Build result
-    sol <- list(
-      par = theta,
-      value = ll_final,
-      convergence = if (converged) 0L else 1L,
-      hessian = -fim_final
-    )
-
-    result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_newton_raphson"
-    )
-
-    result$iterations <- iter
-    result$solver <- "newton_raphson"
-    result$trace_data <- finalize_trace(recorder)
-
-    result
+    .build_result(theta, ll_final, converged, -fim_final,
+                  "newton_raphson", "mle_newton_raphson", iter, recorder)
   }
 }
 

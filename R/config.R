@@ -25,13 +25,8 @@ mle_config <- function(
   debug = FALSE,
   debug_freq = 1L
 ) {
-  # Coerce to integer if numeric
-  if (is.numeric(max_iter) && !is.integer(max_iter)) {
-    max_iter <- as.integer(max_iter)
-  }
-  if (is.numeric(debug_freq) && !is.integer(debug_freq)) {
-    debug_freq <- as.integer(debug_freq)
-  }
+  max_iter <- as.integer(max_iter)
+  debug_freq <- as.integer(debug_freq)
 
   stopifnot(
     is.integer(max_iter), max_iter > 0,
@@ -145,10 +140,7 @@ mle_config_linesearch <- function(
     trace = trace, debug = debug, debug_freq = debug_freq
   )
 
-  # Coerce to integer if numeric
-  if (is.numeric(max_iter_ls) && !is.integer(max_iter_ls)) {
-    max_iter_ls <- as.integer(max_iter_ls)
-  }
+  max_iter_ls <- as.integer(max_iter_ls)
 
   stopifnot(
     is.numeric(backtrack_ratio), backtrack_ratio > 0, backtrack_ratio < 1,

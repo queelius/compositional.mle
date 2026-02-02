@@ -75,23 +75,17 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
            pch = 19, col = "red", cex = 1.5)
   }
 
-  # Plot gradient norm decay
   if ("gradient" %in% which && !is.null(trace$gradients)) {
     iterations <- seq_along(trace$gradients)
-    # Use log scale if values span multiple orders of magnitude
     use_log <- max(trace$gradients) / min(trace$gradients[trace$gradients > 0]) > 100
 
-    if (use_log) {
-      plot(iterations, trace$gradients,
-           type = "l", lwd = 2, col = "darkgreen",
-           xlab = "Iteration", ylab = "Gradient Norm (log scale)",
-           main = "Gradient Norm Decay", log = "y", ...)
-    } else {
-      plot(iterations, trace$gradients,
-           type = "l", lwd = 2, col = "darkgreen",
-           xlab = "Iteration", ylab = "Gradient Norm",
-           main = "Gradient Norm Decay", ...)
-    }
+    log_arg <- if (use_log) "y" else ""
+    ylab <- if (use_log) "Gradient Norm (log scale)" else "Gradient Norm"
+
+    plot(iterations, trace$gradients,
+         type = "l", lwd = 2, col = "darkgreen",
+         xlab = "Iteration", ylab = ylab,
+         main = "Gradient Norm Decay", log = log_arg, ...)
     abline(h = 0, lty = 2, col = "gray")
   }
 
@@ -159,37 +153,26 @@ optimization_path.mle_numerical <- function(x, ...) {
 
 #' @export
 optimization_path.mle_trace_data <- function(x, ...) {
-  # Determine number of recorded iterations
-  n_iter <- NULL
-  if (!is.null(x$values)) n_iter <- length(x$values)
-  if (!is.null(x$gradients)) n_iter <- length(x$gradients)
-  if (!is.null(x$path)) n_iter <- nrow(x$path)
-  if (!is.null(x$times)) n_iter <- length(x$times)
+  n_iter <- if (!is.null(x$values)) length(x$values)
+    else if (!is.null(x$gradients)) length(x$gradients)
+    else if (!is.null(x$path)) nrow(x$path)
+    else if (!is.null(x$times)) length(x$times)
+    else NULL
 
   if (is.null(n_iter) || n_iter == 0) {
     warning("No trace data to extract")
     return(NULL)
   }
 
-  # Build data frame
   df <- data.frame(iteration = seq_len(n_iter))
 
-  if (!is.null(x$values)) {
-    df$loglike <- x$values
-  }
-
-  if (!is.null(x$gradients)) {
-    df$grad_norm <- x$gradients
-  }
-
-  if (!is.null(x$times)) {
-    df$time <- x$times
-  }
+  if (!is.null(x$values)) df$loglike <- x$values
+  if (!is.null(x$gradients)) df$grad_norm <- x$gradients
+  if (!is.null(x$times)) df$time <- x$times
 
   if (!is.null(x$path)) {
     path_df <- as.data.frame(x$path)
-    n_params <- ncol(path_df)
-    names(path_df) <- paste0("theta_", seq_len(n_params))
+    names(path_df) <- paste0("theta_", seq_len(ncol(path_df)))
     df <- cbind(df, path_df)
   }
 

@@ -1,8 +1,7 @@
 test_that("coordinate_ascent finds optimum for simple problem", {
   # Simple quadratic - optimum at (3, 2)
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(3, 2))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
 
   result <- coordinate_ascent(max_cycles = 30)(problem, theta0 = c(0, 0))
@@ -34,8 +33,7 @@ test_that("coordinate_ascent respects constraints", {
 
 test_that("coordinate_ascent converges with convergence flag", {
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(1, 1))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(1, 1))^2)
   )
 
   result <- coordinate_ascent(max_cycles = 50, tol = 1e-6)(problem, theta0 = c(0, 0))
@@ -47,8 +45,7 @@ test_that("coordinate_ascent converges with convergence flag", {
 
 test_that("coordinate_ascent returns proper result structure", {
   problem <- mle_problem(
-    loglike = function(theta) -sum(theta^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum(theta^2)
   )
 
   result <- coordinate_ascent(max_cycles = 10)(problem, theta0 = c(1, 1))
@@ -63,24 +60,22 @@ test_that("coordinate_ascent returns proper result structure", {
 
 test_that("coordinate_ascent with tracing records values", {
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(1, 1))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(1, 1))^2)
   )
 
   trace_cfg <- mle_trace(values = TRUE, path = TRUE)
   result <- coordinate_ascent(max_cycles = 10)(problem, theta0 = c(0, 0), trace = trace_cfg)
 
   expect_false(is.null(result$trace_data))
-  expect_true(!is.null(result$trace_data$values))
-  expect_true(!is.null(result$trace_data$path))
+  expect_false(is.null(result$trace_data$values))
+  expect_false(is.null(result$trace_data$path))
 })
 
 test_that("coordinate_ascent random cycle order works", {
   set.seed(123)
 
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(2, 3))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(2, 3))^2)
   )
 
   result <- coordinate_ascent(max_cycles = 20, cycle_order = "random")(
@@ -94,8 +89,7 @@ test_that("coordinate_ascent random cycle order works", {
 
 test_that("coordinate_ascent without line_search works", {
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(1, 1))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(1, 1))^2)
   )
 
   result <- coordinate_ascent(max_cycles = 30, line_search = FALSE)(
@@ -109,8 +103,7 @@ test_that("coordinate_ascent without line_search works", {
 test_that("coordinate_ascent can compose with other solvers", {
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
-    score = function(theta) -2 * (theta - c(3, 2)),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    score = function(theta) -2 * (theta - c(3, 2))
   )
 
   # Coordinate ascent followed by Newton refinement

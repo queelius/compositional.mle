@@ -1,9 +1,7 @@
 test_that("plot.mle_numerical works with trace data", {
-  # Create a simple problem
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
-    score = function(theta) -2 * (theta - c(3, 2)),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    score = function(theta) -2 * (theta - c(3, 2))
   )
 
   # Solve with tracing
@@ -25,10 +23,8 @@ test_that("plot.mle_numerical works with trace data", {
 })
 
 test_that("plot.mle_numerical warns when no trace data", {
-  # Create a simple problem
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(3, 2))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
 
   # Solve WITHOUT tracing
@@ -39,11 +35,9 @@ test_that("plot.mle_numerical warns when no trace data", {
 })
 
 test_that("optimization_path extracts trace as data frame", {
-  # Create a simple problem
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
-    score = function(theta) -2 * (theta - c(3, 2)),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    score = function(theta) -2 * (theta - c(3, 2))
   )
 
   # Solve with full tracing
@@ -73,10 +67,8 @@ test_that("optimization_path extracts trace as data frame", {
 })
 
 test_that("optimization_path warns when no trace data", {
-  # Create a simple problem
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(3, 2))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
 
   # Solve WITHOUT tracing
@@ -88,11 +80,9 @@ test_that("optimization_path warns when no trace data", {
 })
 
 test_that("plot.mle_trace_data works directly", {
-  # Create a simple problem
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
-    score = function(theta) -2 * (theta - c(3, 2)),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    score = function(theta) -2 * (theta - c(3, 2))
   )
 
   # Solve with tracing
@@ -108,10 +98,8 @@ test_that("plot.mle_trace_data works directly", {
 })
 
 test_that("optimization_path works on trace_data directly", {
-  # Create a simple problem
   problem <- mle_problem(
-    loglike = function(theta) -sum((theta - c(3, 2))^2),
-    constraint = mle_constraint(support = function(theta) TRUE)
+    loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
 
   # Solve with tracing

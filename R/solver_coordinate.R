@@ -53,7 +53,6 @@ coordinate_ascent <- function(
   max_cycles <- as.integer(max_cycles)
   cycle_order <- match.arg(cycle_order)
 
-  # Return solver function
   function(problem, theta0, trace = mle_trace()) {
     stopifnot(is_mle_problem(problem))
     stopifnot(is.numeric(theta0))
@@ -62,18 +61,9 @@ coordinate_ascent <- function(
     constraint <- problem$constraint
     n_params <- length(theta0)
 
-    # Check initial point is in support
-    if (!constraint$support(theta0)) {
-      theta0 <- constraint$project(theta0)
-      if (!constraint$support(theta0)) {
-        stop("Initial point not in support and projection failed")
-      }
-    }
-
-    # Initialize tracing
+    theta0 <- .ensure_support(theta0, constraint)
     recorder <- new_trace_recorder(trace, n_params)
 
-    # Initialize progress handler (track cycles, not individual iterations)
     progress <- .progress_handler(
       verbose = verbose,
       solver_name = "Coordinate Ascent",
@@ -81,7 +71,6 @@ coordinate_ascent <- function(
     )
     progress$start()
 
-    # Initialize state
     theta <- theta0
     ll_current <- loglike(theta)
 
@@ -92,31 +81,24 @@ coordinate_ascent <- function(
     converged <- FALSE
     total_iter <- 0L
 
-    # Coordinate ascent cycles
     for (cycle in seq_len(max_cycles)) {
       ll_start <- ll_current
-
-      # Update progress at start of each cycle
       progress$update(cycle, ll_current)
 
-      # Determine coordinate order for this cycle
       coord_order <- if (cycle_order == "random") {
         sample(n_params)
       } else {
         seq_len(n_params)
       }
 
-      # Optimize each coordinate
       for (j in coord_order) {
         total_iter <- total_iter + 1L
 
-        # Record iteration
         if (!is.null(recorder)) {
           record_iteration(recorder, theta, value = ll_current)
         }
 
         if (line_search) {
-          # Golden section search along coordinate j
           result_j <- .coordinate_line_search(
             loglike = loglike,
             theta = theta,
@@ -126,25 +108,19 @@ coordinate_ascent <- function(
           theta <- result_j$theta
           ll_current <- result_j$value
         } else {
-          # Simple step in gradient direction for coordinate j
-          # Use numerical derivative for this coordinate
           eps <- sqrt(.Machine$double.eps)
           theta_plus <- theta
           theta_plus[j] <- theta[j] + eps
           theta_minus <- theta
           theta_minus[j] <- theta[j] - eps
 
-          # Central difference
           ll_plus <- if (constraint$support(theta_plus)) loglike(theta_plus) else -Inf
           ll_minus <- if (constraint$support(theta_minus)) loglike(theta_minus) else -Inf
 
           if (is.finite(ll_plus) && is.finite(ll_minus)) {
             grad_j <- (ll_plus - ll_minus) / (2 * eps)
-
-            # Take a step
-            step <- 0.1 * sign(grad_j)
             theta_new <- theta
-            theta_new[j] <- theta[j] + step
+            theta_new[j] <- theta[j] + 0.1 * sign(grad_j)
 
             if (constraint$support(theta_new)) {
               ll_new <- loglike(theta_new)
@@ -157,39 +133,20 @@ coordinate_ascent <- function(
         }
       }
 
-      # Check convergence
-      ll_improvement <- ll_current - ll_start
-      if (abs(ll_improvement) < tol) {
+      if (abs(ll_current - ll_start) < tol) {
         converged <- TRUE
         break
       }
     }
 
-    # Report completion
     progress$finish(converged, cycle, ll_current)
 
-    # Compute Fisher information numerically
-    fisher <- tryCatch(
-      -numDeriv::hessian(loglike, theta),
-      error = function(e) NULL
-    )
+    fisher <- .numerical_fisher(loglike, theta)
+    hessian <- if (!is.null(fisher)) -fisher else NULL
 
-    # Build result
-    sol <- list(
-      par = theta,
-      value = ll_current,
-      convergence = if (converged) 0L else 1L,
-      hessian = if (!is.null(fisher)) -fisher else NULL
-    )
-
-    result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_coordinate_ascent"
-    )
-
-    result$iterations <- total_iter
-    result$solver <- "coordinate_ascent"
-    result$trace_data <- finalize_trace(recorder)
+    result <- .build_result(theta, ll_current, converged, hessian,
+                            "coordinate_ascent", "mle_coordinate_ascent",
+                            total_iter, recorder)
     result$cycles <- cycle
 
     result
@@ -206,13 +163,11 @@ coordinate_ascent <- function(
 #' @keywords internal
 .coordinate_line_search <- function(loglike, theta, coord, constraint,
                                      max_iter = 50, tol = 1e-8) {
-  # Wrapper that evaluates loglike at theta with coord set to x
   f <- function(x) {
     theta_test <- theta
     theta_test[coord] <- x
     if (!constraint$support(theta_test)) return(-Inf)
-    ll <- tryCatch(loglike(theta_test), error = function(e) -Inf)
-    ll
+    tryCatch(loglike(theta_test), error = function(e) -Inf)
   }
 
   current_val <- theta[coord]

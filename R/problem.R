@@ -106,6 +106,35 @@ print.mle_problem <- function(x, ...) {
   invisible(x)
 }
 
+# Build a cached numerical derivative function
+# @param problem An mle_problem object
+# @param compute_fn Function(theta) that computes the derivative
+# @param cache_key Prefix for cache entries in problem$.cache
+# @return A function(theta) with optional single-value caching
+# @noRd
+make_cached_derivative <- function(problem, compute_fn, cache_key) {
+  theta_key <- paste0(cache_key, "_theta")
+  value_key <- paste0(cache_key, "_value")
+
+  function(theta) {
+    if (isTRUE(problem$cache_derivatives)) {
+      cached_theta <- problem$.cache[[theta_key]]
+      if (!is.null(cached_theta) && identical(theta, cached_theta)) {
+        return(problem$.cache[[value_key]])
+      }
+    }
+
+    result <- compute_fn(theta)
+
+    if (isTRUE(problem$cache_derivatives)) {
+      problem$.cache[[theta_key]] <- theta
+      problem$.cache[[value_key]] <- result
+    }
+
+    result
+  }
+}
+
 #' Get score function from problem
 #'
 #' Returns the score (gradient) function, computing numerically if not provided.
@@ -119,27 +148,11 @@ get_score <- function(problem) {
   if (!is.null(problem$.score)) {
     problem$.score
   } else {
-    # Return numerical score function with optional caching
-    function(theta) {
-      if (isTRUE(problem$cache_derivatives)) {
-        # Check cache
-        cached_theta <- problem$.cache$score_theta
-        if (!is.null(cached_theta) && identical(theta, cached_theta)) {
-          return(problem$.cache$score_value)
-        }
-      }
-
-      # Compute numerical gradient
-      result <- numDeriv::grad(problem$loglike, theta)
-
-      # Cache if enabled
-      if (isTRUE(problem$cache_derivatives)) {
-        problem$.cache$score_theta <- theta
-        problem$.cache$score_value <- result
-      }
-
-      result
-    }
+    make_cached_derivative(
+      problem,
+      function(theta) numDeriv::grad(problem$loglike, theta),
+      "score"
+    )
   }
 }
 
@@ -156,27 +169,11 @@ get_fisher <- function(problem) {
   if (!is.null(problem$.fisher)) {
     problem$.fisher
   } else {
-    # Return numerical Fisher (negative Hessian) with optional caching
-    function(theta) {
-      if (isTRUE(problem$cache_derivatives)) {
-        # Check cache
-        cached_theta <- problem$.cache$fisher_theta
-        if (!is.null(cached_theta) && identical(theta, cached_theta)) {
-          return(problem$.cache$fisher_value)
-        }
-      }
-
-      # Compute numerical Hessian (negative for Fisher)
-      result <- -numDeriv::hessian(problem$loglike, theta)
-
-      # Cache if enabled
-      if (isTRUE(problem$cache_derivatives)) {
-        problem$.cache$fisher_theta <- theta
-        problem$.cache$fisher_value <- result
-      }
-
-      result
-    }
+    make_cached_derivative(
+      problem,
+      function(theta) -numDeriv::hessian(problem$loglike, theta),
+      "fisher"
+    )
   }
 }
 

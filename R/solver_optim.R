@@ -1,3 +1,24 @@
+# Convert optim() result (which minimizes) to mle_numerical (which maximizes)
+.optim_to_mle <- function(optim_result, solver_name, superclass) {
+  sol <- list(
+    par = optim_result$par,
+    value = -optim_result$value,
+    convergence = optim_result$convergence,
+    hessian = -optim_result$hessian
+  )
+
+  mle_result <- algebraic.mle::mle_numerical(
+    sol = sol,
+    superclasses = superclass
+  )
+
+  mle_result$iterations <- optim_result$counts["function"]
+  mle_result$solver <- solver_name
+  mle_result$optim_result <- optim_result
+
+  mle_result
+}
+
 #' BFGS Solver
 #'
 #' Creates a solver using the BFGS quasi-Newton method via \code{optim()}.
@@ -39,12 +60,10 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
     score_fn <- get_score(problem)
     constraint <- problem$constraint
 
-    # Check initial point
     if (!constraint$support(theta0)) {
       theta0 <- constraint$project(theta0)
     }
 
-    # optim minimizes, so negate for maximization
     fn <- function(theta) {
       if (!constraint$support(theta)) return(Inf)
       -loglike(theta)
@@ -55,7 +74,6 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
       -score_fn(theta)
     }
 
-    # Run optim
     result <- optim(
       par = theta0,
       fn = fn,
@@ -70,24 +88,7 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
       hessian = TRUE
     )
 
-    # Convert to mle_numerical
-    sol <- list(
-      par = result$par,
-      value = -result$value,  # un-negate
-      convergence = result$convergence,
-      hessian = -result$hessian  # un-negate
-    )
-
-    mle_result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_bfgs"
-    )
-
-    mle_result$iterations <- result$counts["function"]
-    mle_result$solver <- "bfgs"
-    mle_result$optim_result <- result
-
-    mle_result
+    .optim_to_mle(result, "bfgs", "mle_bfgs")
   }
 }
 
@@ -125,11 +126,9 @@ lbfgsb <- function(lower = -Inf, upper = Inf, max_iter = 100L, tol = 1e-8) {
     loglike <- problem$loglike
     score_fn <- get_score(problem)
 
-    # Expand bounds if scalar
     if (length(lower) == 1) lower <- rep(lower, length(theta0))
     if (length(upper) == 1) upper <- rep(upper, length(theta0))
 
-    # optim minimizes
     fn <- function(theta) -loglike(theta)
     gr <- function(theta) -score_fn(theta)
 
@@ -144,23 +143,7 @@ lbfgsb <- function(lower = -Inf, upper = Inf, max_iter = 100L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    sol <- list(
-      par = result$par,
-      value = -result$value,
-      convergence = result$convergence,
-      hessian = -result$hessian
-    )
-
-    mle_result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_lbfgsb"
-    )
-
-    mle_result$iterations <- result$counts["function"]
-    mle_result$solver <- "lbfgsb"
-    mle_result$optim_result <- result
-
-    mle_result
+    .optim_to_mle(result, "lbfgsb", "mle_lbfgsb")
   }
 }
 
@@ -199,12 +182,10 @@ nelder_mead <- function(max_iter = 500L, tol = 1e-8) {
     loglike <- problem$loglike
     constraint <- problem$constraint
 
-    # Check initial point
     if (!constraint$support(theta0)) {
       theta0 <- constraint$project(theta0)
     }
 
-    # optim minimizes
     fn <- function(theta) {
       if (!constraint$support(theta)) return(Inf)
       -loglike(theta)
@@ -218,22 +199,6 @@ nelder_mead <- function(max_iter = 500L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    sol <- list(
-      par = result$par,
-      value = -result$value,
-      convergence = result$convergence,
-      hessian = -result$hessian
-    )
-
-    mle_result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_nelder_mead"
-    )
-
-    mle_result$iterations <- result$counts["function"]
-    mle_result$solver <- "nelder_mead"
-    mle_result$optim_result <- result
-
-    mle_result
+    .optim_to_mle(result, "nelder_mead", "mle_nelder_mead")
   }
 }

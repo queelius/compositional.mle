@@ -77,37 +77,13 @@ test_that("newton_raphson without line_search", {
 })
 
 test_that("fisher_scoring works on normal MLE", {
-  set.seed(123)
-  data <- rnorm(100, mean = 5, sd = 2)
-
-  problem <- mle_problem(
-    loglike = function(theta) {
-      if (theta[2] <= 0) return(-Inf)
-      sum(dnorm(data, theta[1], theta[2], log = TRUE))
-    },
-    score = function(theta) {
-      mu <- theta[1]
-      sigma <- theta[2]
-      n <- length(data)
-      c(sum(data - mu) / sigma^2,
-        -n / sigma + sum((data - mu)^2) / sigma^3)
-    },
-    fisher = function(theta) {
-      sigma <- theta[2]
-      n <- length(data)
-      matrix(c(n / sigma^2, 0, 0, 2 * n / sigma^2), nrow = 2)
-    },
-    constraint = mle_constraint(
-      support = function(theta) theta[2] > 0,
-      project = function(theta) c(theta[1], max(theta[2], 1e-6))
-    )
-  )
+  problem <- make_normal_problem(seed = 123, fisher = TRUE)
 
   solver <- fisher_scoring(max_iter = 50)
   result <- solver(problem, c(0, 1))
 
   # fisher_scoring is an alias for newton_raphson
   expect_s3_class(result, "mle_newton_raphson")
-  expect_true(abs(result$theta.hat[1] - mean(data)) < 0.5)
-  expect_true(abs(result$theta.hat[2] - sd(data)) < 0.5)
+  expect_true(abs(result$theta.hat[1] - 5) < 0.5)
+  expect_true(abs(result$theta.hat[2] - 2) < 0.5)
 })
