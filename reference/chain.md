@@ -48,9 +48,7 @@ strategy <- chain(
   newton_raphson(max_iter = 20),
   early_stop = function(r) isTRUE(r$converged)
 )
-#> Error in chain(grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5),     gradient_ascent(max_iter = 50), newton_raphson(max_iter = 20),     early_stop = function(r) isTRUE(r$converged)): could not find function "chain"
 
 # Standard chain (no early stopping)
 strategy <- chain(gradient_ascent(), newton_raphson())
-#> Error in chain(gradient_ascent(), newton_raphson()): could not find function "chain"
 ```

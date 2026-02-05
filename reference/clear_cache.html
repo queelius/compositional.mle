@@ -40,7 +40,7 @@ modifying data that the log-likelihood depends on."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Clear derivative cache</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/problem.R" class="external-link"><code>R/problem.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/problem.R" class="external-link"><code>R/problem.R</code></a></small>
       <div class="d-none name"><code>clear_cache.Rd</code></div>
     </div>
 
@@ -73,10 +73,8 @@ modifying data that the log-likelihood depends on.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># \donttest{</span></span></span>
 <span class="r-in"><span><span class="va">loglike</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">theta</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">problem</span> <span class="op">&lt;-</span> <span class="fu"><a href="mle_problem.html">mle_problem</a></span><span class="op">(</span><span class="va">loglike</span>, cache_derivatives <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in mle_problem(loglike, cache_derivatives = TRUE):</span> unused argument (cache_derivatives = TRUE)</span>
 <span class="r-in"><span><span class="co"># ... run some optimization ...</span></span></span>
 <span class="r-in"><span><span class="fu">clear_cache</span><span class="op">(</span><span class="va">problem</span><span class="op">)</span>  <span class="co"># Force fresh derivative computation</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in clear_cache(problem):</span> could not find function "clear_cache"</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

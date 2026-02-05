@@ -38,7 +38,7 @@ This allows building complex log-likelihood transformations from simple ones."><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Compose Multiple Function Transformations</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/transformers.R" class="external-link"><code>R/transformers.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/transformers.R" class="external-link"><code>R/transformers.R</code></a></small>
       <div class="d-none name"><code>compose_transforms.Rd</code></div>
     </div>
 
@@ -77,14 +77,12 @@ This allows building complex log-likelihood transformations from simple ones.</p
 <span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="fu"><a href="with_penalty.html">with_penalty</a></span><span class="op">(</span><span class="va">f</span>, <span class="fu"><a href="penalty_l1.html">penalty_l1</a></span><span class="op">(</span><span class="op">)</span>, lambda <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  <span class="kw">function</span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="fu"><a href="with_penalty.html">with_penalty</a></span><span class="op">(</span><span class="va">f</span>, <span class="fu"><a href="penalty_l2.html">penalty_l2</a></span><span class="op">(</span><span class="op">)</span>, lambda <span class="op">=</span> <span class="fl">0.05</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in compose_transforms(function(f) with_penalty(f, penalty_l1(),     lambda = 0.01), function(f) with_penalty(f, penalty_l2(),     lambda = 0.05)):</span> could not find function "compose_transforms"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Apply to log-likelihood</span></span></span>
 <span class="r-in"><span><span class="va">loglike</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">theta</span><span class="op">)</span> <span class="op">-</span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">theta</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">loglike_transformed</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/transform.html" class="external-link">transform</a></span><span class="op">(</span><span class="va">loglike</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in as.data.frame.default(x[[i]], optional = TRUE):</span> cannot coerce class ‘"function"’ to a data.frame</span>
 <span class="r-in"><span><span class="fu">loglike_transformed</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in loglike_transformed(c(1, 2)):</span> could not find function "loglike_transformed"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.28</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>
