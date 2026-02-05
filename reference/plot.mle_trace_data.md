@@ -18,3 +18,8 @@ plot(x, ...)
 - ...:
 
   Arguments passed to plotting functions
+
+## Value
+
+Called for side effects (generates a plot). Returns the input object
+invisibly.

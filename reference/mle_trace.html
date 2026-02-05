@@ -36,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create a Trace Configuration</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/trace.R" class="external-link"><code>R/trace.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/trace.R" class="external-link"><code>R/trace.R</code></a></small>
       <div class="d-none name"><code>mle_trace.Rd</code></div>
     </div>
 
@@ -52,7 +52,10 @@
 <span>  gradients <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  timing <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  every <span class="op">=</span> <span class="fl">1L</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'mle_trace'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,10 +81,19 @@
 <dt id="arg-every">every<a class="anchor" aria-label="anchor" href="#arg-every"></a></dt>
 <dd><p>Record every nth iteration (1 = all iterations)</p></dd>
 
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>An mle_trace object.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments (unused).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An mle_trace configuration object</p>
+<p>The input object, invisibly (for method chaining).</p>
     </div>
 
     <div class="section level2">

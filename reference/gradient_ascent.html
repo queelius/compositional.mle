@@ -38,7 +38,7 @@ Optionally uses backtracking line search for adaptive step sizes."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Gradient Ascent Solver</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/solver_gradient.R" class="external-link"><code>R/solver_gradient.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/solver_gradient.R" class="external-link"><code>R/solver_gradient.R</code></a></small>
       <div class="d-none name"><code>gradient_ascent.Rd</code></div>
     </div>
 
@@ -103,6 +103,12 @@ display progress during optimization. Default is FALSE.</p></dd>
 of log-likelihood). With line search enabled, the step size is adaptively
 chosen to ensure the log-likelihood increases.</p>
 <p>The solver respects constraints defined in the problem via projection.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
+    <div class="dont-index"><p><code><a href="newton_raphson.html">newton_raphson</a></code> for second-order optimization,
+  <code><a href="bfgs.html">bfgs</a></code> for quasi-Newton, <code>%&gt;&gt;%</code> and
+  <code><a href="race_operator.html">%|%</a></code> for solver composition</p></div>
     </div>
 
     <div class="section level2">

@@ -60,6 +60,13 @@ Coordinate ascent can be effective when:
 However, it may converge slowly for problems with strong parameter
 correlations.
 
+## See also
+
+[`gradient_ascent`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)
+for gradient-based optimization,
+[`nelder_mead`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)
+for another derivative-free method
+
 ## Examples
 
 ``` r

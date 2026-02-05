@@ -30,11 +30,9 @@ Transformed log-likelihood function
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
+# \donttest{
 # Regression with L2 penalty (Ridge)
-loglike <- function(theta) {
-  # ... likelihood calculation ...
-}
+loglike <- function(theta) -sum((theta - c(1, 2))^2)
 
 # Add L2 penalty
 loglike_penalized <- with_penalty(
@@ -42,10 +40,7 @@ loglike_penalized <- with_penalty(
   penalty = penalty_l2(),
   lambda = 0.1
 )
-
-# Combine with stochastic subsampling
-loglike_final <- loglike %>%
-  with_subsampling(data, 100) %>%
-  with_penalty(penalty_l1(), lambda = 0.01)
-} # }
+loglike_penalized(c(1, 2))  # Evaluate penalized likelihood
+#> [1] -0.5
+# }
 ```

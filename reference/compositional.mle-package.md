@@ -6,7 +6,10 @@ sequential chaining, parallel racing, and random restarts. Implements
 gradient ascent, Newton-Raphson, quasi-Newton (BFGS), and
 derivative-free methods with support for constrained optimization and
 tracing. Returns 'mle' objects compatible with 'algebraic.mle' for
-downstream analysis.
+downstream analysis. Methods based on Nocedal J, Wright SJ (2006)
+"Numerical Optimization"
+[doi:10.1007/978-0-387-40065-5](https://doi.org/10.1007/978-0-387-40065-5)
+.
 
 A domain-specific language for maximum likelihood estimation where
 solvers are first-class composable functions. Following SICP principles,

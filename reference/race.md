@@ -26,12 +26,10 @@ A new solver function that races all solvers and picks the best
 
 ## Details
 
-When `parallel = TRUE`, solvers are executed using
-[`future::future()`](https://future.futureverse.org/reference/future.html)
-and results collected with
-[`future::value()`](https://future.futureverse.org/reference/value.html).
-The current future plan determines how parallelization happens (e.g.,
-`plan(multisession)` for multi-process execution).
+When `parallel = TRUE`, solvers are executed using `future::future()`
+and results collected with `future::value()`. The current future plan
+determines how parallelization happens (e.g., `plan(multisession)` for
+multi-process execution).
 
 Failed solvers (those that throw errors) are ignored. If all solvers
 fail, an error is thrown.
@@ -41,6 +39,7 @@ fail, an error is thrown.
 ``` r
 # Race three methods sequentially
 strategy <- race(gradient_ascent(), bfgs(), nelder_mead())
+#> Error in race(gradient_ascent(), bfgs(), nelder_mead()): could not find function "race"
 
 # Race with parallel execution (requires future package)
 if (FALSE) { # \dontrun{

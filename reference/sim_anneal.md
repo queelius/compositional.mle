@@ -61,6 +61,13 @@ different runs. For best results, use with
 [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
 or combine with a local optimizer via `%>>%`.
 
+## See also
+
+[`with_restarts`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)
+for multi-start optimization,
+[`gradient_ascent`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)
+for local refinement
+
 ## Examples
 
 ``` r

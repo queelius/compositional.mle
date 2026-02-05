@@ -16,4 +16,14 @@ is_mle_constraint(x)
 
 ## Value
 
-Logical
+Logical indicating whether `x` is an `mle_constraint`.
+
+## Examples
+
+``` r
+constraint <- mle_constraint(support = function(theta) all(theta > 0))
+is_mle_constraint(constraint)  # TRUE
+#> [1] TRUE
+is_mle_constraint(list())      # FALSE
+#> [1] FALSE
+```

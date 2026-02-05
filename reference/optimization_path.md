@@ -13,8 +13,7 @@ optimization_path(x, ...)
 
 - x:
 
-  An mle_numerical result object with trace_data, or an mle_trace_data
-  object
+  An mle_numerical result with trace_data, or an mle_trace_data object
 
 - ...:
 

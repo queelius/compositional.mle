@@ -60,6 +60,15 @@ adaptively chosen to ensure the log-likelihood increases.
 
 The solver respects constraints defined in the problem via projection.
 
+## See also
+
+[`newton_raphson`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)
+for second-order optimization,
+[`bfgs`](https://queelius.github.io/compositional.mle/reference/bfgs.md)
+for quasi-Newton, `%>>%` and
+[`%|%`](https://queelius.github.io/compositional.mle/reference/race_operator.md)
+for solver composition
+
 ## Examples
 
 ``` r

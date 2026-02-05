@@ -70,7 +70,7 @@ strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = uniform_sample
 | `R/problem.R` | [`mle_problem()`](https://queelius.github.io/compositional.mle/reference/mle_problem.md) - encapsulates log-likelihood, derivatives, constraints                                                                                       |
 | `R/compose.R` | Composition operators: `%>>%`, `%|%`, [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md), [`unless_converged()`](https://queelius.github.io/compositional.mle/reference/unless_converged.md) |
 | `R/trace.R`   | [`mle_trace()`](https://queelius.github.io/compositional.mle/reference/mle_trace.md) - configurable iteration tracing                                                                                                                  |
-| `R/config.R`  | [`mle_config()`](https://queelius.github.io/compositional.mle/reference/mle_config.md), [`mle_constraint()`](https://queelius.github.io/compositional.mle/reference/mle_constraint.md) - type-safe configuration objects               |
+| `R/config.R`  | `mle_config()`, [`mle_constraint()`](https://queelius.github.io/compositional.mle/reference/mle_constraint.md) - type-safe configuration objects                                                                                       |
 
 ### Solver Factories
 

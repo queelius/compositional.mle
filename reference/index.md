@@ -5,6 +5,7 @@
 Define the statistical estimation problem
 
 - [`mle_problem()`](https://queelius.github.io/compositional.mle/reference/mle_problem.md)
+  [`print(`*`<mle_problem>`*`)`](https://queelius.github.io/compositional.mle/reference/mle_problem.md)
   : Create an MLE Problem Specification
 - [`update(`*`<mle_problem>`*`)`](https://queelius.github.io/compositional.mle/reference/update.mle_problem.md)
   : Update an mle_problem
@@ -91,24 +92,12 @@ Transform log-likelihood functions
 - [`compose_transforms()`](https://queelius.github.io/compositional.mle/reference/compose_transforms.md)
   : Compose Multiple Function Transformations
 
-## Configuration
-
-Type-safe configuration objects
-
-- [`mle_config()`](https://queelius.github.io/compositional.mle/reference/mle_config.md)
-  : Create optimization configuration
-- [`mle_config_gradient()`](https://queelius.github.io/compositional.mle/reference/mle_config_gradient.md)
-  : Create gradient-based optimization configuration
-- [`mle_config_linesearch()`](https://queelius.github.io/compositional.mle/reference/mle_config_linesearch.md)
-  : Create line search configuration
-- [`is_mle_config()`](https://queelius.github.io/compositional.mle/reference/is_mle_config.md)
-  : Check if object is an mle_config
-
 ## Tracing
 
 Track optimization progress
 
 - [`mle_trace()`](https://queelius.github.io/compositional.mle/reference/mle_trace.md)
+  [`print(`*`<mle_trace>`*`)`](https://queelius.github.io/compositional.mle/reference/mle_trace.md)
   : Create a Trace Configuration
 - [`is_tracing()`](https://queelius.github.io/compositional.mle/reference/is_tracing.md)
   : Check if tracing is enabled
@@ -129,3 +118,5 @@ Work with and visualize optimization results
   : Plot Optimization Convergence
 - [`plot(`*`<mle_trace_data>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.md)
   : Plot Trace Data Directly
+- [`print(`*`<mle_trace_data>`*`)`](https://queelius.github.io/compositional.mle/reference/print.mle_trace_data.md)
+  : Print MLE Trace Data

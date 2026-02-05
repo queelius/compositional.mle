@@ -12,6 +12,9 @@ mle_trace(
   timing = FALSE,
   every = 1L
 )
+
+# S3 method for class 'mle_trace'
+print(x, ...)
 ```
 
 ## Arguments
@@ -36,9 +39,19 @@ mle_trace(
 
   Record every nth iteration (1 = all iterations)
 
+- x:
+
+  An mle_trace object.
+
+- ...:
+
+  Additional arguments (unused).
+
 ## Value
 
 An mle_trace configuration object
+
+The input object, invisibly (for method chaining).
 
 ## Examples
 

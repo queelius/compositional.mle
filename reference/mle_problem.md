@@ -15,6 +15,9 @@ mle_problem(
   n_obs = NULL,
   cache_derivatives = FALSE
 )
+
+# S3 method for class 'mle_problem'
+print(x, ...)
 ```
 
 ## Arguments
@@ -52,9 +55,19 @@ mle_problem(
   particularly useful during line search where the same point may be
   evaluated multiple times. Default is FALSE.
 
+- x:
+
+  An mle_problem object.
+
+- ...:
+
+  Additional arguments (unused).
+
 ## Value
 
 An mle_problem object
+
+The input object, invisibly (for method chaining).
 
 ## Details
 

@@ -1,5 +1,6 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://queelius.github.io/compositional.mle/404.html</loc></url>
+<url><loc>https://queelius.github.io/compositional.mle/AGENTS.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/CLAUDE.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/LICENSE-text.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/LICENSE.html</loc></url>
@@ -32,16 +33,12 @@
 <url><loc>https://queelius.github.io/compositional.mle/reference/grid_search.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/index.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_converged.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_config.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_constraint.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_numerical.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_problem.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_tracing.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/lbfgsb.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/merge_traces.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/mle_config.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/mle_config_gradient.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/mle_config_linesearch.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/mle_constraint.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/mle_problem.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/mle_trace.html</loc></url>
@@ -56,6 +53,7 @@
 <url><loc>https://queelius.github.io/compositional.mle/reference/penalty_l2.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/plot.mle_numerical.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.html</loc></url>
+<url><loc>https://queelius.github.io/compositional.mle/reference/print.mle_trace_data.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/race.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/race_operator.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/random_search.html</loc></url>

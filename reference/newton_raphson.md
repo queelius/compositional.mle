@@ -58,6 +58,13 @@ faster than gradient ascent when near the optimum.
 Requires the problem to have a Fisher information function (either
 analytic or computed numerically).
 
+## See also
+
+[`gradient_ascent`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)
+for first-order optimization,
+[`fisher_scoring`](https://queelius.github.io/compositional.mle/reference/fisher_scoring.md)
+(alias), `%>>%` for chaining
+
 ## Examples
 
 ``` r

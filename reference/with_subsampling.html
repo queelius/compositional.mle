@@ -38,7 +38,7 @@ observations. Useful for stochastic gradient ascent on large datasets."></head><
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create stochastic log-likelihood with subsampling</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/transformers.R" class="external-link"><code>R/transformers.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/transformers.R" class="external-link"><code>R/transformers.R</code></a></small>
       <div class="d-none name"><code>with_subsampling.Rd</code></div>
     </div>
 
@@ -96,9 +96,9 @@ observations. Useful for stochastic gradient ascent on large datasets.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Each call uses different random subsample</span></span></span>
 <span class="r-in"><span><span class="fu">loglike_stoch</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -207.7651</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -218.2995</span>
 <span class="r-in"><span><span class="fu">loglike_stoch</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span>  <span class="co"># Different value</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -216.0809</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -213.796</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

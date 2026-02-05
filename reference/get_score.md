@@ -18,4 +18,16 @@ get_score(problem)
 
 ## Value
 
-Score function
+Score function that takes a parameter vector and returns the gradient of
+the log-likelihood.
+
+## Examples
+
+``` r
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+score_fn <- get_score(problem)
+score_fn(c(0, 0))  # Gradient at (0, 0)
+#> [1] 2 4
+```

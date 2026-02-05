@@ -38,7 +38,7 @@ statistical specification from the optimization strategy."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Create an MLE Problem Specification</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/problem.R" class="external-link"><code>R/problem.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/problem.R" class="external-link"><code>R/problem.R</code></a></small>
       <div class="d-none name"><code>mle_problem.Rd</code></div>
     </div>
 
@@ -57,7 +57,10 @@ statistical specification from the optimization strategy.</p>
 <span>  theta_names <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  n_obs <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  cache_derivatives <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'mle_problem'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -96,10 +99,19 @@ numerically, cache the most recent result to avoid redundant computation.
 This is particularly useful during line search where the same point may
 be evaluated multiple times. Default is FALSE.</p></dd>
 
+
+<dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dd><p>An mle_problem object.</p></dd>
+
+
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments (unused).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>An mle_problem object</p>
+<p>The input object, invisibly (for method chaining).</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>

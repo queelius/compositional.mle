@@ -19,4 +19,18 @@ get_fisher(problem)
 
 ## Value
 
-Fisher information function
+Fisher information function that takes a parameter vector and returns
+the Fisher information matrix (negative Hessian of log-likelihood).
+
+## Examples
+
+``` r
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+fisher_fn <- get_fisher(problem)
+fisher_fn(c(1, 2))  # Fisher information at the optimum
+#>              [,1]         [,2]
+#> [1,]  2.00000e+00 -1.52056e-17
+#> [2,] -1.52056e-17  2.00000e+00
+```
