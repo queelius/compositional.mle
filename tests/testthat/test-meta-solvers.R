@@ -205,3 +205,47 @@ test_that("parallel race %|% works", {
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
 })
+
+test_that("race() with parallel = TRUE works", {
+  skip_if_not_installed("future")
+
+  problem <- mle_problem(
+    loglike = function(theta) -(theta[1] - 3)^2 - (theta[2] + 1)^2
+  )
+
+  # Set up parallel backend
+  future::plan(future::multisession, workers = 2)
+  on.exit(future::plan(future::sequential), add = TRUE)
+
+  solver <- race(
+    nelder_mead(max_iter = 50),
+    bfgs(max_iter = 50),
+    gradient_ascent(max_iter = 50),
+    parallel = TRUE
+  )
+  result <- solver(problem, c(0, 0))
+
+  expect_true(is_mle_numerical(result))
+  expect_true(abs(result$theta.hat[1] - 3) < 0.5)
+  expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
+  expect_false(is.null(result$winner_index))
+  expect_equal(result$strategy, "race")
+})
+
+test_that("race() without parallel works", {
+  problem <- mle_problem(
+    loglike = function(theta) -(theta[1] - 3)^2 - (theta[2] + 1)^2
+  )
+
+  solver <- race(
+    nelder_mead(max_iter = 50),
+    bfgs(max_iter = 50),
+    parallel = FALSE
+  )
+  result <- solver(problem, c(0, 0))
+
+  expect_true(is_mle_numerical(result))
+  expect_true(abs(result$theta.hat[1] - 3) < 0.5)
+  expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
+  expect_false(is.null(result$winner_index))
+})

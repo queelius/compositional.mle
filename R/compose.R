@@ -135,10 +135,14 @@ race <- function(..., parallel = FALSE) {
 
     if (parallel && requireNamespace("future", quietly = TRUE)) {
       futures <- lapply(solvers, function(s) {
-        future::future(
-          tryCatch(s(problem, theta0, trace), error = function(e) NULL),
-          seed = TRUE
-        )
+        # Capture variables for the future
+        force(s)
+        force(problem)
+        force(theta0)
+        force(trace)
+        future::future({
+          tryCatch(s(problem, theta0, trace), error = function(e) NULL)
+        }, seed = TRUE, packages = "compositional.mle")
       })
       results <- lapply(futures, future::value)
     } else {
