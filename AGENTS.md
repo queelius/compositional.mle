@@ -4,9 +4,8 @@
 
 - Package source lives in `R/` (solvers, composition operators, tracing,
   configuration). Keep new APIs exported via roxygen comments
-  (`@export`) and rely on
-  [`devtools::document()`](https://devtools.r-lib.org/reference/document.html)
-  to refresh `NAMESPACE` and `man/`.
+  (`@export`) and rely on `devtools::document()` to refresh `NAMESPACE`
+  and `man/`.
 - Tests are under `tests/testthat/`; prefer `test-<topic>.R` files that
   mirror the module names (e.g., `test-solvers.R`,
   `test-transformers.R`).

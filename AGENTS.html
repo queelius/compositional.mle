@@ -36,14 +36,14 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Repository Guidelines</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/AGENTS.md" class="external-link"><code>AGENTS.md</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/AGENTS.md" class="external-link"><code>AGENTS.md</code></a></small>
     </div>
 
 <div id="repository-guidelines" class="section level1">
 
 <div class="section level2">
 <h2 id="project-structure--module-organization">Project Structure &amp; Module Organization<a class="anchor" aria-label="anchor" href="#project-structure--module-organization"></a></h2>
-<ul><li>Package source lives in <code>R/</code> (solvers, composition operators, tracing, configuration). Keep new APIs exported via roxygen comments (<code>@export</code>) and rely on <code><a href="https://devtools.r-lib.org/reference/document.html" class="external-link">devtools::document()</a></code> to refresh <code>NAMESPACE</code> and <code>man/</code>.</li>
+<ul><li>Package source lives in <code>R/</code> (solvers, composition operators, tracing, configuration). Keep new APIs exported via roxygen comments (<code>@export</code>) and rely on <code>devtools::document()</code> to refresh <code>NAMESPACE</code> and <code>man/</code>.</li>
 <li>Tests are under <code>tests/testthat/</code>; prefer <code>test-&lt;topic&gt;.R</code> files that mirror the module names (e.g., <code>test-solvers.R</code>, <code>test-transformers.R</code>).</li>
 <li>Documentation sources: <code>README.Rmd</code> (rendered into <code>README.md</code>), vignettes in <code>vignettes/</code>, and pkgdown site output in <code>docs/</code> driven by <code>_pkgdown.yml</code>.</li>
 <li>Additional references: <code>DESIGN.md</code> for architecture context and <code>TESTING_SUMMARY.md</code> for historical coverage notes.</li>
