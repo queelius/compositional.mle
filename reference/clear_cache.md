@@ -26,7 +26,9 @@ The problem object (invisibly), modified in place
 # \donttest{
 loglike <- function(theta) -sum((theta - c(1, 2))^2)
 problem <- mle_problem(loglike, cache_derivatives = TRUE)
+#> Error in mle_problem(loglike, cache_derivatives = TRUE): unused argument (cache_derivatives = TRUE)
 # ... run some optimization ...
 clear_cache(problem)  # Force fresh derivative computation
+#> Error in clear_cache(problem): could not find function "clear_cache"
 # }
 ```

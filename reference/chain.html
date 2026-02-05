@@ -9,7 +9,7 @@ More flexible than %&amp;gt;&amp;gt;% operator."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">compositional.mle</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@ More flexible than %&amp;gt;&amp;gt;% operator."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Chain Solvers with Early Stopping</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/R/compose.R" class="external-link"><code>R/compose.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/compose.R" class="external-link"><code>R/compose.R</code></a></small>
       <div class="d-none name"><code>chain.Rd</code></div>
     </div>
 
@@ -88,9 +88,11 @@ for any intermediate result, the chain stops early.</p>
 <span class="r-in"><span>  <span class="fu"><a href="newton_raphson.html">newton_raphson</a></span><span class="op">(</span>max_iter <span class="op">=</span> <span class="fl">20</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  early_stop <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/Logic.html" class="external-link">isTRUE</a></span><span class="op">(</span><span class="va">r</span><span class="op">$</span><span class="va">converged</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in chain(grid_search(lower = c(-10, 0.1), upper = c(10, 5), n = 5),     gradient_ascent(max_iter = 50), newton_raphson(max_iter = 20),     early_stop = function(r) isTRUE(r$converged)):</span> could not find function "chain"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Standard chain (no early stopping)</span></span></span>
 <span class="r-in"><span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu">chain</span><span class="op">(</span><span class="fu"><a href="gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="newton_raphson.html">newton_raphson</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in chain(gradient_ascent(), newton_raphson()):</span> could not find function "chain"</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
