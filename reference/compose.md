@@ -42,6 +42,5 @@ strategy <- compose(
   newton_raphson(max_iter = 20)
 )
 result <- strategy(problem, c(0, 1))
-#> Error in strategy(problem, c(0, 1)): unused argument (c(0, 1))
 # }
 ```

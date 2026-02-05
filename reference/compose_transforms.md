@@ -35,13 +35,11 @@ transform <- compose_transforms(
   function(f) with_penalty(f, penalty_l1(), lambda = 0.01),
   function(f) with_penalty(f, penalty_l2(), lambda = 0.05)
 )
-#> Error in compose_transforms(function(f) with_penalty(f, penalty_l1(),     lambda = 0.01), function(f) with_penalty(f, penalty_l2(),     lambda = 0.05)): could not find function "compose_transforms"
 
 # Apply to log-likelihood
 loglike <- function(theta) -sum((theta - c(1, 2))^2)
 loglike_transformed <- transform(loglike)
-#> Error in as.data.frame.default(x[[i]], optional = TRUE): cannot coerce class ‘"function"’ to a data.frame
 loglike_transformed(c(1, 2))
-#> Error in loglike_transformed(c(1, 2)): could not find function "loglike_transformed"
+#> [1] -0.28
 # }
 ```

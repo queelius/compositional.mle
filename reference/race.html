@@ -38,7 +38,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Race Multiple Solvers</h1>
-      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/HEAD/R/compose.R" class="external-link"><code>R/compose.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/v1.0.1/R/compose.R" class="external-link"><code>R/compose.R</code></a></small>
       <div class="d-none name"><code>race.Rd</code></div>
     </div>
 
@@ -71,8 +71,8 @@ solvers are run in parallel using the current future plan. Default is FALSE.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>When <code>parallel = TRUE</code>, solvers are executed using <code>future::future()</code>
-and results collected with <code>future::value()</code>. The current future plan
+    <p>When <code>parallel = TRUE</code>, solvers are executed using <code><a href="https://future.futureverse.org/reference/future.html" class="external-link">future::future()</a></code>
+and results collected with <code><a href="https://future.futureverse.org/reference/value.html" class="external-link">future::value()</a></code>. The current future plan
 determines how parallelization happens (e.g., <code>plan(multisession)</code> for
 multi-process execution).</p>
 <p>Failed solvers (those that throw errors) are ignored. If all solvers fail,
@@ -83,11 +83,10 @@ an error is thrown.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Race three methods sequentially</span></span></span>
 <span class="r-in"><span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu">race</span><span class="op">(</span><span class="fu"><a href="gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in race(gradient_ascent(), bfgs(), nelder_mead()):</span> could not find function "race"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Race with parallel execution (requires future package)</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
-<span class="r-in"><span><span class="fu">future</span><span class="fu">::</span><span class="fu">plan</span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va">multisession</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">future</span><span class="fu">::</span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="fu">future</span><span class="fu">::</span><span class="va"><a href="https://future.futureverse.org/reference/multisession.html" class="external-link">multisession</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">strategy</span> <span class="op">&lt;-</span> <span class="fu">race</span><span class="op">(</span><span class="fu"><a href="gradient_ascent.html">gradient_ascent</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="bfgs.html">bfgs</a></span><span class="op">(</span><span class="op">)</span>, <span class="fu"><a href="nelder_mead.html">nelder_mead</a></span><span class="op">(</span><span class="op">)</span>, parallel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
 <span class="r-in"><span></span></span>

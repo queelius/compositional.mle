@@ -24,6 +24,7 @@ devtools::install_github("queelius/compositional.mle")
 
 ``` r
 library(compositional.mle)
+#> Loading required package: algebraic.mle
 ```
 
 ## Quick Start: Normal Distribution MLE
