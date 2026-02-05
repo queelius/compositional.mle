@@ -8,7 +8,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/queelius/compositional.mle/blob/v1.0.1/inst/CITATION)
+[`inst/CITATION`](https://github.com/queelius/compositional.mle/blob/HEAD/inst/CITATION)
 
 Towell A (2026). *compositional.mle: Compositional Maximum Likelihood
 Estimation*. R package version 1.0.0,
