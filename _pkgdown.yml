@@ -78,14 +78,6 @@ reference:
   - penalty_elastic_net
   - compose_transforms
 
-- title: Configuration
-  desc: Type-safe configuration objects
-  contents:
-  - mle_config
-  - mle_config_gradient
-  - mle_config_linesearch
-  - is_mle_config
-
 - title: Tracing
   desc: Track optimization progress
   contents:
@@ -101,6 +93,7 @@ reference:
   - optimization_path
   - plot.mle_numerical
   - plot.mle_trace_data
+  - print.mle_trace_data
 
 articles:
 - title: Getting Started
