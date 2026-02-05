@@ -58,3 +58,7 @@ solver <- sim_anneal(temp_init = 100, cooling_rate = 0.999)
 strategy <- sim_anneal(max_iter = 500) \%>>\% gradient_ascent()
 
 }
+\seealso{
+\code{\link{with_restarts}} for multi-start optimization,
+  \code{\link{gradient_ascent}} for local refinement
+}

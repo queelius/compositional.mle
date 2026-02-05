@@ -34,6 +34,9 @@
 #' # Without line search (fixed step size)
 #' solver <- gradient_ascent(learning_rate = 0.01, line_search = FALSE)
 #'
+#' @seealso \code{\link{newton_raphson}} for second-order optimization,
+#'   \code{\link{bfgs}} for quasi-Newton, \code{\link{\%>>\%}} and
+#'   \code{\link{\%|\%}} for solver composition
 #' @export
 gradient_ascent <- function(
   learning_rate = 1.0,
@@ -146,7 +149,7 @@ gradient_ascent <- function(
   constraint
 ) {
   dir_norm <- sqrt(sum(direction^2))
-  if (dir_norm == 0) {
+  if (dir_norm < .Machine$double.eps) {
     return(list(success = FALSE, theta = theta))
   }
 

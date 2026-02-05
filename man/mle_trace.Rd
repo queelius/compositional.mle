@@ -2,6 +2,7 @@
 % Please edit documentation in R/trace.R
 \name{mle_trace}
 \alias{mle_trace}
+\alias{print.mle_trace}
 \title{Create a Trace Configuration}
 \usage{
 mle_trace(
@@ -11,6 +12,8 @@ mle_trace(
   timing = FALSE,
   every = 1L
 )
+
+\method{print}{mle_trace}(x, ...)
 }
 \arguments{
 \item{values}{Track log-likelihood values at each iteration}
@@ -22,9 +25,15 @@ mle_trace(
 \item{timing}{Track wall-clock time}
 
 \item{every}{Record every nth iteration (1 = all iterations)}
+
+\item{x}{An mle_trace object.}
+
+\item{...}{Additional arguments (unused).}
 }
 \value{
 An mle_trace configuration object
+
+The input object, invisibly (for method chaining).
 }
 \description{
 Specifies what information to track during optimization.

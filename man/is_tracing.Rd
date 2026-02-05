@@ -15,3 +15,12 @@ Logical indicating if any tracing is enabled
 \description{
 Check if tracing is enabled
 }
+\examples{
+# Tracing disabled (default)
+trace <- mle_trace()
+is_tracing(trace)  # FALSE
+
+# Tracing enabled
+trace <- mle_trace(values = TRUE)
+is_tracing(trace)  # TRUE
+}

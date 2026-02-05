@@ -10,8 +10,13 @@ is_mle_constraint(x)
 \item{x}{Object to test}
 }
 \value{
-Logical
+Logical indicating whether \code{x} is an \code{mle_constraint}.
 }
 \description{
 Check if object is an mle_constraint
+}
+\examples{
+constraint <- mle_constraint(support = function(theta) all(theta > 0))
+is_mle_constraint(constraint)  # TRUE
+is_mle_constraint(list())      # FALSE
 }

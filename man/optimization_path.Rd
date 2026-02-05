@@ -7,7 +7,7 @@
 optimization_path(x, ...)
 }
 \arguments{
-\item{x}{An mle_numerical result object with trace_data, or an mle_trace_data object}
+\item{x}{An mle_numerical result with trace_data, or an mle_trace_data object}
 
 \item{...}{Additional arguments (unused)}
 }

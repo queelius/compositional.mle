@@ -62,3 +62,7 @@ strategy <- gradient_ascent(max_iter = 50) \%>>\% newton_raphson(max_iter = 20)
 }
 
 }
+\seealso{
+\code{\link{gradient_ascent}} for first-order optimization,
+  \code{\link{fisher_scoring}} (alias), \code{\link{\%>>\%}} for chaining
+}

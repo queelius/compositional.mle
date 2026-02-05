@@ -20,19 +20,16 @@ This allows building complex log-likelihood transformations from simple ones.
 Note: For composing solvers, use \code{\link{compose}} instead.
 }
 \examples{
-\dontrun{
-# Create a composition
+\donttest{
+# Create a composition of transformations
 transform <- compose_transforms(
   function(f) with_penalty(f, penalty_l1(), lambda = 0.01),
-  function(f) with_subsampling(f, data, 50)
+  function(f) with_penalty(f, penalty_l2(), lambda = 0.05)
 )
 
 # Apply to log-likelihood
+loglike <- function(theta) -sum((theta - c(1, 2))^2)
 loglike_transformed <- transform(loglike)
-
-# Equivalent to:
-loglike_transformed <- loglike \%>\%
-  with_subsampling(data, 50) \%>\%
-  with_penalty(penalty_l1(), lambda = 0.01)
+loglike_transformed(c(1, 2))
 }
 }

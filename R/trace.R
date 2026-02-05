@@ -27,13 +27,16 @@ mle_trace <- function(
   timing = FALSE,
   every = 1L
 ) {
+  stopifnot(is.numeric(every), every >= 1)
+  every <- as.integer(every)
+
   structure(
     list(
       values = values,
       path = path,
       gradients = gradients,
       timing = timing,
-      every = as.integer(every)
+      every = every
     ),
     class = "mle_trace"
   )
@@ -43,6 +46,14 @@ mle_trace <- function(
 #'
 #' @param trace An mle_trace object
 #' @return Logical indicating if any tracing is enabled
+#' @examples
+#' # Tracing disabled (default)
+#' trace <- mle_trace()
+#' is_tracing(trace)  # FALSE
+#'
+#' # Tracing enabled
+#' trace <- mle_trace(values = TRUE)
+#' is_tracing(trace)  # TRUE
 #' @export
 is_tracing <- function(trace) {
   trace$values || trace$path || trace$gradients || trace$timing
@@ -145,6 +156,10 @@ finalize_trace <- function(recorder) {
   result
 }
 
+#' @rdname mle_trace
+#' @param x An mle_trace object.
+#' @param ... Additional arguments (unused).
+#' @return The input object, invisibly (for method chaining).
 #' @export
 print.mle_trace <- function(x, ...) {
   cat("MLE Trace Configuration\n")
@@ -156,19 +171,31 @@ print.mle_trace <- function(x, ...) {
   invisible(x)
 }
 
+#' Print MLE Trace Data
+#'
+#' @param x An mle_trace_data object.
+#' @param ... Additional arguments (unused).
+#' @return The input object, invisibly (for method chaining).
 #' @export
 print.mle_trace_data <- function(x, ...) {
   cat("MLE Trace Data\n")
   cat("  Total iterations:", x$total_iterations, "\n")
   cat("  Total time:", round(x$total_time, 3), "seconds\n")
+
+  ll_start <- x$values[1]
+  ll_end <- tail(x$values, 1)
   if (!is.null(x$values)) {
-    cat("  Log-likelihood: ", round(x$values[1], 4), " -> ", round(tail(x$values, 1), 4), "\n", sep = "")
+    cat("  Log-likelihood: ", round(ll_start, 4),
+        " -> ", round(ll_end, 4), "\n", sep = "")
   }
   if (!is.null(x$path)) {
     cat("  Path recorded:", nrow(x$path), "points\n")
   }
+  grad_start <- x$gradients[1]
+  grad_end <- tail(x$gradients, 1)
   if (!is.null(x$gradients)) {
-    cat("  Gradient norm: ", round(x$gradients[1], 4), " -> ", round(tail(x$gradients, 1), 4), "\n", sep = "")
+    cat("  Gradient norm: ", round(grad_start, 4),
+        " -> ", round(grad_end, 4), "\n", sep = "")
   }
   if (!is.null(x$stages)) {
     cat("  Stages:", length(x$stages), "(composed trace)\n")

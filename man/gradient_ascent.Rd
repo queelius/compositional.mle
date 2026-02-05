@@ -59,3 +59,8 @@ solver <- gradient_ascent(
 solver <- gradient_ascent(learning_rate = 0.01, line_search = FALSE)
 
 }
+\seealso{
+\code{\link{newton_raphson}} for second-order optimization,
+  \code{\link{bfgs}} for quasi-Newton, \code{\link{\%>>\%}} and
+  \code{\link{\%|\%}} for solver composition
+}

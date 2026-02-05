@@ -35,6 +35,8 @@
 #' # Coarse global search, then local refinement
 #' strategy <- sim_anneal(max_iter = 500) %>>% gradient_ascent()
 #'
+#' @seealso \code{\link{with_restarts}} for multi-start optimization,
+#'   \code{\link{gradient_ascent}} for local refinement
 #' @export
 sim_anneal <- function(
   temp_init = 10.0,
@@ -77,7 +79,7 @@ sim_anneal <- function(
     ll_current <- loglike(theta)
 
     if (!is.finite(ll_current)) {
-      stop("Initial log-likelihood is not finite")
+      stop("sim_anneal: Initial log-likelihood is not finite")
     }
 
     best_theta <- theta

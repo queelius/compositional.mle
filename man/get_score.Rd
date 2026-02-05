@@ -10,10 +10,18 @@ get_score(problem)
 \item{problem}{An mle_problem object}
 }
 \value{
-Score function
+Score function that takes a parameter vector and returns the
+  gradient of the log-likelihood.
 }
 \description{
 Returns the score (gradient) function, computing numerically if not provided.
 If \code{cache_derivatives = TRUE} was set in the problem and score is
 computed numerically, results are cached using a single-value cache.
+}
+\examples{
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+score_fn <- get_score(problem)
+score_fn(c(0, 0))  # Gradient at (0, 0)
 }

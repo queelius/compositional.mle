@@ -11,6 +11,10 @@
 
 \item{...}{Arguments passed to plotting functions}
 }
+\value{
+Called for side effects (generates a plot). Returns the input
+  object invisibly.
+}
 \description{
 Plot Trace Data Directly
 }

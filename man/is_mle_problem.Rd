@@ -10,8 +10,15 @@ is_mle_problem(x)
 \item{x}{Object to test}
 }
 \value{
-Logical
+Logical indicating whether \code{x} is an \code{mle_problem}.
 }
 \description{
 Check if object is an mle_problem
+}
+\examples{
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+is_mle_problem(problem)  # TRUE
+is_mle_problem(list())   # FALSE
 }

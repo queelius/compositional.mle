@@ -89,10 +89,19 @@ mle_problem <- function(
   )
 }
 
+#' @rdname mle_problem
+#' @param x An mle_problem object.
+#' @param ... Additional arguments (unused).
+#' @return The input object, invisibly (for method chaining).
 #' @export
 print.mle_problem <- function(x, ...) {
   cat("MLE Problem\n")
-  cat("  Parameters:", if (!is.null(x$theta_names)) paste(x$theta_names, collapse = ", ") else "unnamed", "\n")
+  param_str <- if (!is.null(x$theta_names)) {
+    paste(x$theta_names, collapse = ", ")
+  } else {
+    "unnamed"
+  }
+  cat("  Parameters:", param_str, "\n")
   score_type <- if (!is.null(x$.score)) "analytic" else "numerical"
   fisher_type <- if (!is.null(x$.fisher)) "analytic" else "numerical"
   if (isTRUE(x$cache_derivatives)) {
@@ -101,7 +110,8 @@ print.mle_problem <- function(x, ...) {
   }
   cat("  Score:", score_type, "\n")
   cat("  Fisher:", fisher_type, "\n")
-  cat("  Constraints:", if (!identical(x$constraint, mle_constraint())) "yes" else "none", "\n")
+  has_constraint <- !identical(x$constraint, mle_constraint())
+  cat("  Constraints:", if (has_constraint) "yes" else "none", "\n")
   if (!is.null(x$n_obs)) cat("  Observations:", x$n_obs, "\n")
   invisible(x)
 }
@@ -142,7 +152,14 @@ make_cached_derivative <- function(problem, compute_fn, cache_key) {
 #' computed numerically, results are cached using a single-value cache.
 #'
 #' @param problem An mle_problem object
-#' @return Score function
+#' @return Score function that takes a parameter vector and returns the
+#'   gradient of the log-likelihood.
+#' @examples
+#' problem <- mle_problem(
+#'   loglike = function(theta) -sum((theta - c(1, 2))^2)
+#' )
+#' score_fn <- get_score(problem)
+#' score_fn(c(0, 0))  # Gradient at (0, 0)
 #' @export
 get_score <- function(problem) {
   if (!is.null(problem$.score)) {
@@ -158,12 +175,20 @@ get_score <- function(problem) {
 
 #' Get Fisher information function from problem
 #'
-#' Returns the Fisher information matrix function, computing numerically if not provided.
-#' If \code{cache_derivatives = TRUE} was set in the problem and Fisher is
-#' computed numerically, results are cached using a single-value cache.
+#' Returns the Fisher information matrix function, computing numerically if not
+#' provided. If \code{cache_derivatives = TRUE} was set in the problem and
+#' Fisher is computed numerically, results are cached using a single-value
+#' cache.
 #'
 #' @param problem An mle_problem object
-#' @return Fisher information function
+#' @return Fisher information function that takes a parameter vector and
+#'   returns the Fisher information matrix (negative Hessian of log-likelihood).
+#' @examples
+#' problem <- mle_problem(
+#'   loglike = function(theta) -sum((theta - c(1, 2))^2)
+#' )
+#' fisher_fn <- get_fisher(problem)
+#' fisher_fn(c(1, 2))  # Fisher information at the optimum
 #' @export
 get_fisher <- function(problem) {
   if (!is.null(problem$.fisher)) {
@@ -180,7 +205,13 @@ get_fisher <- function(problem) {
 #' Check if object is an mle_problem
 #'
 #' @param x Object to test
-#' @return Logical
+#' @return Logical indicating whether \code{x} is an \code{mle_problem}.
+#' @examples
+#' problem <- mle_problem(
+#'   loglike = function(theta) -sum((theta - c(1, 2))^2)
+#' )
+#' is_mle_problem(problem)  # TRUE
+#' is_mle_problem(list())   # FALSE
 #' @export
 is_mle_problem <- function(x) {
   inherits(x, "mle_problem")
@@ -195,7 +226,8 @@ is_mle_problem <- function(x) {
 #' @param problem An mle_problem object
 #' @return The problem object (invisibly), modified in place
 #' @examples
-#' \dontrun{
+#' \donttest{
+#' loglike <- function(theta) -sum((theta - c(1, 2))^2)
 #' problem <- mle_problem(loglike, cache_derivatives = TRUE)
 #' # ... run some optimization ...
 #' clear_cache(problem)  # Force fresh derivative computation

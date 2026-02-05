@@ -31,11 +31,9 @@ NULL
     ))
   }
 
-  last_ll <- -Inf
-  start_time <- NULL
+  # start_time is updated in start() for potential future use with elapsed time
 
   start <- function() {
-    start_time <<- Sys.time()
     if (.has_cli() && !is.null(max_iter)) {
       # Use cli progress bar
       cli::cli_progress_bar(
@@ -54,7 +52,7 @@ NULL
       )
     } else if (.has_cli()) {
       cli::cli_alert_info("Starting {solver_name}...")
-    } else {
+    } else if (interactive()) {
       message(sprintf("Starting %s...", solver_name))
     }
   }
@@ -62,7 +60,6 @@ NULL
   update <- function(iter, loglike, grad_norm = NULL) {
     if (iter %% show_every != 0) return(invisible(NULL))
 
-    last_ll <<- loglike
     grad_str <- if (!is.null(grad_norm)) sprintf(" |grad|=%.2e", grad_norm) else ""
 
     if (.has_cli() && !is.null(max_iter)) {
@@ -72,9 +69,9 @@ NULL
       cli::cli_status(
         "{solver_name} iter {iter}: LL={format(loglike, digits=4)}{grad_str}"
       )
-    } else if (iter %% 10 == 0 || iter == 1) {
+    } else if (interactive() && (iter %% 10 == 0 || iter == 1)) {
       message(sprintf("%s iter %d: LL=%.4f%s",
-                     solver_name, iter, loglike, grad_str))
+                      solver_name, iter, loglike, grad_str))
     }
   }
 
@@ -96,9 +93,9 @@ NULL
           "{solver_name} stopped at {status} ({iterations} iterations, LL={format(final_ll, digits=4)})"
         )
       }
-    } else {
+    } else if (interactive()) {
       message(sprintf("%s %s in %d iterations (LL=%.4f)",
-                     solver_name, status, iterations, final_ll))
+                      solver_name, status, iterations, final_ll))
     }
   }
 

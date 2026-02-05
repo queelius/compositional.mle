@@ -57,3 +57,7 @@ solver <- coordinate_ascent(max_cycles = 100)
 solver <- coordinate_ascent(cycle_order = "random")
 
 }
+\seealso{
+\code{\link{gradient_ascent}} for gradient-based optimization,
+  \code{\link{nelder_mead}} for another derivative-free method
+}

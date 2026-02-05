@@ -18,7 +18,8 @@ This is useful when you want to force recomputation, for example after
 modifying data that the log-likelihood depends on.
 }
 \examples{
-\dontrun{
+\donttest{
+loglike <- function(theta) -sum((theta - c(1, 2))^2)
 problem <- mle_problem(loglike, cache_derivatives = TRUE)
 # ... run some optimization ...
 clear_cache(problem)  # Force fresh derivative computation

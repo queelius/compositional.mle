@@ -37,17 +37,19 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
   trace <- x$trace_data
 
   if (is.null(trace)) {
-    warning("No trace data available. Run solver with trace = mle_trace(values = TRUE, ...)")
+    warning("No trace data available. ",
+            "Run solver with trace = mle_trace(values = TRUE, ...)")
     return(invisible(NULL))
   }
 
   which <- match.arg(which, c("loglike", "gradient", "path"), several.ok = TRUE)
 
   # Determine layout
+  show_path <- !is.null(trace$path) && ncol(trace$path) == 2
   n_plots <- sum(c(
     "loglike" %in% which && !is.null(trace$values),
     "gradient" %in% which && !is.null(trace$gradients),
-    "path" %in% which && !is.null(trace$path) && ncol(trace$path) == 2
+    "path" %in% which && show_path
   ))
 
   if (n_plots == 0) {
@@ -77,7 +79,8 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
 
   if ("gradient" %in% which && !is.null(trace$gradients)) {
     iterations <- seq_along(trace$gradients)
-    use_log <- max(trace$gradients) / min(trace$gradients[trace$gradients > 0]) > 100
+    positive_grads <- trace$gradients[trace$gradients > 0]
+    use_log <- max(trace$gradients) / min(positive_grads) > 100
 
     log_arg <- if (use_log) "y" else ""
     ylab <- if (use_log) "Gradient Norm (log scale)" else "Gradient Norm"
@@ -90,7 +93,7 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
   }
 
   # Plot 2D parameter path
-  if ("path" %in% which && !is.null(trace$path) && ncol(trace$path) == 2) {
+  if ("path" %in% which && show_path) {
     plot(trace$path[, 1], trace$path[, 2],
          type = "l", lwd = 1.5, col = "purple",
          xlab = expression(theta[1]), ylab = expression(theta[2]),
@@ -98,9 +101,11 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
     # Mark start and end
     points(trace$path[1, 1], trace$path[1, 2],
            pch = 1, col = "blue", cex = 2, lwd = 2)
-    points(trace$path[nrow(trace$path), 1], trace$path[nrow(trace$path), 2],
+    n_pts <- nrow(trace$path)
+    points(trace$path[n_pts, 1], trace$path[n_pts, 2],
            pch = 19, col = "red", cex = 1.5)
-    legend("topright", c("Start", "MLE"), pch = c(1, 19), col = c("blue", "red"))
+    legend("topright", c("Start", "MLE"),
+           pch = c(1, 19), col = c("blue", "red"))
   }
 
   invisible(trace)
@@ -112,7 +117,7 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
 #' Converts the trace data from an MLE result into a tidy data frame for
 #' custom analysis and plotting (e.g., with ggplot2).
 #'
-#' @param x An mle_numerical result object with trace_data, or an mle_trace_data object
+#' @param x An mle_numerical result with trace_data, or an mle_trace_data object
 #' @param ... Additional arguments (unused)
 #' @return A data frame with columns:
 #'   \itemize{
@@ -145,7 +150,8 @@ optimization_path <- function(x, ...) {
 #' @export
 optimization_path.mle_numerical <- function(x, ...) {
   if (is.null(x$trace_data)) {
-    warning("No trace data available. Run solver with trace = mle_trace(path = TRUE, ...)")
+    warning("No trace data available. ",
+            "Run solver with trace = mle_trace(path = TRUE, ...)")
     return(NULL)
   }
   optimization_path.mle_trace_data(x$trace_data, ...)
@@ -184,6 +190,8 @@ optimization_path.mle_trace_data <- function(x, ...) {
 #'
 #' @param x An mle_trace_data object
 #' @param ... Arguments passed to plotting functions
+#' @return Called for side effects (generates a plot). Returns the input
+#'   object invisibly.
 #' @export
 plot.mle_trace_data <- function(x, ...) {
   # Create a wrapper object to use plot.mle_numerical

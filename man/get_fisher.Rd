@@ -10,10 +10,19 @@ get_fisher(problem)
 \item{problem}{An mle_problem object}
 }
 \value{
-Fisher information function
+Fisher information function that takes a parameter vector and
+  returns the Fisher information matrix (negative Hessian of log-likelihood).
 }
 \description{
-Returns the Fisher information matrix function, computing numerically if not provided.
-If \code{cache_derivatives = TRUE} was set in the problem and Fisher is
-computed numerically, results are cached using a single-value cache.
+Returns the Fisher information matrix function, computing numerically if not
+provided. If \code{cache_derivatives = TRUE} was set in the problem and
+Fisher is computed numerically, results are cached using a single-value
+cache.
+}
+\examples{
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+fisher_fn <- get_fisher(problem)
+fisher_fn(c(1, 2))  # Fisher information at the optimum
 }

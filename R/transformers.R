@@ -72,11 +72,9 @@ with_subsampling <- function(
 #' @param lambda Penalty weight (non-negative numeric, default: 1.0)
 #' @return Transformed log-likelihood function
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' # Regression with L2 penalty (Ridge)
-#' loglike <- function(theta) {
-#'   # ... likelihood calculation ...
-#' }
+#' loglike <- function(theta) -sum((theta - c(1, 2))^2)
 #'
 #' # Add L2 penalty
 #' loglike_penalized <- with_penalty(
@@ -84,11 +82,7 @@ with_subsampling <- function(
 #'   penalty = penalty_l2(),
 #'   lambda = 0.1
 #' )
-#'
-#' # Combine with stochastic subsampling
-#' loglike_final <- loglike %>%
-#'   with_subsampling(data, 100) %>%
-#'   with_penalty(penalty_l1(), lambda = 0.01)
+#' loglike_penalized(c(1, 2))  # Evaluate penalized likelihood
 #' }
 #' @export
 with_penalty <- function(
@@ -206,20 +200,17 @@ penalty_elastic_net <- function(alpha = 0.5, weights = NULL) {
 #' @param ... Transformer functions
 #' @return Composed transformer function
 #' @examples
-#' \dontrun{
-#' # Create a composition
+#' \donttest{
+#' # Create a composition of transformations
 #' transform <- compose_transforms(
 #'   function(f) with_penalty(f, penalty_l1(), lambda = 0.01),
-#'   function(f) with_subsampling(f, data, 50)
+#'   function(f) with_penalty(f, penalty_l2(), lambda = 0.05)
 #' )
 #'
 #' # Apply to log-likelihood
+#' loglike <- function(theta) -sum((theta - c(1, 2))^2)
 #' loglike_transformed <- transform(loglike)
-#'
-#' # Equivalent to:
-#' loglike_transformed <- loglike %>%
-#'   with_subsampling(data, 50) %>%
-#'   with_penalty(penalty_l1(), lambda = 0.01)
+#' loglike_transformed(c(1, 2))
 #' }
 #' @export
 compose_transforms <- function(...) {

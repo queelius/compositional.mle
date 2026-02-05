@@ -36,6 +36,8 @@
 #' # Random cycling to avoid systematic bias
 #' solver <- coordinate_ascent(cycle_order = "random")
 #'
+#' @seealso \code{\link{gradient_ascent}} for gradient-based optimization,
+#'   \code{\link{nelder_mead}} for another derivative-free method
 #' @export
 coordinate_ascent <- function(
   max_cycles = 50L,
@@ -75,7 +77,7 @@ coordinate_ascent <- function(
     ll_current <- loglike(theta)
 
     if (!is.finite(ll_current)) {
-      stop("Initial log-likelihood is not finite")
+      stop("coordinate_ascent: Initial log-likelihood is not finite")
     }
 
     converged <- FALSE

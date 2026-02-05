@@ -12,8 +12,17 @@ num_iterations(x, ...)
 \item{...}{Additional arguments (unused)}
 }
 \value{
-Number of iterations
+Number of iterations, or \code{NA_integer_} if not available.
 }
 \description{
 Get number of iterations
+}
+\examples{
+\donttest{
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+result <- gradient_ascent(max_iter = 50)(problem, c(0, 0))
+num_iterations(result)
+}
 }
