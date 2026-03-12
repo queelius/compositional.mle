@@ -18,7 +18,7 @@ Encoding: UTF-8
 ByteCompile: true
 Depends:
     R (>= 3.5.0),
-    algebraic.mle
+    algebraic.mle (>= 2.0.0)
 Imports:
     MASS,
     numDeriv
