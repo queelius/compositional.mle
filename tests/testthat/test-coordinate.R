@@ -9,7 +9,7 @@ test_that("coordinate_ascent finds optimum for simple problem", {
   # Should converge to optimum
   expect_true(abs(result$theta.hat[1] - 3) < 0.1)
   expect_true(abs(result$theta.hat[2] - 2) < 0.1)
-  expect_equal(result$solver, "coordinate_ascent")
+  expect_equal(result$solver_info$name, "coordinate_ascent")
 })
 
 test_that("coordinate_ascent respects constraints", {
@@ -40,7 +40,7 @@ test_that("coordinate_ascent converges with convergence flag", {
 
   # Should converge
   expect_true(result$converged)
-  expect_equal(result$solver, "coordinate_ascent")
+  expect_equal(result$solver_info$name, "coordinate_ascent")
 })
 
 test_that("coordinate_ascent returns proper result structure", {
@@ -50,12 +50,12 @@ test_that("coordinate_ascent returns proper result structure", {
 
   result <- coordinate_ascent(max_cycles = 10)(problem, theta0 = c(1, 1))
 
-  expect_s3_class(result, "mle_numerical")
+  expect_s3_class(result, "solver_result")
   expect_true("theta.hat" %in% names(result))
   expect_true("loglike" %in% names(result))
-  expect_true("iterations" %in% names(result))
-  expect_true("solver" %in% names(result))
-  expect_true("cycles" %in% names(result))
+  expect_true(!is.null(result$solver_info$iterations))
+  expect_true(!is.null(result$solver_info$name))
+  expect_true(!is.null(result$solver_info$diagnostics$cycles))
 })
 
 test_that("coordinate_ascent with tracing records values", {
@@ -66,9 +66,9 @@ test_that("coordinate_ascent with tracing records values", {
   trace_cfg <- mle_trace(values = TRUE, path = TRUE)
   result <- coordinate_ascent(max_cycles = 10)(problem, theta0 = c(0, 0), trace = trace_cfg)
 
-  expect_false(is.null(result$trace_data))
-  expect_false(is.null(result$trace_data$values))
-  expect_false(is.null(result$trace_data$path))
+  expect_false(is.null(result$solver_info$trace_data))
+  expect_false(is.null(result$solver_info$trace_data$values))
+  expect_false(is.null(result$solver_info$trace_data$path))
 })
 
 test_that("coordinate_ascent random cycle order works", {
@@ -113,5 +113,5 @@ test_that("coordinate_ascent can compose with other solvers", {
   # Should find optimum
   expect_true(abs(result$theta.hat[1] - 3) < 0.01)
   expect_true(abs(result$theta.hat[2] - 2) < 0.01)
-  expect_equal(result$strategy, "sequential")
+  expect_equal(result$solver_info$composition$strategy, "sequential")
 })

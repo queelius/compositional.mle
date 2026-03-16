@@ -37,6 +37,14 @@ test_that("mle_constraint validates inputs", {
   expect_error(mle_constraint(support = NULL))
 })
 
+test_that("mle_constraint default has is_default = TRUE", {
+  c_default <- mle_constraint()
+  expect_true(c_default$is_default)
+
+  c_custom <- mle_constraint(support = function(theta) all(theta > 0))
+  expect_false(c_custom$is_default)
+})
+
 test_that("mle_constraint with box constraints works", {
   # Box constraints: 0 <= theta <= 1
   constraint <- mle_constraint(

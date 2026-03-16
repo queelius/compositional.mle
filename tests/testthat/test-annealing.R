@@ -11,7 +11,7 @@ test_that("sim_anneal finds global optimum for simple problem", {
   # Should converge reasonably close to optimum
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - 2) < 0.5)
-  expect_equal(result$solver, "sim_anneal")
+  expect_equal(result$solver_info$name, "sim_anneal")
 })
 
 test_that("sim_anneal respects constraints", {
@@ -35,7 +35,7 @@ test_that("sim_anneal respects constraints", {
 
   # sigma should remain positive
   expect_true(result$theta.hat[2] > 0)
-  expect_equal(result$solver, "sim_anneal")
+  expect_equal(result$solver_info$name, "sim_anneal")
 })
 
 test_that("sim_anneal returns proper result structure", {
@@ -47,13 +47,13 @@ test_that("sim_anneal returns proper result structure", {
 
   result <- sim_anneal(max_iter = 100)(problem, theta0 = c(1, 1))
 
-  expect_s3_class(result, "mle_numerical")
+  expect_s3_class(result, "solver_result")
   expect_true("theta.hat" %in% names(result))
   expect_true("loglike" %in% names(result))
-  expect_true("iterations" %in% names(result))
-  expect_true("solver" %in% names(result))
-  expect_true("final_temp" %in% names(result))
-  expect_true("acceptance_rate" %in% names(result))
+  expect_true(!is.null(result$solver_info$iterations))
+  expect_true(!is.null(result$solver_info$name))
+  expect_true(!is.null(result$solver_info$diagnostics$final_temp))
+  expect_true(!is.null(result$solver_info$diagnostics$acceptance_rate))
 })
 
 test_that("sim_anneal with tracing records values", {
@@ -66,9 +66,9 @@ test_that("sim_anneal with tracing records values", {
   trace_cfg <- mle_trace(values = TRUE, path = TRUE)
   result <- sim_anneal(max_iter = 100)(problem, theta0 = c(0, 0), trace = trace_cfg)
 
-  expect_false(is.null(result$trace_data))
-  expect_false(is.null(result$trace_data$values))
-  expect_false(is.null(result$trace_data$path))
+  expect_false(is.null(result$solver_info$trace_data))
+  expect_false(is.null(result$solver_info$trace_data$values))
+  expect_false(is.null(result$solver_info$trace_data$path))
 })
 
 test_that("sim_anneal can compose with other solvers", {
@@ -86,7 +86,7 @@ test_that("sim_anneal can compose with other solvers", {
   # Should find good solution
   expect_true(abs(result$theta.hat[1] - 3) < 0.1)
   expect_true(abs(result$theta.hat[2] - 2) < 0.1)
-  expect_equal(result$strategy, "sequential")
+  expect_equal(result$solver_info$composition$strategy, "sequential")
 })
 
 test_that("sim_anneal cooling affects exploration", {
@@ -103,5 +103,5 @@ test_that("sim_anneal cooling affects exploration", {
   result_slow <- sim_anneal(cooling_rate = 0.99, max_iter = 100)(problem, c(5, 5))
 
   # Both should work, slow cooling typically accepts more moves
-  expect_true(result_slow$acceptance_rate > 0)
+  expect_true(result_slow$solver_info$diagnostics$acceptance_rate > 0)
 })

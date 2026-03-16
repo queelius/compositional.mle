@@ -9,10 +9,10 @@ test_that("algebraic.mle generics work on gradient_ascent result", {
   expect_equal(params(result)[1], 5, tolerance = 0.5)
   expect_length(se(result), 2)
   expect_true(all(se(result) > 0))
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_equal(nparams(result), 2)
-  expect_true(is.numeric(aic(result)))
-  expect_equal(aic(result), -2 * loglik_val(result) + 2 * nparams(result))
+  expect_true(is.numeric(AIC(result)))
+  expect_equal(AIC(result), -2 * as.numeric(logLik(result)) + 2 * nparams(result))
   expect_true(is.matrix(vcov(result)))
   expect_equal(dim(vcov(result)), c(2, 2))
 
@@ -32,9 +32,9 @@ test_that("algebraic.mle generics work on newton_raphson result", {
   result <- newton_raphson(max_iter = 50)(problem, c(4, 1.5))
 
   expect_length(params(result), 2)
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_length(se(result), 2)
-  expect_true(is.numeric(aic(result)))
+  expect_true(is.numeric(AIC(result)))
   expect_true(is.matrix(vcov(result)))
 })
 
@@ -43,7 +43,7 @@ test_that("algebraic.mle generics work on bfgs result", {
   result <- bfgs(max_iter = 100)(problem, c(4, 1.5))
 
   expect_length(params(result), 2)
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_length(se(result), 2)
   expect_true(is.matrix(vcov(result)))
 })
@@ -55,9 +55,9 @@ test_that("algebraic.mle generics work on composed chain result", {
 
   expect_length(params(result), 2)
   expect_equal(params(result)[1], 5, tolerance = 0.5)
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_length(se(result), 2)
-  expect_true(is.numeric(aic(result)))
+  expect_true(is.numeric(AIC(result)))
   expect_true(is.matrix(vcov(result)))
 })
 
@@ -67,9 +67,9 @@ test_that("algebraic.mle generics work on race result", {
   result <- strategy(problem, c(4, 1.5))
 
   expect_length(params(result), 2)
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_length(se(result), 2)
-  expect_true(is.numeric(aic(result)))
+  expect_true(is.numeric(AIC(result)))
   expect_true(is.matrix(vcov(result)))
 })
 
@@ -81,7 +81,7 @@ test_that("algebraic.mle generics work on with_restarts result", {
   result <- strategy(problem, c(0, 1))
 
   expect_length(params(result), 2)
-  expect_true(is.numeric(loglik_val(result)))
+  expect_true(is.numeric(as.numeric(logLik(result))))
   expect_length(se(result), 2)
-  expect_true(is.numeric(aic(result)))
+  expect_true(is.numeric(AIC(result)))
 })

@@ -6,7 +6,7 @@ test_that("gradient_ascent solves normal MLE", {
 
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_equal(result$theta.hat[1], 5, tolerance = 0.5)
   expect_equal(result$theta.hat[2], 2, tolerance = 0.5)
 })
@@ -17,7 +17,7 @@ test_that("newton_raphson solves normal MLE", {
 
   result <- solver(problem, c(4, 1.5))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_equal(result$theta.hat[1], 5, tolerance = 0.5)
   expect_equal(result$theta.hat[2], 2, tolerance = 0.5)
 })
@@ -29,7 +29,7 @@ test_that("bfgs solves normal MLE", {
   # BFGS needs reasonable starting point to avoid overshooting
   result <- solver(problem, c(4, 1.5))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_equal(result$theta.hat[1], 5, tolerance = 0.5)
   expect_equal(result$theta.hat[2], 2, tolerance = 0.5)
 })
@@ -40,7 +40,7 @@ test_that("nelder_mead solves normal MLE", {
 
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_equal(result$theta.hat[1], 5, tolerance = 0.5)
   expect_equal(result$theta.hat[2], 2, tolerance = 0.5)
 })
@@ -51,7 +51,7 @@ test_that("grid_search finds reasonable starting point", {
 
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   # Grid search won't be exact but should be in ballpark
   expect_true(abs(result$theta.hat[1] - 5) < 3)
   expect_true(abs(result$theta.hat[2] - 2) < 2)
@@ -64,5 +64,5 @@ test_that("random_search finds reasonable starting point", {
 
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
 })

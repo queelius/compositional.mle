@@ -1,4 +1,4 @@
-test_that("plot.mle_numerical works with trace data", {
+test_that("plot.solver_result works with trace data", {
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2),
     score = function(theta) -2 * (theta - c(3, 2))
@@ -22,7 +22,7 @@ test_that("plot.mle_numerical works with trace data", {
   expect_s3_class(trace_out, "mle_trace_data")
 })
 
-test_that("plot.mle_numerical warns when no trace data", {
+test_that("plot.solver_result warns when no trace data", {
   problem <- mle_problem(
     loglike = function(theta) -sum((theta - c(3, 2))^2)
   )
@@ -93,7 +93,7 @@ test_that("plot.mle_trace_data works directly", {
   expect_silent({
     pdf(NULL)
     on.exit(dev.off())
-    plot(result$trace_data)
+    plot(result$solver_info$trace_data)
   })
 })
 
@@ -107,7 +107,7 @@ test_that("optimization_path works on trace_data directly", {
   result <- gradient_ascent(max_iter = 15)(problem, c(0, 0), trace = trace_cfg)
 
   # Should work on trace_data directly
-  path_df <- optimization_path(result$trace_data)
+  path_df <- optimization_path(result$solver_info$trace_data)
 
   expect_s3_class(path_df, "data.frame")
   expect_true(nrow(path_df) > 0)

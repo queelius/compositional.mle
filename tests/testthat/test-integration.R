@@ -30,7 +30,7 @@ test_that("Grid search finds approximate solution", {
   solver <- grid_search(lower = c(-5, -5), upper = c(5, 5), n = 10)
   result <- solver(problem, c(0, 0))
 
-  expect_s3_class(result, "mle_grid_search")
+  expect_s3_class(result, "solver_result")
   expect_true(abs(result$theta.hat[1] - 2) < 1.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 1.5)
 })
@@ -42,7 +42,7 @@ test_that("Sequential composition works", {
   solver <- grid_search(c(0, 0.5), c(10, 4), n = 5) %>>% gradient_ascent(max_iter = 100)
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 5) < 0.5)
   expect_true(abs(result$theta.hat[2] - 2) < 0.5)
 })
@@ -54,7 +54,7 @@ test_that("with_restarts improves robustness", {
   solver <- with_restarts(gradient_ascent(max_iter = 100), n = 5, sampler = sampler)
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 5) < 0.5)
   expect_true(abs(result$theta.hat[2] - 2) < 0.5)
 })
@@ -89,7 +89,7 @@ test_that("BFGS solver works on simple problem", {
   solver <- bfgs(max_iter = 100)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 2) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
 })
@@ -102,7 +102,7 @@ test_that("Nelder-Mead solver works", {
   solver <- nelder_mead(max_iter = 500)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 2) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
 })
@@ -115,7 +115,7 @@ test_that("L-BFGS-B respects bounds", {
   solver <- lbfgsb(lower = c(0, 0), upper = c(2, 2))
   result <- solver(problem, c(1, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 2) < 0.1)
   expect_true(abs(result$theta.hat[2] - 2) < 0.1)
 })
@@ -133,7 +133,7 @@ test_that("unless_converged applies refinement when needed", {
   )
   result <- solver(problem, c(1, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
 })
 
 test_that("Parallel race selects best result", {
@@ -144,7 +144,7 @@ test_that("Parallel race selects best result", {
   solver <- nelder_mead(max_iter = 100) %|% bfgs(max_iter = 50)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-2)) < 0.5)
 })
