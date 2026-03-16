@@ -1,7 +1,7 @@
 # Tests for generic functions
 
-test_that("mle_numerical objects from algebraic.mle work correctly", {
-  # Create a simple mle_numerical object using optim-style output
+test_that("solver_result objects from algebraic.mle work correctly", {
+  # Create a simple solver_result object using optim-style output
   sol <- list(
     par = c(0, 1),
     value = -10,
@@ -9,10 +9,10 @@ test_that("mle_numerical objects from algebraic.mle work correctly", {
     hessian = -matrix(c(1, 0, 0, 1), nrow = 2)
   )
 
-  result <- algebraic.mle::mle_numerical(sol = sol)
+  result <- algebraic.mle::mle_numerical(sol = sol, superclasses = "solver_result")
 
-  expect_true(inherits(result, "mle_numerical"))
-  expect_true(inherits(result, "mle"))
+  expect_true(inherits(result, "solver_result"))
+  expect_true(inherits(result, "mle_fit_numerical"))
   expect_true(result$converged)  # convergence == 0 means converged
   expect_equal(result$theta.hat, c(0, 1))
   expect_equal(result$loglike, -10)
@@ -20,7 +20,7 @@ test_that("mle_numerical objects from algebraic.mle work correctly", {
 
 test_that("is_converged works correctly", {
   # Converged result (convergence = 0)
-  converged_result <- create_test_mle_numerical(
+  converged_result <- create_test_solver_result(
     par = c(0, 1),
     value = -10,
     convergence = 0L,
@@ -28,7 +28,7 @@ test_that("is_converged works correctly", {
   )
 
   # Not converged result (convergence = 1)
-  not_converged_result <- create_test_mle_numerical(
+  not_converged_result <- create_test_solver_result(
     par = c(0, 1),
     value = -10,
     convergence = 1L,
@@ -39,23 +39,23 @@ test_that("is_converged works correctly", {
   expect_false(is_converged(not_converged_result))
 })
 
-test_that("is_mle_numerical works correctly", {
-  result <- create_test_mle_numerical(
+test_that("is_solver_result works correctly", {
+  result <- create_test_solver_result(
     par = c(0, 1),
     value = -10,
     convergence = 0L,
     iterations = 50L
   )
 
-  expect_true(is_mle_numerical(result))
-  expect_false(is_mle_numerical(list(a = 1)))
-  expect_false(is_mle_numerical("string"))
-  expect_false(is_mle_numerical(123))
-  expect_false(is_mle_numerical(NULL))
+  expect_true(is_solver_result(result))
+  expect_false(is_solver_result(list(a = 1)))
+  expect_false(is_solver_result("string"))
+  expect_false(is_solver_result(123))
+  expect_false(is_solver_result(NULL))
 })
 
 test_that("num_iterations works correctly", {
-  result <- create_test_mle_numerical(
+  result <- create_test_solver_result(
     par = c(0, 1),
     value = -10,
     convergence = 0L,
@@ -65,22 +65,15 @@ test_that("num_iterations works correctly", {
   expect_equal(num_iterations(result), 75L)
 })
 
-test_that("num_iterations handles both field names", {
-  # Test with 'iterations' field
-  result1 <- create_test_mle_numerical(
+test_that("num_iterations handles solver_info field", {
+  # Test with solver_info$iterations field
+  result1 <- create_test_solver_result(
     par = c(0, 1),
     value = -10,
     convergence = 0L,
     iterations = 42L
   )
   expect_equal(num_iterations(result1), 42L)
-
-  # Test with legacy 'iter' field
-  result2 <- algebraic.mle::mle_numerical(
-    sol = list(par = c(0, 1), value = -10, convergence = 0L)
-  )
-  result2$iter <- 33L
-  expect_equal(num_iterations(result2), 33L)
 })
 
 test_that("generic functions work with solver results", {
@@ -102,7 +95,7 @@ test_that("generic functions work with solver results", {
   solver <- gradient_ascent(max_iter = 200)
   result <- solver(problem, c(0, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(is.logical(is_converged(result)))
   expect_true(is.numeric(num_iterations(result)))
   expect_true(num_iterations(result) > 0)

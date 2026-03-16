@@ -1,5 +1,4 @@
 #' Check if solver converged
-#'
 #' @param x An mle result object
 #' @param ... Additional arguments (unused)
 #' @return Logical indicating convergence
@@ -17,7 +16,7 @@ is_converged <- function(x, ...) {
 }
 
 #' @export
-is_converged.mle_numerical <- function(x, ...) {
+is_converged.solver_result <- function(x, ...) {
   isTRUE(x$converged)
 }
 
@@ -32,26 +31,24 @@ is_converged.default <- function(x, ...) {
   }
 }
 
-#' Check if object is an mle_numerical
-#'
+#' Check if object is a solver result
 #' @param x Object to test
-#' @return Logical indicating whether \code{x} inherits from \code{mle_numerical}.
+#' @return Logical indicating whether \code{x} inherits from \code{solver_result}.
 #' @examples
 #' \donttest{
 #' problem <- mle_problem(
 #'   loglike = function(theta) -sum((theta - c(1, 2))^2)
 #' )
 #' result <- gradient_ascent(max_iter = 20)(problem, c(0, 0))
-#' is_mle_numerical(result)  # TRUE
-#' is_mle_numerical(list())  # FALSE
+#' is_solver_result(result)  # TRUE
+#' is_solver_result(list())  # FALSE
 #' }
 #' @export
-is_mle_numerical <- function(x) {
-  inherits(x, "mle_numerical")
+is_solver_result <- function(x) {
+  inherits(x, "solver_result")
 }
 
 #' Get number of iterations
-#'
 #' @param x An mle result object
 #' @param ... Additional arguments (unused)
 #' @return Number of iterations, or \code{NA_integer_} if not available.
@@ -66,6 +63,11 @@ is_mle_numerical <- function(x) {
 #' @export
 num_iterations <- function(x, ...) {
   UseMethod("num_iterations")
+}
+
+#' @export
+num_iterations.solver_result <- function(x, ...) {
+  x$solver_info$iterations %||% NA_integer_
 }
 
 #' @export

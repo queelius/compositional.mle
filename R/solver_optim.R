@@ -1,22 +1,15 @@
 # Convert optim() result (which minimizes) to mle_numerical (which maximizes)
-.optim_to_mle <- function(optim_result, solver_name, superclass) {
-  sol <- list(
-    par = optim_result$par,
-    value = -optim_result$value,
-    convergence = optim_result$convergence,
-    hessian = -optim_result$hessian
+.optim_to_mle <- function(optim_result, solver_name, recorder = NULL) {
+  .build_result(
+    theta = optim_result$par,
+    ll = -optim_result$value,
+    converged = optim_result$convergence == 0,
+    hessian = -optim_result$hessian,
+    solver_name = solver_name,
+    iterations = optim_result$counts["function"],
+    recorder = recorder,
+    diagnostics = list(optim_result = optim_result)
   )
-
-  mle_result <- algebraic.mle::mle_numerical(
-    sol = sol,
-    superclasses = superclass
-  )
-
-  mle_result$iterations <- optim_result$counts["function"]
-  mle_result$solver <- solver_name
-  mle_result$optim_result <- optim_result
-
-  mle_result
 }
 
 #' BFGS Solver
@@ -95,7 +88,7 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "bfgs", "mle_bfgs")
+    .optim_to_mle(result, "bfgs")
   }
 }
 
@@ -155,7 +148,7 @@ lbfgsb <- function(lower = -Inf, upper = Inf, max_iter = 100L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "lbfgsb", "mle_lbfgsb")
+    .optim_to_mle(result, "lbfgsb")
   }
 }
 
@@ -218,6 +211,6 @@ nelder_mead <- function(max_iter = 500L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "nelder_mead", "mle_nelder_mead")
+    .optim_to_mle(result, "nelder_mead")
   }
 }

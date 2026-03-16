@@ -17,7 +17,7 @@ Applies transformations right-to-left (like mathematical composition).
 This allows building complex log-likelihood transformations from simple ones.
 }
 \details{
-Note: For composing solvers, use \code{\link{compose}} instead.
+Note: For composing solvers, use \code{\link{chain}} instead.
 }
 \examples{
 \donttest{

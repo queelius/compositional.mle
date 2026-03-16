@@ -123,7 +123,7 @@ library(algebraic.mle)
 params(result)       # parameter estimates (theta-hat)
 se(result)           # standard errors
 vcov(result)         # variance-covariance matrix
-loglik_val(result)   # log-likelihood at the MLE
+as.numeric(logLik(result))   # log-likelihood at the MLE
 confint(result)      # 95% confidence intervals
 ```
 
@@ -139,7 +139,7 @@ confint(result)      # 95% confidence intervals
 #> [1,]  0.019009 -0.000007
 #> [2,] -0.000007  0.009506
 #>
-#> loglik_val(result)
+#> as.numeric(logLik(result))
 #> [1] -424.84
 #>
 #> confint(result)
@@ -241,7 +241,7 @@ w
 ```{r}
 # Likelihood ratio test: does sigma differ from 3?
 # Compare full model (mu, sigma free) vs restricted (mu free, sigma = 3)
-ll_full <- loglik_val(fit2)  # full model log-likelihood
+ll_full <- as.numeric(logLik(fit2))  # full model log-likelihood
 ll_null <- sum(dnorm(y2, mean = params(fit2)[1], sd = 3, log = TRUE))
 
 lr <- lrt(null_loglik = ll_null, alt_loglik = ll_full, dof = 1)
@@ -357,6 +357,32 @@ derivative-free problems, use `nelder_mead()`.
 | Complex models (mixtures, hierarchical) | AD package | Hand-coding is error-prone and tedious |
 | Non-differentiable objective | `nelder_mead()` | Derivative-free simplex method |
 
+## The `likelihood.model` Bridge
+
+The [`likelihood.model`](https://github.com/queelius/likelihood.model) package
+provides a Fisherian likelihood framework with generics (`loglik`, `score`,
+`hess_loglik`, `fim`) and contribution-based models for heterogeneous observation
+types.
+
+`compositional.mle` provides a bridge: pass a `likelihood_model` object and
+your data directly to `mle_problem()`, and it will auto-extract the loglik,
+score, and Fisher information functions:
+
+```{r likelihood-model-bridge, eval=FALSE}
+library(likelihood.model)
+
+# model is a likelihood_model object from likelihood.model
+problem <- mle_problem(model, data = my_data)
+
+# Now solve with any composed strategy
+solver <- lbfgsb(lower = c(-Inf, 1e-4), upper = c(Inf, Inf))
+result <- solver(problem, theta0 = c(0, 1))
+```
+
+This means any model in the `likelihood.model` ecosystem can immediately be
+optimized with the full suite of `compositional.mle` strategies---no glue
+code required.
+
 ## The Ecosystem at a Glance
 
 The packages form a pipeline: **define** a model, **solve** for the MLE,
@@ -369,7 +395,8 @@ level.
 | [`algebraic.dist`](https://CRAN.R-project.org/package=algebraic.dist) | Yes | Distribution algebra: convolution, mixture, truncation |
 | [`compositional.mle`](https://github.com/queelius/compositional.mle) | --- | Solver composition: `%>>%`, `%|%`, `with_restarts()` |
 | [`hypothesize`](https://CRAN.R-project.org/package=hypothesize) | Yes | Test composition: `wald_test()`, `lrt()`, `fisher_combine()` |
-| [`dfr.dist`](https://github.com/queelius/dfr.dist) | --- | Distribution-free reliability methods |
+| [`flexhaz`](https://github.com/queelius/flexhaz) | --- | Distributions via arbitrary hazard functions |
+| [`likelihood.model`](https://github.com/queelius/likelihood.model) | --- | Fisherian likelihood framework; bridge via `mle_problem(model, data)` |
 
 The typical workflow:
 

@@ -39,3 +39,4 @@ result <- strategy(problem, c(0, 1))
 }
 
 }
+\keyword{internal}

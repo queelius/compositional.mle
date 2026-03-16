@@ -1,3 +1,43 @@
+# compositional.mle 2.0.0
+
+## Breaking Changes
+
+* All solvers now return `solver_result` objects (class vector:
+  `c("solver_result", "mle_fit_numerical", "mle_fit")`). Per-solver subclasses
+  (`mle_gradient_ascent`, `mle_bfgs`, etc.) are removed.
+* Solver metadata moved to `$solver_info` nested list. Access solver name via
+  `result$solver_info$name`, iterations via `result$solver_info$iterations`,
+  trace data via `result$solver_info$trace_data`.
+* Composition metadata moved to `$solver_info$composition`. Access strategy via
+  `result$solver_info$composition$strategy`, chain results via
+  `result$solver_info$composition$chain`, etc.
+* Solver-specific diagnostics moved to `$solver_info$diagnostics` (e.g.,
+  `$diagnostics$final_temp` for sim_anneal, `$diagnostics$cycles` for
+  coordinate_ascent).
+* `is_mle_numerical()` replaced by `is_solver_result()`.
+* `compose()` removed from exports — use `chain()` instead (superset with `early_stop`).
+* `mle_problem()` is now an S3 generic dispatching on its first argument.
+* Requires `algebraic.mle >= 2.0.0`.
+
+## New Features
+
+* `mle_problem.likelihood_model()`: Bridge to the `likelihood.model` package.
+  Pass a `likelihood_model` object and data to auto-extract loglik/score/fisher.
+* `fisher_scoring()` now correctly reports `"fisher_scoring"` as solver name
+  (previously reported `"newton_raphson"`).
+* `coordinate_ascent()` gains `learning_rate` parameter for non-line-search mode.
+* `grid_search()` now errors if the grid would exceed 1 million points.
+* `race()` warns when `parallel = TRUE` but `future` is not installed.
+
+## Bug Fixes
+
+* `sim_anneal()` now correctly reports convergence based on temperature cooling
+  (previously always reported `converged = TRUE`).
+* `coordinate_ascent()` non-line-search mode uses scaled gradient step instead
+  of hardcoded 0.1 step.
+* `print.mle_trace_data()` no longer accesses vector elements before null-check.
+* `print.mle_problem()` correctly detects default (unconstrained) problems.
+
 # compositional.mle 1.0.0
 
 ## CRAN Release

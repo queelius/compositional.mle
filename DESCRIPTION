@@ -1,7 +1,7 @@
 Package: compositional.mle
 Type: Package
 Title: Compositional Maximum Likelihood Estimation
-Version: 1.0.2
+Version: 2.0.0
 Authors@R:
     person("Alexander", "Towell", , "queelius@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6443-9897"))
@@ -31,7 +31,8 @@ Suggests:
     testthat (>= 3.0.0),
     cli,
     future,
-    hypothesize
+    hypothesize,
+    likelihood.model
 URL: https://github.com/queelius/compositional.mle,
     https://queelius.github.io/compositional.mle/
 BugReports: https://github.com/queelius/compositional.mle/issues

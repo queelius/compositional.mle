@@ -53,7 +53,6 @@ reference:
 - title: Composition Operators
   desc: Combine solvers into strategies
   contents:
-  - compose
   - chain
   - race
   - "%>>%"
@@ -88,10 +87,10 @@ reference:
   desc: Work with and visualize optimization results
   contents:
   - is_converged
-  - is_mle_numerical
+  - is_solver_result
   - num_iterations
   - optimization_path
-  - plot.mle_numerical
+  - plot.solver_result
   - plot.mle_trace_data
   - print.mle_trace_data
 

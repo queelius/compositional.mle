@@ -2,23 +2,40 @@
 % Please edit documentation in R/problem.R
 \name{mle_problem}
 \alias{mle_problem}
+\alias{mle_problem.default}
+\alias{mle_problem.likelihood_model}
 \alias{print.mle_problem}
 \title{Create an MLE Problem Specification}
 \usage{
-mle_problem(
+mle_problem(loglike, ...)
+
+\method{mle_problem}{default}(
   loglike,
   score = NULL,
   fisher = NULL,
   constraint = NULL,
   theta_names = NULL,
   n_obs = NULL,
-  cache_derivatives = FALSE
+  cache_derivatives = FALSE,
+  ...
+)
+
+\method{mle_problem}{likelihood_model}(
+  loglike,
+  data,
+  constraint = NULL,
+  theta_names = NULL,
+  cache_derivatives = FALSE,
+  ...
 )
 
 \method{print}{mle_problem}(x, ...)
 }
 \arguments{
-\item{loglike}{Log-likelihood function taking parameter vector theta}
+\item{loglike}{Log-likelihood function taking parameter vector theta, or a
+\code{likelihood_model} object.}
+
+\item{...}{Additional arguments (unused).}
 
 \item{score}{Score function (gradient of log-likelihood). If NULL,
 computed numerically via numDeriv::grad when needed.}
@@ -37,9 +54,9 @@ numerically, cache the most recent result to avoid redundant computation.
 This is particularly useful during line search where the same point may
 be evaluated multiple times. Default is FALSE.}
 
-\item{x}{An mle_problem object.}
+\item{data}{Data frame (or matrix/vector) of observations}
 
-\item{...}{Additional arguments (unused).}
+\item{x}{An mle_problem object.}
 }
 \value{
 An mle_problem object
@@ -51,6 +68,10 @@ Encapsulates a maximum likelihood estimation problem, separating the
 statistical specification from the optimization strategy.
 }
 \details{
+When passed a \code{likelihood_model} object (from the \pkg{likelihood.model}
+package), automatically extracts log-likelihood, score, and Fisher information
+functions.
+
 The problem object provides lazy evaluation of derivatives. If you don't
 provide analytic score or fisher functions, they will be computed
 numerically when requested.
@@ -62,6 +83,11 @@ at the same point (e.g., during line search or convergence checking).
 Use \code{\link{clear_cache}} to manually clear the cache if needed.
 }
 \examples{
+# Direct specification
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+
 # With analytic derivatives
 problem <- mle_problem(
   loglike = function(theta) sum(dnorm(data, theta[1], theta[2], log = TRUE)),
@@ -84,4 +110,7 @@ problem <- mle_problem(
   )
 )
 
+}
+\seealso{
+\code{\link{mle_constraint}} for constraint specification
 }

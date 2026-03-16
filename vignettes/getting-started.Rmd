@@ -131,7 +131,7 @@ Race multiple methods and keep the best result:
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 
 result <- strategy(problem, theta0 = c(0, 1))
-cat("Winner:", result$solver, "\n")
+cat("Winner:", result$solver_info$name, "\n")
 cat("Result:", result$theta.hat, "\n")
 ```
 
@@ -147,7 +147,7 @@ strategy <- with_restarts(
 )
 
 result <- strategy(problem, theta0 = c(0, 1))
-cat("Best restart:", result$best_restart, "of", result$n_restarts, "\n")
+cat("Best restart:", result$solver_info$composition$best_restart, "of", result$solver_info$composition$n_restarts, "\n")
 cat("Result:", result$theta.hat, "\n")
 ```
 
@@ -248,9 +248,9 @@ result <- gradient_ascent(max_iter = 20)(
   trace = trace_config
 )
 
-if (!is.null(result$trace_data)) {
-  cat("Iterations:", result$trace_data$total_iterations, "\n")
-  cat("Final log-likelihood:", tail(result$trace_data$values, 1), "\n")
+if (!is.null(result$solver_info$trace_data)) {
+  cat("Iterations:", result$solver_info$trace_data$total_iterations, "\n")
+  cat("Final log-likelihood:", tail(result$solver_info$trace_data$values, 1), "\n")
 }
 ```
 
@@ -269,7 +269,7 @@ if (!is.null(result$trace_data)) {
 - `%|%` - Parallel racing
 - `with_restarts()` - Multiple starting points
 - `unless_converged()` - Conditional refinement
-- `compose()` - Compose multiple solvers
+- `chain()` - Compose multiple solvers sequentially
 
 **Samplers:**
 - `uniform_sampler()`, `normal_sampler()`

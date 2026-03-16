@@ -143,7 +143,7 @@ newton_raphson <- function(
     progress$finish(converged, iter, ll_final)
 
     .build_result(theta, ll_final, converged, -fim_final,
-                  "newton_raphson", "mle_newton_raphson", iter, recorder)
+                  "newton_raphson", iter, recorder)
   }
 }
 
@@ -152,7 +152,7 @@ newton_raphson <- function(
 #' Variant of Newton-Raphson that uses the expected Fisher information
 #' instead of the observed Fisher. Can be more stable for some problems.
 #'
-#' @inheritParams newton_raphson
+#' @param ... Arguments passed to \code{\link{newton_raphson}}
 #' @return A solver function with signature (problem, theta0, trace) ->
 #'   mle_result
 #'
@@ -177,4 +177,11 @@ newton_raphson <- function(
 #' }
 #'
 #' @export
-fisher_scoring <- newton_raphson
+fisher_scoring <- function(...) {
+  solver <- newton_raphson(...)
+  function(problem, theta0, trace = mle_trace()) {
+    result <- solver(problem, theta0, trace)
+    result$solver_info$name <- "fisher_scoring"
+    result
+  }
+}

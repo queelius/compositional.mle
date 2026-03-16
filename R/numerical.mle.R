@@ -15,7 +15,7 @@
 #' @section The Problem Abstraction:
 #' \code{\link{mle_problem}} encapsulates a statistical estimation problem:
 #' \itemize{
-#'   \item Log-likelihood function
+#'   \item Log-likelihood function (or a \code{likelihood_model} object)
 #'   \item Optional analytic score and Fisher information (computed numerically if not provided)
 #'   \item Domain constraints
 #'   \item Metadata (parameter names, observation count)
@@ -23,13 +23,23 @@
 #'
 #' @section Solver Factories:
 #' Solver factories return solver functions with signature
-#' \code{(problem, theta0, trace) -> mle_result}:
+#' \code{(problem, theta0, trace) -> solver_result}:
 #' \itemize{
 #'   \item \code{\link{gradient_ascent}}: First-order gradient method
 #'   \item \code{\link{newton_raphson}}: Second-order Newton's method
 #'   \item \code{\link{bfgs}}: Quasi-Newton BFGS
 #'   \item \code{\link{nelder_mead}}: Derivative-free simplex
 #'   \item \code{\link{grid_search}}: Exhaustive grid search
+#' }
+#'
+#' @section Result Objects:
+#' All solvers return \code{solver_result} objects (extending
+#' \code{algebraic.mle::mle}) with:
+#' \itemize{
+#'   \item \code{$theta.hat}: MLE estimate
+#'   \item \code{$loglike}: Log-likelihood at MLE
+#'   \item \code{$solver_info}: Nested list of solver metadata (convergence,
+#'     iterations, solver name, trace data)
 #' }
 #'
 #' @section Composition Operators:

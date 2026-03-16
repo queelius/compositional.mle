@@ -6,6 +6,7 @@
 #'
 #' @param max_cycles Maximum number of full cycles through all parameters
 #' @param tol Convergence tolerance on log-likelihood change
+#' @param learning_rate Step size for non-line-search mode (default 0.1)
 #' @param line_search Use line search for each coordinate (slower but more robust)
 #' @param cycle_order Order of cycling: "sequential" (1,2,...,p) or "random"
 #' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
@@ -43,6 +44,7 @@ coordinate_ascent <- function(
   max_cycles = 50L,
   tol = 1e-8,
   line_search = TRUE,
+  learning_rate = 0.1,
   cycle_order = c("sequential", "random"),
   verbose = FALSE
 ) {
@@ -122,7 +124,7 @@ coordinate_ascent <- function(
           if (is.finite(ll_plus) && is.finite(ll_minus)) {
             grad_j <- (ll_plus - ll_minus) / (2 * eps)
             theta_new <- theta
-            theta_new[j] <- theta[j] + 0.1 * sign(grad_j)
+            theta_new[j] <- theta[j] + learning_rate * sign(grad_j)
 
             if (constraint$support(theta_new)) {
               ll_new <- loglike(theta_new)
@@ -146,12 +148,9 @@ coordinate_ascent <- function(
     fisher <- .numerical_fisher(loglike, theta)
     hessian <- if (!is.null(fisher)) -fisher else NULL
 
-    result <- .build_result(theta, ll_current, converged, hessian,
-                            "coordinate_ascent", "mle_coordinate_ascent",
-                            total_iter, recorder)
-    result$cycles <- cycle
-
-    result
+    .build_result(theta, ll_current, converged, hessian,
+                  "coordinate_ascent", total_iter, recorder,
+                  diagnostics = list(cycles = cycle))
   }
 }
 

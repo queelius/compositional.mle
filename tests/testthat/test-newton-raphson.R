@@ -10,8 +10,7 @@ test_that("newton_raphson works on simple quadratic problem", {
   solver <- newton_raphson(max_iter = 50, line_search = TRUE)
   result <- solver(problem, c(2, 2))
 
-  expect_s3_class(result, "mle_newton_raphson")
-  expect_s3_class(result, "mle_numerical")
+  expect_s3_class(result, "solver_result")
   expect_true(abs(result$theta.hat[1]) < 0.1)
   expect_true(abs(result$theta.hat[2]) < 0.1)
 })
@@ -26,7 +25,7 @@ test_that("newton_raphson respects max_iter", {
   solver <- newton_raphson(max_iter = 3)
   result <- solver(problem, c(100, 100))
 
-  expect_equal(result$iterations, 3)
+  expect_equal(result$solver_info$iterations, 3L)
 })
 
 test_that("newton_raphson works with constrained optimization", {
@@ -82,8 +81,8 @@ test_that("fisher_scoring works on normal MLE", {
   solver <- fisher_scoring(max_iter = 50)
   result <- solver(problem, c(0, 1))
 
-  # fisher_scoring is an alias for newton_raphson
-  expect_s3_class(result, "mle_newton_raphson")
+  # fisher_scoring now reports its own name
+  expect_equal(result$solver_info$name, "fisher_scoring")
   expect_true(abs(result$theta.hat[1] - 5) < 0.5)
   expect_true(abs(result$theta.hat[2] - 2) < 0.5)
 })

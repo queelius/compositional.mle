@@ -38,16 +38,18 @@ make_normal_problem <- function(n = 100, true_mu = 5, true_sigma = 2,
   )
 }
 
-# Optim-style mle_numerical for testing generic functions
-create_test_mle_numerical <- function(par, value, convergence = 0L,
+# Optim-style solver_result for testing generic functions
+create_test_solver_result <- function(par, value, convergence = 0L,
                                        iterations = 50L, hessian = NULL) {
-  sol <- list(
-    par = par,
-    value = value,
-    convergence = convergence,
-    hessian = hessian
+  sol <- list(par = par, value = value, convergence = convergence, hessian = hessian)
+  result <- algebraic.mle::mle_numerical(sol = sol, superclasses = "solver_result")
+  result$solver_info <- list(
+    name = "test_solver",
+    iterations = iterations,
+    converged = convergence == 0L,
+    trace_data = NULL,
+    composition = NULL,
+    diagnostics = NULL
   )
-  result <- algebraic.mle::mle_numerical(sol = sol)
-  result$iterations <- iterations
   result
 }

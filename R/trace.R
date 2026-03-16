@@ -182,20 +182,16 @@ print.mle_trace_data <- function(x, ...) {
   cat("  Total iterations:", x$total_iterations, "\n")
   cat("  Total time:", round(x$total_time, 3), "seconds\n")
 
-  ll_start <- x$values[1]
-  ll_end <- tail(x$values, 1)
-  if (!is.null(x$values)) {
-    cat("  Log-likelihood: ", round(ll_start, 4),
-        " -> ", round(ll_end, 4), "\n", sep = "")
+  if (!is.null(x$values) && length(x$values) > 0) {
+    cat("  Log-likelihood: ", round(x$values[1], 4),
+        " -> ", round(tail(x$values, 1), 4), "\n", sep = "")
   }
   if (!is.null(x$path)) {
     cat("  Path recorded:", nrow(x$path), "points\n")
   }
-  grad_start <- x$gradients[1]
-  grad_end <- tail(x$gradients, 1)
-  if (!is.null(x$gradients)) {
-    cat("  Gradient norm: ", round(grad_start, 4),
-        " -> ", round(grad_end, 4), "\n", sep = "")
+  if (!is.null(x$gradients) && length(x$gradients) > 0) {
+    cat("  Gradient norm: ", round(x$gradients[1], 4),
+        " -> ", round(tail(x$gradients, 1), 4), "\n", sep = "")
   }
   if (!is.null(x$stages)) {
     cat("  Stages:", length(x$stages), "(composed trace)\n")
@@ -212,8 +208,11 @@ print.mle_trace_data <- function(x, ...) {
 #' @return A merged mle_trace_data object with stage information
 #' @keywords internal
 merge_traces <- function(results) {
-  # Filter to results with trace data
-  traces <- lapply(results, function(r) r$trace_data)
+  # Filter to results with trace data (check new and old field paths)
+  traces <- lapply(results, function(r) {
+    if (!is.null(r$solver_info$trace_data)) r$solver_info$trace_data
+    else r$trace_data
+  })
   traces <- Filter(Negate(is.null), traces)
 
   if (length(traces) == 0) return(NULL)

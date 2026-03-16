@@ -95,7 +95,7 @@ test_that("solver works with cached derivatives", {
   problem <- make_test_problem(cache = TRUE)
   result <- gradient_ascent(max_iter = 50)(problem, c(3, 1))
 
-  expect_true(result$converged || result$iterations > 0)
+  expect_true(result$converged || result$solver_info$iterations > 0)
   expect_true(is.finite(result$loglike))
 })
 
@@ -139,11 +139,11 @@ test_that("%>>% merges trace data from both solvers", {
   strategy <- gradient_ascent(max_iter = 20) %>>% gradient_ascent(max_iter = 10)
   result <- strategy(problem, c(3, 1), trace = trace_cfg)
 
-  expect_s3_class(result$trace_data, "mle_trace_data")
-  expect_false(is.null(result$trace_data$values))
+  expect_s3_class(result$solver_info$trace_data, "mle_trace_data")
+  expect_false(is.null(result$solver_info$trace_data$values))
 
   # Should have more iterations than single solver
-  expect_true(length(result$trace_data$values) > 10)
+  expect_true(length(result$solver_info$trace_data$values) > 10)
 })
 
 test_that("%>>% trace has stage boundaries", {
@@ -154,8 +154,8 @@ test_that("%>>% trace has stage boundaries", {
   result <- strategy(problem, c(3, 1), trace = trace_cfg)
 
   # Should have stages field marking boundaries
-  expect_false(is.null(result$trace_data$stages))
-  expect_true(length(result$trace_data$stages) >= 2)
+  expect_false(is.null(result$solver_info$trace_data$stages))
+  expect_true(length(result$solver_info$trace_data$stages) >= 2)
 })
 
 test_that("compose() merges trace data", {
@@ -168,8 +168,8 @@ test_that("compose() merges trace data", {
   )
   result <- strategy(problem, c(3, 1), trace = trace_cfg)
 
-  expect_s3_class(result$trace_data, "mle_trace_data")
-  expect_false(is.null(result$trace_data$stages))
+  expect_s3_class(result$solver_info$trace_data, "mle_trace_data")
+  expect_false(is.null(result$solver_info$trace_data$stages))
 })
 
 # ============================================================================
@@ -182,10 +182,10 @@ test_that("race() runs multiple solvers and picks best", {
   strategy <- race(gradient_ascent(max_iter = 30), bfgs())
   result <- strategy(problem, c(3, 1))
 
-  expect_equal(result$strategy, "race")
-  expect_false(is.null(result$alternatives))
-  expect_length(result$alternatives, 2)
-  expect_false(is.null(result$winner_index))
+  expect_equal(result$solver_info$composition$strategy, "race")
+  expect_false(is.null(result$solver_info$composition$alternatives))
+  expect_length(result$solver_info$composition$alternatives, 2)
+  expect_false(is.null(result$solver_info$composition$winner_index))
 })
 
 test_that("race() handles solver failures gracefully", {
@@ -195,7 +195,7 @@ test_that("race() handles solver failures gracefully", {
   result <- strategy(problem, c(3, 1))
 
   expect_true(is.finite(result$loglike))
-  expect_equal(result$winner_index, 2)
+  expect_equal(result$solver_info$composition$winner_index, 2)
 })
 
 test_that("race() errors when all solvers fail", {
@@ -215,8 +215,8 @@ test_that("race() works with three or more solvers", {
   )
   result <- strategy(problem, c(3, 1))
 
-  expect_length(result$alternatives, 3)
-  expect_true(result$winner_index %in% 1:3)
+  expect_length(result$solver_info$composition$alternatives, 3)
+  expect_true(result$solver_info$composition$winner_index %in% 1:3)
 })
 
 # ============================================================================
@@ -232,9 +232,9 @@ test_that("chain() runs solvers sequentially", {
   )
   result <- strategy(problem, c(3, 1))
 
-  expect_equal(result$strategy, "chain")
-  expect_false(is.null(result$chain))
-  expect_length(result$chain, 2)
+  expect_equal(result$solver_info$composition$strategy, "chain")
+  expect_false(is.null(result$solver_info$composition$chain))
+  expect_length(result$solver_info$composition$chain, 2)
 })
 
 test_that("chain() stops early when condition is met", {
@@ -252,8 +252,8 @@ test_that("chain() stops early when condition is met", {
   result <- strategy(problem, c(3, 1))
 
   # Should have stopped after first solver
-  expect_true(result$stopped_early)
-  expect_length(result$chain, 1)
+  expect_true(result$solver_info$composition$stopped_early)
+  expect_length(result$solver_info$composition$chain, 1)
 })
 
 test_that("chain() continues when early_stop returns FALSE", {
@@ -269,8 +269,8 @@ test_that("chain() continues when early_stop returns FALSE", {
   )
   result <- strategy(problem, c(3, 1))
 
-  expect_false(result$stopped_early)
-  expect_length(result$chain, 2)
+  expect_false(result$solver_info$composition$stopped_early)
+  expect_length(result$solver_info$composition$chain, 2)
 })
 
 test_that("chain() with convergence-based early stop", {
@@ -287,10 +287,10 @@ test_that("chain() with convergence-based early stop", {
   result <- strategy(problem, c(3, 1))
 
   # If first solver converged, should have stopped early
-  if (result$stopped_early) {
-    expect_length(result$chain, 1)
+  if (result$solver_info$composition$stopped_early) {
+    expect_length(result$solver_info$composition$chain, 1)
   } else {
-    expect_length(result$chain, 2)
+    expect_length(result$solver_info$composition$chain, 2)
   }
 })
 
@@ -304,8 +304,8 @@ test_that("chain() merges trace data", {
   )
   result <- strategy(problem, c(3, 1), trace = trace_cfg)
 
-  expect_s3_class(result$trace_data, "mle_trace_data")
-  expect_false(is.null(result$trace_data$stages))
+  expect_s3_class(result$solver_info$trace_data, "mle_trace_data")
+  expect_false(is.null(result$solver_info$trace_data$stages))
 })
 
 test_that("chain() with single solver returns that solver", {

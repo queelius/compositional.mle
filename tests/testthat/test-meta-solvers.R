@@ -8,7 +8,7 @@ test_that("grid_search works without refinement", {
   solver <- grid_search(lower = c(-2, -2), upper = c(2, 2), n = 5)
   result <- solver(problem, c(0, 0))
 
-  expect_s3_class(result, "mle_grid_search")
+  expect_s3_class(result, "solver_result")
   expect_length(result$theta.hat, 2)
   expect_true(all(result$theta.hat >= -2 & result$theta.hat <= 2))
   expect_true(abs(result$theta.hat[1]) <= 1)  # Should be near 0
@@ -47,8 +47,8 @@ test_that("grid_search records metadata", {
   solver <- grid_search(lower = c(-1, -1), upper = c(1, 1), n = 3)
   result <- solver(problem, c(0, 0))
 
-  expect_false(is.null(result$grid_points))
-  expect_false(is.null(result$grid_evaluated))
+  expect_false(is.null(result$solver_info$diagnostics$grid_points))
+  expect_false(is.null(result$solver_info$diagnostics$grid_evaluated))
 })
 
 ## Random Search Tests
@@ -62,9 +62,9 @@ test_that("random_search basic functionality", {
   solver <- random_search(sampler, n = 100)
   result <- solver(problem, c(0, 0))
 
-  expect_s3_class(result, "mle_random_search")
-  expect_false(is.null(result$n_samples))
-  expect_false(is.null(result$n_evaluated))
+  expect_s3_class(result, "solver_result")
+  expect_false(is.null(result$solver_info$diagnostics$n_samples))
+  expect_false(is.null(result$solver_info$diagnostics$n_evaluated))
 })
 
 test_that("random_search validates inputs", {
@@ -101,8 +101,8 @@ test_that("with_restarts basic functionality", {
   solver <- with_restarts(gradient_ascent(max_iter = 50), n = 5, sampler = sampler)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
-  expect_false(is.null(result$n_restarts))
+  expect_true(is_solver_result(result))
+  expect_false(is.null(result$solver_info$composition$n_restarts))
 })
 
 test_that("with_restarts respects problem constraints", {
@@ -125,7 +125,7 @@ test_that("with_restarts respects problem constraints", {
   solver <- with_restarts(gradient_ascent(max_iter = 50), n = 10, sampler = sampler)
   result <- solver(problem, c(1, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(all(result$theta.hat > 0))
 })
 
@@ -155,7 +155,7 @@ test_that("sequential composition %>>% works", {
             nelder_mead(max_iter = 100)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 5) < 0.5)
   expect_true(abs(result$theta.hat[2] - 5) < 0.5)
 })
@@ -171,7 +171,7 @@ test_that("three-stage composition works", {
             nelder_mead(max_iter = 50)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1]) < 0.5)
   expect_true(abs(result$theta.hat[2]) < 0.5)
 })
@@ -189,7 +189,7 @@ test_that("unless_converged only runs refinement on failure", {
   )
   result <- solver(problem, c(1, 1))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(result$converged)
 })
 
@@ -201,13 +201,22 @@ test_that("parallel race %|% works", {
   solver <- nelder_mead(max_iter = 100) %|% bfgs(max_iter = 50)
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
 })
 
 test_that("race() with parallel = TRUE works", {
   skip_if_not_installed("future")
+  # Parallel workers load the *installed* package via library(), not
+  # devtools::load_all(). If the installed version is pre-2.0 the
+  # workers will fail because the solver_result class doesn't exist.
+  # Detect devtools by checking the package's loaded path.
+  pkg_ns <- asNamespace("compositional.mle")
+  pkg_path <- getNamespaceInfo(pkg_ns, "path")
+  is_devtools <- grepl("(tests|testthat|R$)", pkg_path) ||
+    !any(startsWith(pkg_path, .libPaths()))
+  skip_if(is_devtools, "Parallel race requires installed v2.0 package")
 
   problem <- mle_problem(
     loglike = function(theta) -(theta[1] - 3)^2 - (theta[2] + 1)^2
@@ -225,11 +234,11 @@ test_that("race() with parallel = TRUE works", {
   )
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
-  expect_false(is.null(result$winner_index))
-  expect_equal(result$strategy, "race")
+  expect_false(is.null(result$solver_info$composition$winner_index))
+  expect_equal(result$solver_info$composition$strategy, "race")
 })
 
 test_that("race() without parallel works", {
@@ -244,8 +253,8 @@ test_that("race() without parallel works", {
   )
   result <- solver(problem, c(0, 0))
 
-  expect_true(is_mle_numerical(result))
+  expect_true(is_solver_result(result))
   expect_true(abs(result$theta.hat[1] - 3) < 0.5)
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
-  expect_false(is.null(result$winner_index))
+  expect_false(is.null(result$solver_info$composition$winner_index))
 })

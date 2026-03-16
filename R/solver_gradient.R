@@ -132,7 +132,7 @@ gradient_ascent <- function(
     hessian <- if (!is.null(fisher)) -fisher else NULL
 
     .build_result(theta, ll_final, converged, hessian,
-                  "gradient_ascent", "mle_gradient_ascent", iter, recorder)
+                  "gradient_ascent", iter, recorder)
   }
 }
 

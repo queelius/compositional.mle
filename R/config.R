@@ -35,7 +35,8 @@ mle_constraint <- function(
   structure(
     list(
       support = support,
-      project = project
+      project = project,
+      is_default = missing(support) && missing(project)
     ),
     class = "mle_constraint"
   )

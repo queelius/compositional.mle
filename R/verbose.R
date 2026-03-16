@@ -123,23 +123,24 @@ NULL
 }
 
 # Build an mle_numerical result from iterative solver output
-.build_result <- function(theta, ll, converged, hessian,
-                          solver_name, superclass, iterations, recorder) {
+.build_result <- function(theta, ll, converged, hessian, solver_name,
+                          iterations, recorder, n_obs = NULL,
+                          diagnostics = list()) {
   sol <- list(
     par = theta,
     value = ll,
     convergence = if (converged) 0L else 1L,
     hessian = hessian
   )
-
-  result <- algebraic.mle::mle_numerical(
-    sol = sol,
-    superclasses = superclass
+  mle <- algebraic.mle::mle_numerical(sol = sol, superclasses = "solver_result")
+  if (!is.null(n_obs)) mle$nobs <- n_obs
+  mle$solver_info <- list(
+    name = solver_name,
+    iterations = as.integer(iterations),
+    converged = converged,
+    trace_data = finalize_trace(recorder),
+    composition = NULL,
+    diagnostics = if (length(diagnostics) > 0) diagnostics else NULL
   )
-
-  result$iterations <- iterations
-  result$solver <- solver_name
-  result$trace_data <- finalize_trace(recorder)
-
-  result
+  mle
 }
