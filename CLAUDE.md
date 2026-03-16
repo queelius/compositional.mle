@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 `compositional.mle` is an R package for composable maximum likelihood estimation. Solvers are first-class functions that combine via operators: sequential chaining (`%>>%`), parallel racing (`%|%`), and random restarts (`with_restarts`). The design follows SICP principles where combining solvers yields a solver (closure property).
 
-Key dependency: `algebraic.mle` provides the base `mle` class for results.
+Key dependencies: `algebraic.mle` (>= 2.0.0) provides the base `mle` class for results. `likelihood.model` (optional, in Suggests) enables direct bridge via `mle_problem(model, data)`.
+
 
 ## Development Commands
 
@@ -51,17 +52,20 @@ strategy <- grid_search(n = 5) %>>% gradient_ascent() %>>% newton_raphson()
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 
 # Multiple random restarts
-strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = uniform_sampler(lower, upper))
+strategy <- with_restarts(gradient_ascent(), n = 20, sampler = uniform_sampler(lower, upper))
+
+# Sequential composition with early stopping (replaces removed compose())
+strategy <- chain(gradient_ascent(), newton_raphson(), early_stop = TRUE)
 ```
 
 ### Key Abstractions
 
 | File | Purpose |
 |------|---------|
-| `R/problem.R` | `mle_problem()` - encapsulates log-likelihood, derivatives, constraints |
-| `R/compose.R` | Composition operators: `%>>%`, `%|%`, `with_restarts()`, `unless_converged()` |
+| `R/problem.R` | `mle_problem()` - S3 generic; dispatches on first arg; `mle_problem.likelihood_model()` bridges to `likelihood.model` package |
+| `R/compose.R` | Composition operators: `%>>%`, `%|%`, `chain()`, `race()`, `with_restarts()`, `unless_converged()` |
 | `R/trace.R` | `mle_trace()` - configurable iteration tracing |
-| `R/config.R` | `mle_config()`, `mle_constraint()` - type-safe configuration objects |
+| `R/config.R` | `mle_constraint()` - type-safe constraint objects |
 
 ### Solver Factories
 
@@ -77,13 +81,18 @@ strategy <- gradient_ascent() %>% with_restarts(n = 20, sampler = uniform_sample
 
 ### Result Objects
 
-All solvers return `mle_numerical` objects (extending `algebraic.mle::mle`) with:
+All solvers return `solver_result` objects (class vector: `c("solver_result", "mle_fit_numerical", "mle_fit")`) with:
 - `$theta.hat` - MLE estimate
 - `$loglike` - log-likelihood at MLE
 - `$converged` - convergence flag
-- `$iterations` - iteration count
-- `$solver` - solver name
-- `$trace_data` - optimization trace (if tracing enabled)
+- `$solver_info` - nested list containing all solver metadata:
+  - `$solver_info$name` - solver name (e.g., `"gradient_ascent"`, `"bfgs"`)
+  - `$solver_info$iterations` - iteration count
+  - `$solver_info$trace_data` - optimization trace (if tracing enabled)
+  - `$solver_info$diagnostics` - solver-specific diagnostics (e.g., `$final_temp` for `sim_anneal`)
+  - `$solver_info$composition` - composition metadata (e.g., `$strategy`, `$chain`, `$best_restart`, `$n_restarts`)
+
+Use `is_solver_result()` to test for this class (replaces old `is_mle_numerical()`).
 
 ## Typical Workflow
 
