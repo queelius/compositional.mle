@@ -212,8 +212,11 @@ print.mle_trace_data <- function(x, ...) {
 #' @return A merged mle_trace_data object with stage information
 #' @keywords internal
 merge_traces <- function(results) {
-  # Filter to results with trace data
-  traces <- lapply(results, function(r) r$trace_data)
+  # Filter to results with trace data (check new and old field paths)
+  traces <- lapply(results, function(r) {
+    if (!is.null(r$solver_info$trace_data)) r$solver_info$trace_data
+    else r$trace_data
+  })
   traces <- Filter(Negate(is.null), traces)
 
   if (length(traces) == 0) return(NULL)

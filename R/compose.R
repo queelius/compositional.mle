@@ -27,6 +27,7 @@
 #' result <- strategy(problem, c(0, 1))
 #' }
 #'
+#' @keywords internal
 #' @export
 compose <- function(...) {
   solvers <- list(...)
@@ -44,10 +45,11 @@ compose <- function(...) {
       chain <- c(chain, list(result))
     }
 
-    result$chain <- chain
-    result$strategy <- "sequential"
-    result$trace_data <- merge_traces(chain)
-
+    result$solver_info$composition <- list(
+      strategy = "sequential",
+      chain = chain
+    )
+    result$solver_info$trace_data <- merge_traces(chain)
     result
   }
 }
@@ -82,14 +84,19 @@ compose <- function(...) {
     result1 <- s1(problem, theta0, trace)
     result2 <- s2(problem, result1$theta.hat, trace)
 
-    chain <- c(
-      if (!is.null(result1$chain)) result1$chain else list(result1),
+    chain_list <- c(
+      if (!is.null(result1$solver_info$composition$chain)) {
+        result1$solver_info$composition$chain
+      } else {
+        list(result1)
+      },
       list(result2)
     )
-    result2$chain <- chain
-    result2$strategy <- "sequential"
-
-    result2$trace_data <- merge_traces(chain)
+    result2$solver_info$composition <- list(
+      strategy = "sequential",
+      chain = chain_list
+    )
+    result2$solver_info$trace_data <- merge_traces(chain_list)
     result2
   }
 }
@@ -131,6 +138,12 @@ race <- function(..., parallel = FALSE) {
   stopifnot(is.logical(parallel), length(parallel) == 1)
 
   function(problem, theta0, trace = mle_trace()) {
+    if (parallel && !requireNamespace("future", quietly = TRUE)) {
+      warning("parallel = TRUE but 'future' package not installed. ",
+              "Falling back to sequential execution.", call. = FALSE)
+      parallel <- FALSE
+    }
+
     results <- vector("list", length(solvers))
 
     if (parallel && requireNamespace("future", quietly = TRUE)) {
@@ -164,9 +177,11 @@ race <- function(..., parallel = FALSE) {
 
     best_idx <- which.max(loglikes)
     winner <- results[[best_idx]]
-    winner$alternatives <- results
-    winner$strategy <- "race"
-    winner$winner_index <- best_idx
+    winner$solver_info$composition <- list(
+      strategy = "race",
+      alternatives = results,
+      winner_index = best_idx
+    )
 
     winner
   }
@@ -210,9 +225,13 @@ race <- function(..., parallel = FALSE) {
     ll1 <- if (!is.null(result1$loglike)) result1$loglike else -Inf
     ll2 <- if (!is.null(result2$loglike)) result2$loglike else -Inf
 
+    winner_idx <- if (ll1 >= ll2) 1L else 2L
     winner <- if (ll1 >= ll2) result1 else result2
-    winner$alternatives <- list(result1, result2)
-    winner$strategy <- "race"
+    winner$solver_info$composition <- list(
+      strategy = "race",
+      alternatives = list(result1, result2),
+      winner_index = winner_idx
+    )
 
     winner
   }
@@ -290,10 +309,12 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
     best_idx <- which.max(loglikes)
     best <- results[[best_idx]]
 
-    best$n_restarts <- n
-    best$restart_loglikes <- loglikes
-    best$best_restart <- best_idx
-    best$strategy <- "restarts"
+    best$solver_info$composition <- list(
+      strategy = "restarts",
+      n_restarts = n,
+      restart_loglikes = loglikes,
+      winner_index = best_idx
+    )
 
     best
   }
@@ -321,9 +342,12 @@ unless_converged <- function(solver, refinement) {
 
     if (!isTRUE(result$converged)) {
       result2 <- refinement(problem, result$theta.hat, trace)
-      result2$chain <- list(result, result2)
-      result2$strategy <- "conditional"
-      result2$trace_data <- merge_traces(result2$chain)
+      chain_list <- list(result, result2)
+      result2$solver_info$composition <- list(
+        strategy = "conditional",
+        chain = chain_list
+      )
+      result2$solver_info$trace_data <- merge_traces(chain_list)
       return(result2)
     }
 
@@ -376,10 +400,12 @@ chain <- function(..., early_stop = NULL) {
 
   function(problem, theta0, trace = mle_trace()) {
     finalize <- function(result, chain_results, stopped_early) {
-      result$chain <- chain_results
-      result$strategy <- "chain"
-      result$stopped_early <- stopped_early
-      result$trace_data <- merge_traces(chain_results)
+      result$solver_info$composition <- list(
+        strategy = "chain",
+        chain = chain_results,
+        stopped_early = stopped_early
+      )
+      result$solver_info$trace_data <- merge_traces(chain_results)
       result
     }
 
