@@ -3,7 +3,28 @@
 #' Encapsulates a maximum likelihood estimation problem, separating the
 #' statistical specification from the optimization strategy.
 #'
-#' @param loglike Log-likelihood function taking parameter vector theta
+#' When passed a \code{likelihood_model} object (from the \pkg{likelihood.model}
+#' package), automatically extracts log-likelihood, score, and Fisher information
+#' functions.
+#'
+#' @param loglike Log-likelihood function taking parameter vector theta, or a
+#'   \code{likelihood_model} object.
+#' @param ... Additional arguments passed to methods
+#' @return An mle_problem object
+#'
+#' @examples
+#' # Direct specification
+#' problem <- mle_problem(
+#'   loglike = function(theta) -sum((theta - c(1, 2))^2)
+#' )
+#'
+#' @seealso \code{\link{mle_constraint}} for constraint specification
+#' @export
+mle_problem <- function(loglike, ...) {
+  UseMethod("mle_problem")
+}
+
+#' @rdname mle_problem
 #' @param score Score function (gradient of log-likelihood). If NULL,
 #'   computed numerically via numDeriv::grad when needed.
 #' @param fisher Fisher information matrix function. If NULL, computed
@@ -15,7 +36,6 @@
 #'   numerically, cache the most recent result to avoid redundant computation.
 #'   This is particularly useful during line search where the same point may
 #'   be evaluated multiple times. Default is FALSE.
-#' @return An mle_problem object
 #'
 #' @details
 #' The problem object provides lazy evaluation of derivatives. If you don't
@@ -52,14 +72,15 @@
 #' )
 #'
 #' @export
-mle_problem <- function(
+mle_problem.default <- function(
   loglike,
   score = NULL,
   fisher = NULL,
   constraint = NULL,
   theta_names = NULL,
   n_obs = NULL,
-  cache_derivatives = FALSE
+  cache_derivatives = FALSE,
+  ...
 ) {
   stopifnot(is.function(loglike))
   if (!is.null(score)) stopifnot(is.function(score))
@@ -90,6 +111,42 @@ mle_problem <- function(
 }
 
 #' @rdname mle_problem
+#' @param data Data frame (or matrix/vector) of observations
+#' @export
+mle_problem.likelihood_model <- function(
+  loglike,
+  data,
+  constraint = NULL,
+  theta_names = NULL,
+  cache_derivatives = FALSE,
+  ...
+) {
+  if (!requireNamespace("likelihood.model", quietly = TRUE)) {
+    stop("Package 'likelihood.model' is required for this method. ",
+         "Install it with: install.packages('likelihood.model')",
+         call. = FALSE)
+  }
+  model <- loglike
+  ll_fn <- likelihood.model::loglik(model)
+  sc_fn <- likelihood.model::score(model)
+  hl_fn <- likelihood.model::hess_loglik(model)
+
+  n_obs <- if (is.data.frame(data) || is.matrix(data)) nrow(data) else length(data)
+
+  # hess_loglik returns Hessian of log-likelihood (negative semi-definite at MLE).
+  # mle_problem$fisher expects Fisher info (positive definite) = -Hessian.
+  mle_problem.default(
+    loglike = function(theta) ll_fn(data, theta),
+    score = function(theta) sc_fn(data, theta),
+    fisher = function(theta) -hl_fn(data, theta),
+    constraint = constraint,
+    theta_names = theta_names,
+    n_obs = n_obs,
+    cache_derivatives = cache_derivatives
+  )
+}
+
+#' @rdname mle_problem
 #' @param x An mle_problem object.
 #' @param ... Additional arguments (unused).
 #' @return The input object, invisibly (for method chaining).
@@ -110,7 +167,7 @@ print.mle_problem <- function(x, ...) {
   }
   cat("  Score:", score_type, "\n")
   cat("  Fisher:", fisher_type, "\n")
-  has_constraint <- !identical(x$constraint, mle_constraint())
+  has_constraint <- !isTRUE(x$constraint$is_default)
   cat("  Constraints:", if (has_constraint) "yes" else "none", "\n")
   if (!is.null(x$n_obs)) cat("  Observations:", x$n_obs, "\n")
   invisible(x)

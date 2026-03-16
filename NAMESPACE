@@ -2,6 +2,8 @@
 
 S3method(is_converged,default)
 S3method(is_converged,solver_result)
+S3method(mle_problem,default)
+S3method(mle_problem,likelihood_model)
 S3method(num_iterations,default)
 S3method(num_iterations,solver_result)
 S3method(optimization_path,mle_numerical)

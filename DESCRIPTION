@@ -31,7 +31,8 @@ Suggests:
     testthat (>= 3.0.0),
     cli,
     future,
-    hypothesize
+    hypothesize,
+    likelihood.model
 URL: https://github.com/queelius/compositional.mle,
     https://queelius.github.io/compositional.mle/
 BugReports: https://github.com/queelius/compositional.mle/issues
