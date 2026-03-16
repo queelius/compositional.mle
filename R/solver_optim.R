@@ -88,7 +88,7 @@ bfgs <- function(max_iter = 100L, tol = 1e-8, report = 0L) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "bfgs", "mle_bfgs")
+    .optim_to_mle(result, "bfgs")
   }
 }
 
@@ -148,7 +148,7 @@ lbfgsb <- function(lower = -Inf, upper = Inf, max_iter = 100L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "lbfgsb", "mle_lbfgsb")
+    .optim_to_mle(result, "lbfgsb")
   }
 }
 
@@ -211,6 +211,6 @@ nelder_mead <- function(max_iter = 500L, tol = 1e-8) {
       hessian = TRUE
     )
 
-    .optim_to_mle(result, "nelder_mead", "mle_nelder_mead")
+    .optim_to_mle(result, "nelder_mead")
   }
 }

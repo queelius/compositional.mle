@@ -131,16 +131,16 @@ sim_anneal <- function(
       temp <- temp * cooling_rate
     }
 
-    progress$finish(TRUE, iter, best_ll)
+    progress$finish(temp < min_temp, iter, best_ll)
 
     fisher <- .numerical_fisher(loglike, best_theta)
     hessian <- if (!is.null(fisher)) -fisher else NULL
 
-    result <- .build_result(best_theta, best_ll, TRUE, hessian,
-                            "sim_anneal", "mle_sim_anneal", iter, recorder)
-    result$final_temp <- temp
-    result$acceptance_rate <- n_accepted / iter
-
-    result
+    .build_result(best_theta, best_ll, temp < min_temp, hessian,
+                  "sim_anneal", iter, recorder,
+                  diagnostics = list(
+                    final_temp = temp,
+                    acceptance_rate = n_accepted / iter
+                  ))
   }
 }

@@ -44,6 +44,12 @@ grid_search <- function(lower, upper, n = 10L) {
   stopifnot(length(n) == length(lower))
   stopifnot(all(n >= 1))
 
+  grid_size <- prod(n)
+  if (grid_size > 1e6) {
+    stop("Grid would have ", format(grid_size, big.mark = ","),
+         " points. Reduce n or use fewer dimensions.")
+  }
+
   function(problem, theta0, trace = mle_trace()) {
     stopifnot(is_mle_problem(problem))
 
@@ -84,25 +90,11 @@ grid_search <- function(lower, upper, n = 10L) {
       stop("Grid search found no valid points")
     }
 
-    # Build result
-    sol <- list(
-      par = best_theta,
-      value = best_ll,
-      convergence = 0L,
-      hessian = NULL
+    .build_result(
+      theta = best_theta, ll = best_ll, converged = TRUE, hessian = NULL,
+      solver_name = "grid_search", iterations = n_evaluated, recorder = NULL,
+      diagnostics = list(grid_points = nrow(grid), grid_evaluated = n_evaluated)
     )
-
-    result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_grid_search"
-    )
-
-    result$iterations <- n_evaluated
-    result$solver <- "grid_search"
-    result$grid_points <- nrow(grid)
-    result$grid_evaluated <- n_evaluated
-
-    result
   }
 }
 
@@ -180,23 +172,10 @@ random_search <- function(sampler, n = 100L) {
       stop("Random search found no valid points")
     }
 
-    sol <- list(
-      par = best_theta,
-      value = best_ll,
-      convergence = 0L,
-      hessian = NULL
+    .build_result(
+      theta = best_theta, ll = best_ll, converged = TRUE, hessian = NULL,
+      solver_name = "random_search", iterations = n_evaluated, recorder = NULL,
+      diagnostics = list(n_samples = n, n_evaluated = n_evaluated)
     )
-
-    result <- algebraic.mle::mle_numerical(
-      sol = sol,
-      superclasses = "mle_random_search"
-    )
-
-    result$iterations <- n_evaluated
-    result$solver <- "random_search"
-    result$n_samples <- n
-    result$n_evaluated <- n_evaluated
-
-    result
   }
 }

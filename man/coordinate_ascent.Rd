@@ -8,6 +8,7 @@ coordinate_ascent(
   max_cycles = 50L,
   tol = 1e-08,
   line_search = TRUE,
+  learning_rate = 0.1,
   cycle_order = c("sequential", "random"),
   verbose = FALSE
 )
