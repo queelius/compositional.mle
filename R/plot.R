@@ -4,7 +4,7 @@
 #' Shows log-likelihood progression, gradient norm decay, and optionally the
 #' parameter path (for 2D problems).
 #'
-#' @param x An mle_numerical result object with trace_data
+#' @param x A solver_result object with trace_data in solver_info
 #' @param which Character vector specifying which plots to show:
 #'   "loglike" (log-likelihood), "gradient" (gradient norm), "path" (2D parameter path)
 #' @param main Optional title
@@ -33,8 +33,8 @@
 #' }
 #'
 #' @export
-plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL, ...) {
-  trace <- x$trace_data
+plot.solver_result <- function(x, which = c("loglike", "gradient"), main = NULL, ...) {
+  trace <- x$solver_info$trace_data
 
   if (is.null(trace)) {
     warning("No trace data available. ",
@@ -117,7 +117,7 @@ plot.mle_numerical <- function(x, which = c("loglike", "gradient"), main = NULL,
 #' Converts the trace data from an MLE result into a tidy data frame for
 #' custom analysis and plotting (e.g., with ggplot2).
 #'
-#' @param x An mle_numerical result with trace_data, or an mle_trace_data object
+#' @param x A solver_result with trace_data, or an mle_trace_data object
 #' @param ... Additional arguments (unused)
 #' @return A data frame with columns:
 #'   \itemize{
@@ -148,13 +148,13 @@ optimization_path <- function(x, ...) {
 }
 
 #' @export
-optimization_path.mle_numerical <- function(x, ...) {
-  if (is.null(x$trace_data)) {
+optimization_path.solver_result <- function(x, ...) {
+  if (is.null(x$solver_info$trace_data)) {
     warning("No trace data available. ",
             "Run solver with trace = mle_trace(path = TRUE, ...)")
     return(NULL)
   }
-  optimization_path.mle_trace_data(x$trace_data, ...)
+  optimization_path.mle_trace_data(x$solver_info$trace_data, ...)
 }
 
 #' @export
@@ -194,8 +194,7 @@ optimization_path.mle_trace_data <- function(x, ...) {
 #'   object invisibly.
 #' @export
 plot.mle_trace_data <- function(x, ...) {
-  # Create a wrapper object to use plot.mle_numerical
-  wrapper <- list(trace_data = x)
-  class(wrapper) <- "mle_numerical"
-  plot.mle_numerical(wrapper, ...)
+  wrapper <- list(solver_info = list(trace_data = x))
+  class(wrapper) <- "solver_result"
+  plot.solver_result(wrapper, ...)
 }
