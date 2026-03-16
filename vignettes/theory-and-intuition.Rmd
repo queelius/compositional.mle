@@ -199,7 +199,7 @@ problem <- mle_problem(
 result <- gradient_ascent(max_iter = 50)(problem, theta0 = c(1, 0.8))
 
 cat("Final estimate:", round(result$theta.hat, 4), "\n")
-cat("Iterations:", result$iterations, "\n")
+cat("Iterations:", result$solver_info$iterations, "\n")
 cat("Converged:", result$converged, "\n")
 ```
 
@@ -295,7 +295,7 @@ cat("Result:", round(result$theta.hat, 4), "\n")
 # Race different methods, pick the best
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 result <- strategy(problem, theta0 = c(1, 0.8))
-cat("Winner:", result$solver, "\n")
+cat("Winner:", result$solver_info$name, "\n")
 ```
 
 ## When to Use Which Method

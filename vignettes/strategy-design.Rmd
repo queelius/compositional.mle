@@ -141,7 +141,7 @@ cat("Random restarts (20 starts):\n")
 cat("  mu1 =", round(result_restarts$theta.hat[1], 2),
     " mu2 =", round(result_restarts$theta.hat[3], 2), "\n")
 cat("  Log-likelihood:", round(result_restarts$loglike, 2), "\n")
-cat("  Best restart:", result_restarts$best_restart, "of", result_restarts$n_restarts, "\n")
+cat("  Best restart:", result_restarts$solver_info$composition$best_restart, "of", result_restarts$solver_info$composition$n_restarts, "\n")
 ```
 
 ## Strategy 3: Racing Solvers
@@ -154,7 +154,7 @@ strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 result_race <- strategy(problem_mix, theta_init)
 
 cat("Racing strategy:\n")
-cat("  Winner:", result_race$solver, "\n")
+cat("  Winner:", result_race$solver_info$name, "\n")
 cat("  mu1 =", round(result_race$theta.hat[1], 2),
     " mu2 =", round(result_race$theta.hat[3], 2), "\n")
 cat("  Log-likelihood:", round(result_race$loglike, 2), "\n")
