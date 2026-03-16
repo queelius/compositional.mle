@@ -152,7 +152,7 @@ newton_raphson <- function(
 #' Variant of Newton-Raphson that uses the expected Fisher information
 #' instead of the observed Fisher. Can be more stable for some problems.
 #'
-#' @inheritParams newton_raphson
+#' @param ... Arguments passed to \code{\link{newton_raphson}}
 #' @return A solver function with signature (problem, theta0, trace) ->
 #'   mle_result
 #'

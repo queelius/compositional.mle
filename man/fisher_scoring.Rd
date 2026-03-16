@@ -6,6 +6,9 @@
 \usage{
 fisher_scoring(...)
 }
+\arguments{
+\item{...}{Arguments passed to \code{\link{newton_raphson}}}
+}
 \value{
 A solver function with signature (problem, theta0, trace) ->
   mle_result

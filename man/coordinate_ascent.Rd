@@ -20,6 +20,8 @@ coordinate_ascent(
 
 \item{line_search}{Use line search for each coordinate (slower but more robust)}
 
+\item{learning_rate}{Step size for non-line-search mode (default 0.1)}
+
 \item{cycle_order}{Order of cycling: "sequential" (1,2,...,p) or "random"}
 
 \item{verbose}{Logical; if TRUE and the \pkg{cli} package is installed,

@@ -6,6 +6,7 @@
 #'
 #' @param max_cycles Maximum number of full cycles through all parameters
 #' @param tol Convergence tolerance on log-likelihood change
+#' @param learning_rate Step size for non-line-search mode (default 0.1)
 #' @param line_search Use line search for each coordinate (slower but more robust)
 #' @param cycle_order Order of cycling: "sequential" (1,2,...,p) or "random"
 #' @param verbose Logical; if TRUE and the \pkg{cli} package is installed,
