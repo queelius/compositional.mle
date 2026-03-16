@@ -195,7 +195,7 @@ penalty_elastic_net <- function(alpha = 0.5, weights = NULL) {
 #' Applies transformations right-to-left (like mathematical composition).
 #' This allows building complex log-likelihood transformations from simple ones.
 #'
-#' Note: For composing solvers, use \code{\link{compose}} instead.
+#' Note: For composing solvers, use \code{\link{chain}} instead.
 #'
 #' @param ... Transformer functions
 #' @return Composed transformer function
