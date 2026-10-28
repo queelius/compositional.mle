@@ -23,6 +23,8 @@ jobs:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      # Keep generated output separate from tracked design documents in docs/.
+      PKGDOWN_DEST_DIR: _site
     steps:
       - uses: actions/checkout@v3
 
@@ -38,7 +40,7 @@ jobs:
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        run: pkgdown::build_site_github_pages(dest_dir = Sys.getenv("PKGDOWN_DEST_DIR"), new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
@@ -47,4 +49,4 @@ jobs:
         with:
           clean: false
           branch: gh-pages
-          folder: docs
+          folder: ${{ env.PKGDOWN_DEST_DIR }}
