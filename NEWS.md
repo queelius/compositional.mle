@@ -1,3 +1,10 @@
+# compositional.mle 2.0.1
+
+* Failed solvers retain their result slots in `race()` and `with_restarts()`.
+  Successful restarts are now returned even when later attempts fail, and
+  race alternatives preserve the original solver ordering. All-failure runs
+  report the intended error instead of an out-of-bounds subscript.
+
 # compositional.mle 2.0.0
 
 ## Breaking Changes

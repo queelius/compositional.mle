@@ -160,10 +160,10 @@ race <- function(..., parallel = FALSE) {
       results <- lapply(futures, future::value)
     } else {
       for (i in seq_along(solvers)) {
-        results[[i]] <- tryCatch(
+        results[i] <- list(tryCatch(
           solvers[[i]](problem, theta0, trace),
           error = function(e) NULL
-        )
+        ))
       }
     }
 
@@ -293,10 +293,10 @@ with_restarts <- function(solver, n, sampler, max_reject = 100L) {
     loglikes <- rep(-Inf, n)
 
     for (i in seq_len(n)) {
-      results[[i]] <- tryCatch(
+      results[i] <- list(tryCatch(
         solver(problem, starts[[i]], trace),
         error = function(e) NULL
-      )
+      ))
       if (!is.null(results[[i]]) && !is.null(results[[i]]$loglike)) {
         loglikes[i] <- results[[i]]$loglike
       }

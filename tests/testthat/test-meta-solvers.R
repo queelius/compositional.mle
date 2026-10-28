@@ -258,3 +258,40 @@ test_that("race() without parallel works", {
   expect_true(abs(result$theta.hat[2] - (-1)) < 0.5)
   expect_false(is.null(result$solver_info$composition$winner_index))
 })
+
+test_that("with_restarts retains successful fits when other attempts fail", {
+  problem <- mle_problem(function(theta) -(theta - 2)^2)
+  solver <- function(problem, theta0, trace) {
+    if (theta0 < 0) stop("Starting value rejected")
+    bfgs()(problem, theta0, trace)
+  }
+
+  last_failure <- with_restarts(solver, n = 2, sampler = function() -1)
+  result <- last_failure(problem, 0)
+  expect_equal(as.numeric(coef(result)), 2, tolerance = 1e-5)
+  expect_equal(result$solver_info$composition$winner_index, 1L)
+  expect_equal(result$solver_info$composition$restart_loglikes, c(0, -Inf),
+               tolerance = 1e-8)
+
+  first_failure <- with_restarts(solver, n = 2, sampler = function() 0)
+  result <- first_failure(problem, -1)
+  expect_equal(as.numeric(coef(result)), 2, tolerance = 1e-5)
+  expect_equal(result$solver_info$composition$winner_index, 2L)
+  expect_equal(result$solver_info$composition$restart_loglikes, c(-Inf, 0),
+               tolerance = 1e-8)
+
+  expect_error(last_failure(problem, -1), "All restart attempts failed")
+})
+
+test_that("race preserves one result slot per solver including failures", {
+  problem <- mle_problem(function(theta) -(theta - 2)^2)
+  failed <- function(problem, theta0, trace) stop("Solver failed")
+  result <- race(failed, bfgs(), failed)(problem, 0)
+  alternatives <- result$solver_info$composition$alternatives
+  expect_length(alternatives, 3L)
+  expect_null(alternatives[[1L]])
+  expect_true(is_solver_result(alternatives[[2L]]))
+  expect_null(alternatives[[3L]])
+  expect_equal(result$solver_info$composition$winner_index, 2L)
+  expect_error(race(failed, failed)(problem, 0), "All solvers in race failed")
+})
