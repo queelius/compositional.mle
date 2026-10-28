@@ -24,6 +24,7 @@
 ### Example: Why Composition Matters
 
 ``` r
+
 library(compositional.mle)
 
 # A tricky bimodal likelihood
@@ -56,6 +57,7 @@ cat("Global strategy found:", round(result_global$theta.hat, 2),
 ## Installation
 
 ``` r
+
 # From CRAN (when available)
 install.packages("compositional.mle")
 
@@ -78,6 +80,7 @@ etc. 2. **Composition operators** - `%>>%` (sequential), `%|%` (race),
 ## Quick Start
 
 ``` r
+
 # Generate sample data
 set.seed(42)
 x <- rnorm(100, mean = 5, sd = 2)
@@ -112,6 +115,7 @@ result$theta.hat
 Chain solvers for coarse-to-fine optimization:
 
 ``` r
+
 # Grid search -> gradient ascent -> Newton-Raphson
 strategy <- grid_search(lower = c(-10, 0.5), upper = c(10, 5), n = 5) %>>%
   gradient_ascent(max_iter = 50) %>>%
@@ -128,6 +132,7 @@ result$theta.hat
 Race multiple methods, keep the best:
 
 ``` r
+
 # Try multiple approaches, pick winner by log-likelihood
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 
@@ -142,6 +147,7 @@ c(result$theta.hat, loglike = result$loglike)
 Escape local optima with multiple starting points:
 
 ``` r
+
 strategy <- with_restarts(
   gradient_ascent(),
   n = 10,
@@ -158,6 +164,7 @@ result$theta.hat
 Track and visualize the optimization path:
 
 ``` r
+
 # Enable tracing
 trace_cfg <- mle_trace(values = TRUE, gradients = TRUE, path = TRUE)
 result <- gradient_ascent(max_iter = 50)(problem, c(0, 1), trace = trace_cfg)
@@ -171,6 +178,7 @@ plot(result, which = c("loglike", "gradient"))
 Extract trace as data frame for custom analysis:
 
 ``` r
+
 path_df <- optimization_path(result)
 head(path_df)
 #>   iteration    loglike  grad_norm   theta_1  theta_2
@@ -184,21 +192,22 @@ head(path_df)
 
 ## Available Solvers
 
-| Factory                                                                                              | Method                           | Best For                             |
-|------------------------------------------------------------------------------------------------------|----------------------------------|--------------------------------------|
-| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)     | Steepest ascent with line search | General purpose, smooth likelihoods  |
-| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)       | Second-order Newton              | Fast convergence near optimum        |
-| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)                           | Quasi-Newton BFGS                | Good balance of speed/robustness     |
-| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md)                       | L-BFGS-B with box constraints    | High-dimensional, bounded parameters |
-| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)             | Simplex (derivative-free)        | Non-smooth or noisy likelihoods      |
-| [`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md)               | Simulated annealing              | Global optimization, multi-modal     |
-| [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md) | One parameter at a time          | Different parameter scales           |
-| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md)             | Exhaustive grid                  | Finding starting points              |
-| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)         | Random sampling                  | High-dimensional exploration         |
+| Factory | Method | Best For |
+|----|----|----|
+| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Steepest ascent with line search | General purpose, smooth likelihoods |
+| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md) | Second-order Newton | Fast convergence near optimum |
+| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md) | Quasi-Newton BFGS | Good balance of speed/robustness |
+| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md) | L-BFGS-B with box constraints | High-dimensional, bounded parameters |
+| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) | Simplex (derivative-free) | Non-smooth or noisy likelihoods |
+| [`sim_anneal()`](https://queelius.github.io/compositional.mle/reference/sim_anneal.md) | Simulated annealing | Global optimization, multi-modal |
+| [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md) | One parameter at a time | Different parameter scales |
+| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md) | Exhaustive grid | Finding starting points |
+| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md) | Random sampling | High-dimensional exploration |
 
 ## Function Transformers
 
 ``` r
+
 # Stochastic gradient (mini-batching for large data)
 loglike_sgd <- with_subsampling(loglike, data = x, subsample_size = 32)
 

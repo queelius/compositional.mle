@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>The MLE Ecosystem • compositional.mle</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="The MLE Ecosystem">
 </head>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">compositional.mle</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
                         <h4 data-toc-skip class="author">Alexander
 Towell</h4>
             
-            <h4 data-toc-skip class="date">2026-02-05</h4>
+            <h4 data-toc-skip class="date">2026-10-28</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/queelius/compositional.mle/blob/master/vignettes/mle-ecosystem.Rmd" class="external-link"><code>vignettes/mle-ecosystem.Rmd</code></a></small>
       <div class="d-none name"><code>mle-ecosystem.Rmd</code></div>
@@ -190,7 +190,7 @@ works with every other package.</p>
 <span><span class="fu"><a href="https://queelius.github.io/algebraic.dist/reference/params.html" class="external-link">params</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>       <span class="co"># parameter estimates (theta-hat)</span></span>
 <span><span class="fu"><a href="https://queelius.github.io/algebraic.mle/reference/se.html" class="external-link">se</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>           <span class="co"># standard errors</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>         <span class="co"># variance-covariance matrix</span></span>
-<span><span class="fu"><a href="https://queelius.github.io/algebraic.mle/reference/loglik_val.html" class="external-link">loglik_val</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>   <span class="co"># log-likelihood at the MLE</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span><span class="op">)</span>   <span class="co"># log-likelihood at the MLE</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">result</span><span class="op">)</span>      <span class="co"># 95% confidence intervals</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; params(result)</span></span>
 <span><span class="co">#&gt; [1] 5.0609 1.9498</span></span>
@@ -203,7 +203,7 @@ works with every other package.</p>
 <span><span class="co">#&gt; [1,]  0.019009 -0.000007</span></span>
 <span><span class="co">#&gt; [2,] -0.000007  0.009506</span></span>
 <span><span class="co">#&gt;</span></span>
-<span><span class="co">#&gt; loglik_val(result)</span></span>
+<span><span class="co">#&gt; as.numeric(logLik(result))</span></span>
 <span><span class="co">#&gt; [1] -424.84</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; confint(result)</span></span>
@@ -219,9 +219,9 @@ composed pipeline, <code><a href="https://queelius.github.io/algebraic.dist/refe
 <h2 id="combining-independent-mles">Combining Independent MLEs<a class="anchor" aria-label="anchor" href="#combining-independent-mles"></a>
 </h2>
 <p>Suppose three independent labs each estimate the mean of a
-Normal<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="true" form="prefix">(</mo><mi>μ</mi><mo>,</mo><mi>σ</mi><mo stretchy="true" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\mu, \sigma)</annotation></semantics></math>
+Normal<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">(</mo><mi>μ</mi><mo>,</mo><mi>σ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">(\mu, \sigma)</annotation></semantics></math>
 population from their own data. Each produces an <code>mle</code>
-object. <code>algebraic.mle</code> provides <code><a href="https://queelius.github.io/algebraic.mle/reference/mle_weighted.html" class="external-link">mle_weighted()</a></code>
+object. <code>algebraic.mle</code> provides <code>mle_weighted()</code>
 to combine them via <strong>inverse-variance weighting</strong> using
 Fisher information:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
@@ -246,7 +246,7 @@ Fisher information:</p>
 <span><span class="va">fit3</span> <span class="op">&lt;-</span> <span class="fu">solver</span><span class="op">(</span><span class="fu">make_problem</span><span class="op">(</span><span class="va">y3</span><span class="op">)</span>, theta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Combine: inverse-variance weighting via Fisher information</span></span>
-<span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://queelius.github.io/algebraic.mle/reference/mle_weighted.html" class="external-link">mle_weighted</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit1</span>, <span class="va">fit2</span>, <span class="va">fit3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">combined</span> <span class="op">&lt;-</span> <span class="fu">mle_weighted</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">fit1</span>, <span class="va">fit2</span>, <span class="va">fit3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Individual SEs vs combined</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -262,7 +262,7 @@ Fisher information:</p>
 <span><span class="co">#&gt; 4      Combined    9.934 0.1995</span></span></code></pre>
 <p>The combined estimate has a smaller standard error than any
 individual estimate—this is the power of information pooling. And
-because <code><a href="https://queelius.github.io/algebraic.mle/reference/mle_weighted.html" class="external-link">mle_weighted()</a></code> returns an <code>mle</code> object,
+because <code>mle_weighted()</code> returns an <code>mle</code> object,
 you can pass it to any function that accepts MLEs:
 <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://queelius.github.io/algebraic.mle/reference/se.html" class="external-link">se()</a></code>, further weighting, or
 hypothesis testing. <strong>Combining MLEs yields an MLE</strong>
@@ -278,7 +278,7 @@ estimates, <strong>combining tests yields a test</strong>.</p>
 <h3 id="creating-tests-from-mle-results">Creating tests from MLE results<a class="anchor" aria-label="anchor" href="#creating-tests-from-mle-results"></a>
 </h3>
 <p><code><a href="https://queelius.github.io/hypothesize/reference/wald_test.html" class="external-link">wald_test()</a></code> tests whether a single parameter equals a
-hypothesised value. <code><a href="https://queelius.github.io/hypothesize/reference/lrt.html" class="external-link">lrt()</a></code> compares nested models via the
+hypothesised value. <code><a href="https://queelius.github.io/likelihood.model/reference/lrt.html" class="external-link">lrt()</a></code> compares nested models via the
 likelihood ratio:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/queelius/hypothesize" class="external-link">hypothesize</a></span><span class="op">)</span></span>
@@ -297,7 +297,7 @@ likelihood ratio:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Likelihood ratio test: does sigma differ from 3?</span></span>
 <span><span class="co"># Compare full model (mu, sigma free) vs restricted (mu free, sigma = 3)</span></span>
-<span><span class="va">ll_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://queelius.github.io/algebraic.mle/reference/loglik_val.html" class="external-link">loglik_val</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span>  <span class="co"># full model log-likelihood</span></span>
+<span><span class="va">ll_full</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span><span class="op">)</span>  <span class="co"># full model log-likelihood</span></span>
 <span><span class="va">ll_null</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">dnorm</a></span><span class="op">(</span><span class="va">y2</span>, mean <span class="op">=</span> <span class="fu"><a href="https://queelius.github.io/algebraic.dist/reference/params.html" class="external-link">params</a></span><span class="op">(</span><span class="va">fit2</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, sd <span class="op">=</span> <span class="fl">3</span>, log <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">lr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://queelius.github.io/hypothesize/reference/lrt.html" class="external-link">lrt</a></span><span class="op">(</span>null_loglik <span class="op">=</span> <span class="va">ll_null</span>, alt_loglik <span class="op">=</span> <span class="va">ll_full</span>, dof <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -400,7 +400,7 @@ never knows (or cares) where they come from:</p>
 <tr class="odd">
 <td>Numerical (<code>numDeriv</code>)</td>
 <td>
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>h</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">O(h^2)</annotation></semantics></math>
 truncation error</td>
 <td>None (default)</td>
 <td>Slow (extra evaluations)</td>
@@ -461,6 +461,31 @@ accuracy or performance. For derivative-free problems, use
 </table>
 </div>
 <div class="section level2">
+<h2 id="the-likelihood-model-bridge">The <code>likelihood.model</code> Bridge<a class="anchor" aria-label="anchor" href="#the-likelihood-model-bridge"></a>
+</h2>
+<p>The <a href="https://github.com/queelius/likelihood.model" class="external-link"><code>likelihood.model</code></a>
+package provides a Fisherian likelihood framework with generics
+(<code>loglik</code>, <code>score</code>, <code>hess_loglik</code>,
+<code>fim</code>) and contribution-based models for heterogeneous
+observation types.</p>
+<p><code>compositional.mle</code> provides a bridge: pass a
+<code>likelihood_model</code> object and your data directly to
+<code><a href="../reference/mle_problem.html">mle_problem()</a></code>, and it will auto-extract the loglik, score,
+and Fisher information functions:</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/queelius/likelihood.model" class="external-link">likelihood.model</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># model is a likelihood_model object from likelihood.model</span></span>
+<span><span class="va">problem</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/mle_problem.html">mle_problem</a></span><span class="op">(</span><span class="va">model</span>, data <span class="op">=</span> <span class="va">my_data</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Now solve with any composed strategy</span></span>
+<span><span class="va">solver</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/lbfgsb.html">lbfgsb</a></span><span class="op">(</span>lower <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="fl">1e-4</span><span class="op">)</span>, upper <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">Inf</span>, <span class="cn">Inf</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">result</span> <span class="op">&lt;-</span> <span class="fu">solver</span><span class="op">(</span><span class="va">problem</span>, theta0 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>This means any model in the <code>likelihood.model</code> ecosystem
+can immediately be optimized with the full suite of
+<code>compositional.mle</code> strategies—no glue code required.</p>
+</div>
+<div class="section level2">
 <h2 id="the-ecosystem-at-a-glance">The Ecosystem at a Glance<a class="anchor" aria-label="anchor" href="#the-ecosystem-at-a-glance"></a>
 </h2>
 <p>The packages form a pipeline: <strong>define</strong> a model,
@@ -482,7 +507,7 @@ and <strong>test</strong> hypotheses—with closure at every level.</p>
 <td><a href="https://CRAN.R-project.org/package=algebraic.mle" class="external-link"><code>algebraic.mle</code></a></td>
 <td>Yes</td>
 <td>MLE algebra: <code><a href="https://queelius.github.io/algebraic.dist/reference/params.html" class="external-link">params()</a></code>, <code><a href="https://queelius.github.io/algebraic.mle/reference/se.html" class="external-link">se()</a></code>,
-<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code><a href="https://queelius.github.io/algebraic.mle/reference/mle_weighted.html" class="external-link">mle_weighted()</a></code>
+<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>, <code>mle_weighted()</code>
 </td>
 </tr>
 <tr class="even">
@@ -500,14 +525,21 @@ and <strong>test</strong> hypotheses—with closure at every level.</p>
 <tr class="even">
 <td><a href="https://CRAN.R-project.org/package=hypothesize" class="external-link"><code>hypothesize</code></a></td>
 <td>Yes</td>
-<td>Test composition: <code><a href="https://queelius.github.io/hypothesize/reference/wald_test.html" class="external-link">wald_test()</a></code>, <code><a href="https://queelius.github.io/hypothesize/reference/lrt.html" class="external-link">lrt()</a></code>,
+<td>Test composition: <code><a href="https://queelius.github.io/hypothesize/reference/wald_test.html" class="external-link">wald_test()</a></code>, <code><a href="https://queelius.github.io/likelihood.model/reference/lrt.html" class="external-link">lrt()</a></code>,
 <code><a href="https://queelius.github.io/hypothesize/reference/fisher_combine.html" class="external-link">fisher_combine()</a></code>
 </td>
 </tr>
 <tr class="odd">
-<td><a href="https://github.com/queelius/dfr.dist" class="external-link"><code>dfr.dist</code></a></td>
+<td><a href="https://github.com/queelius/flexhaz" class="external-link"><code>flexhaz</code></a></td>
 <td>—</td>
-<td>Distribution-free reliability methods</td>
+<td>Distributions via arbitrary hazard functions</td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/queelius/likelihood.model" class="external-link"><code>likelihood.model</code></a></td>
+<td>—</td>
+<td>Fisherian likelihood framework; bridge via
+<code>mle_problem(model, data)</code>
+</td>
 </tr>
 </tbody>
 </table>
@@ -522,7 +554,7 @@ to <code><a href="../reference/mle_problem.html">mle_problem()</a></code>
 <code>compositional.mle</code> — get an <code>mle</code> object</li>
 <li>
 <strong>Combine</strong> independent estimates with
-<code><a href="https://queelius.github.io/algebraic.mle/reference/mle_weighted.html" class="external-link">mle_weighted()</a></code> from <code>algebraic.mle</code> — get a
+<code>mle_weighted()</code> from <code>algebraic.mle</code> — get a
 (better) <code>mle</code> object</li>
 <li>
 <strong>Test</strong> hypotheses with <code>hypothesize</code> — get
@@ -546,7 +578,7 @@ composable.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

@@ -1,5 +1,5 @@
-pandoc: 3.1.11
-pkgdown: 2.2.0
+pandoc: 3.8.3
+pkgdown: 2.2.1
 pkgdown_sha: ~
 articles:
   case-studies: case-studies.html
@@ -7,7 +7,7 @@ articles:
   mle-ecosystem: mle-ecosystem.html
   strategy-design: strategy-design.html
   theory-and-intuition: theory-and-intuition.html
-last_built: 2026-02-05T09:32Z
+last_built: 2026-10-28T05:52Z
 urls:
   reference: https://queelius.github.io/compositional.mle/reference
   article: https://queelius.github.io/compositional.mle/articles

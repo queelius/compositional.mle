@@ -11,6 +11,7 @@ coordinate_ascent(
   max_cycles = 50L,
   tol = 1e-08,
   line_search = TRUE,
+  learning_rate = 0.1,
   cycle_order = c("sequential", "random"),
   verbose = FALSE
 )
@@ -29,6 +30,10 @@ coordinate_ascent(
 - line_search:
 
   Use line search for each coordinate (slower but more robust)
+
+- learning_rate:
+
+  Step size for non-line-search mode (default 0.1)
 
 - cycle_order:
 

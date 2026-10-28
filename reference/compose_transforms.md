@@ -23,7 +23,7 @@ Composed transformer function
 ## Details
 
 Note: For composing solvers, use
-[`compose`](https://queelius.github.io/compositional.mle/reference/compose.md)
+[`chain`](https://queelius.github.io/compositional.mle/reference/chain.md)
 instead.
 
 ## Examples

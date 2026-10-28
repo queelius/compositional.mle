@@ -32,6 +32,7 @@ functions that compose via operators:
 Because each operator returns a solver, you can compose freely:
 
 ``` r
+
 library(compositional.mle)
 
 # Generate data
@@ -67,6 +68,7 @@ result
 You can race different approaches and let the best log-likelihood win:
 
 ``` r
+
 race <- bfgs() %|% nelder_mead() %|% gradient_ascent()
 result_race <- race(problem, theta0 = c(0, 1))
 ```
@@ -74,6 +76,7 @@ result_race <- race(problem, theta0 = c(0, 1))
 Or combine restarts with chaining:
 
 ``` r
+
 robust <- with_restarts(
   gradient_ascent() %>>% bfgs(),
   n = 10,
@@ -95,13 +98,14 @@ consumes `mle` objects works with every other package.
 The `mle` class provides a uniform interface:
 
 ``` r
+
 library(algebraic.mle)
 
 # Extract estimates and uncertainty
 params(result)       # parameter estimates (theta-hat)
 se(result)           # standard errors
 vcov(result)         # variance-covariance matrix
-loglik_val(result)   # log-likelihood at the MLE
+as.numeric(logLik(result))   # log-likelihood at the MLE
 confint(result)      # 95% confidence intervals
 ```
 
@@ -116,7 +120,7 @@ confint(result)      # 95% confidence intervals
     #> [1,]  0.019009 -0.000007
     #> [2,] -0.000007  0.009506
     #>
-    #> loglik_val(result)
+    #> as.numeric(logLik(result))
     #> [1] -424.84
     #>
     #> confint(result)
@@ -134,13 +138,12 @@ way.
 ## Combining Independent MLEs
 
 Suppose three independent labs each estimate the mean of a
-Normal$(\mu,\sigma)$ population from their own data. Each produces an
-`mle` object. `algebraic.mle` provides
-[`mle_weighted()`](https://queelius.github.io/algebraic.mle/reference/mle_weighted.html)
-to combine them via **inverse-variance weighting** using Fisher
-information:
+Normal$`(\mu, \sigma)`$ population from their own data. Each produces an
+`mle` object. `algebraic.mle` provides `mle_weighted()` to combine them
+via **inverse-variance weighting** using Fisher information:
 
 ``` r
+
 # Three independent datasets from the same population
 set.seed(123)
 y1 <- rnorm(50,  mean = 10, sd = 3)
@@ -166,6 +169,7 @@ combined <- mle_weighted(list(fit1, fit2, fit3))
 ```
 
 ``` r
+
 # Individual SEs vs combined
 data.frame(
   Source   = c("Lab 1 (n=50)", "Lab 2 (n=100)", "Lab 3 (n=75)", "Combined"),
@@ -183,9 +187,9 @@ data.frame(
 
 The combined estimate has a smaller standard error than any individual
 estimate—this is the power of information pooling. And because
-[`mle_weighted()`](https://queelius.github.io/algebraic.mle/reference/mle_weighted.html)
-returns an `mle` object, you can pass it to any function that accepts
-MLEs: [`confint()`](https://rdrr.io/r/stats/confint.html),
+`mle_weighted()` returns an `mle` object, you can pass it to any
+function that accepts MLEs:
+[`confint()`](https://rdrr.io/r/stats/confint.html),
 [`se()`](https://queelius.github.io/algebraic.mle/reference/se.html),
 further weighting, or hypothesis testing. **Combining MLEs yields an
 MLE** (closure).
@@ -200,10 +204,11 @@ estimates, **combining tests yields a test**.
 
 [`wald_test()`](https://queelius.github.io/hypothesize/reference/wald_test.html)
 tests whether a single parameter equals a hypothesised value.
-[`lrt()`](https://queelius.github.io/hypothesize/reference/lrt.html)
+[`lrt()`](https://queelius.github.io/likelihood.model/reference/lrt.html)
 compares nested models via the likelihood ratio:
 
 ``` r
+
 library(hypothesize)
 
 # Wald test: is mu = 10?
@@ -221,9 +226,10 @@ w
     #> Significant at 5% level: FALSE
 
 ``` r
+
 # Likelihood ratio test: does sigma differ from 3?
 # Compare full model (mu, sigma free) vs restricted (mu free, sigma = 3)
-ll_full <- loglik_val(fit2)  # full model log-likelihood
+ll_full <- as.numeric(logLik(fit2))  # full model log-likelihood
 ll_null <- sum(dnorm(y2, mean = params(fit2)[1], sd = 3, log = TRUE))
 
 lr <- lrt(null_loglik = ll_null, alt_loglik = ll_full, dof = 1)
@@ -239,11 +245,13 @@ lr
 
 ### Combining independent tests
 
-When you have independent tests (e.g., each lab tests $H_{0}:\mu = 10$),
+When you have independent tests (e.g., each lab tests
+$`H_0: \mu = 10`$),
 [`fisher_combine()`](https://queelius.github.io/hypothesize/reference/fisher_combine.html)
 merges them using Fisher’s method:
 
 ``` r
+
 # Each lab tests H0: mu = 10
 w1 <- wald_test(params(fit1)[1], se(fit1)[1], null_value = 10)
 w2 <- wald_test(params(fit2)[1], se(fit2)[1], null_value = 10)
@@ -262,6 +270,7 @@ combined_test
     #> Significant at 5% level: FALSE
 
 ``` r
+
 # Multiple testing correction
 adjusted <- adjust_pval(list(w1, w2, w3), method = "BH")
 ```
@@ -280,6 +289,7 @@ all `mle` objects share
 / [`se()`](https://queelius.github.io/algebraic.mle/reference/se.html):
 
 ``` r
+
 pval(w)                    # extract p-value
 test_stat(w)               # extract test statistic
 dof(w)                     # degrees of freedom
@@ -294,6 +304,7 @@ Derivatives are pluggable in
 The solver never knows (or cares) where they come from:
 
 ``` r
+
 # Strategy 1: numDeriv (default) --- zero effort
 p1 <- mle_problem(loglike = ll)
 
@@ -323,11 +334,11 @@ p2 <- mle_problem(
 
 Each strategy has trade-offs:
 
-| Approach                               | Accuracy                                 | Effort             | Speed                    |
-|----------------------------------------|------------------------------------------|--------------------|--------------------------|
-| Numerical (`numDeriv`)                 | $O\left( h^{2} \right)$ truncation error | None (default)     | Slow (extra evaluations) |
-| Hand-coded analytic                    | Exact                                    | High (error-prone) | Fast                     |
-| Automatic differentiation (AD package) | Exact (machine precision)                | Low                | Moderate                 |
+| Approach | Accuracy | Effort | Speed |
+|----|----|----|----|
+| Numerical (`numDeriv`) | $`O(h^2)`$ truncation error | None (default) | Slow (extra evaluations) |
+| Hand-coded analytic | Exact | High (error-prone) | Fast |
+| Automatic differentiation (AD package) | Exact (machine precision) | Low | Moderate |
 
 The general recommendation: **start with the default** (no explicit
 derivatives) during model development, then **switch to an AD package**
@@ -335,12 +346,41 @@ or hand-coded derivatives when you need accuracy or performance. For
 derivative-free problems, use
 [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md).
 
-| Situation                               | Recommended                                                                              | Reason                                     |
-|-----------------------------------------|------------------------------------------------------------------------------------------|--------------------------------------------|
-| Quick prototyping                       | `numDeriv` (default)                                                                     | Zero effort, just write the log-likelihood |
-| Production / accuracy-critical          | AD package or hand-coded                                                                 | Exact derivatives                          |
-| Complex models (mixtures, hierarchical) | AD package                                                                               | Hand-coding is error-prone and tedious     |
-| Non-differentiable objective            | [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) | Derivative-free simplex method             |
+| Situation | Recommended | Reason |
+|----|----|----|
+| Quick prototyping | `numDeriv` (default) | Zero effort, just write the log-likelihood |
+| Production / accuracy-critical | AD package or hand-coded | Exact derivatives |
+| Complex models (mixtures, hierarchical) | AD package | Hand-coding is error-prone and tedious |
+| Non-differentiable objective | [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) | Derivative-free simplex method |
+
+## The `likelihood.model` Bridge
+
+The [`likelihood.model`](https://github.com/queelius/likelihood.model)
+package provides a Fisherian likelihood framework with generics
+(`loglik`, `score`, `hess_loglik`, `fim`) and contribution-based models
+for heterogeneous observation types.
+
+`compositional.mle` provides a bridge: pass a `likelihood_model` object
+and your data directly to
+[`mle_problem()`](https://queelius.github.io/compositional.mle/reference/mle_problem.md),
+and it will auto-extract the loglik, score, and Fisher information
+functions:
+
+``` r
+
+library(likelihood.model)
+
+# model is a likelihood_model object from likelihood.model
+problem <- mle_problem(model, data = my_data)
+
+# Now solve with any composed strategy
+solver <- lbfgsb(lower = c(-Inf, 1e-4), upper = c(Inf, Inf))
+result <- solver(problem, theta0 = c(0, 1))
+```
+
+This means any model in the `likelihood.model` ecosystem can immediately
+be optimized with the full suite of `compositional.mle` strategies—no
+glue code required.
 
 ## The Ecosystem at a Glance
 
@@ -348,13 +388,14 @@ The packages form a pipeline: **define** a model, **solve** for the MLE,
 **combine** estimates, and **test** hypotheses—with closure at every
 level.
 
-| Package                                                               | CRAN | Purpose                                                                                                                                                                                                                                                                                                         |
-|-----------------------------------------------------------------------|------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [`algebraic.mle`](https://CRAN.R-project.org/package=algebraic.mle)   | Yes  | MLE algebra: [`params()`](https://queelius.github.io/algebraic.dist/reference/params.html), [`se()`](https://queelius.github.io/algebraic.mle/reference/se.html), [`confint()`](https://rdrr.io/r/stats/confint.html), [`mle_weighted()`](https://queelius.github.io/algebraic.mle/reference/mle_weighted.html) |
-| [`algebraic.dist`](https://CRAN.R-project.org/package=algebraic.dist) | Yes  | Distribution algebra: convolution, mixture, truncation                                                                                                                                                                                                                                                          |
-| [`compositional.mle`](https://github.com/queelius/compositional.mle)  | —    | Solver composition: `%>>%`, `%|%`, [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)                                                                                                                                                                                 |
-| [`hypothesize`](https://CRAN.R-project.org/package=hypothesize)       | Yes  | Test composition: [`wald_test()`](https://queelius.github.io/hypothesize/reference/wald_test.html), [`lrt()`](https://queelius.github.io/hypothesize/reference/lrt.html), [`fisher_combine()`](https://queelius.github.io/hypothesize/reference/fisher_combine.html)                                            |
-| [`dfr.dist`](https://github.com/queelius/dfr.dist)                    | —    | Distribution-free reliability methods                                                                                                                                                                                                                                                                           |
+| Package | CRAN | Purpose |
+|----|----|----|
+| [`algebraic.mle`](https://CRAN.R-project.org/package=algebraic.mle) | Yes | MLE algebra: [`params()`](https://queelius.github.io/algebraic.dist/reference/params.html), [`se()`](https://queelius.github.io/algebraic.mle/reference/se.html), [`confint()`](https://rdrr.io/r/stats/confint.html), `mle_weighted()` |
+| [`algebraic.dist`](https://CRAN.R-project.org/package=algebraic.dist) | Yes | Distribution algebra: convolution, mixture, truncation |
+| [`compositional.mle`](https://github.com/queelius/compositional.mle) | — | Solver composition: `%>>%`, `%|%`, [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md) |
+| [`hypothesize`](https://CRAN.R-project.org/package=hypothesize) | Yes | Test composition: [`wald_test()`](https://queelius.github.io/hypothesize/reference/wald_test.html), [`lrt()`](https://queelius.github.io/likelihood.model/reference/lrt.html), [`fisher_combine()`](https://queelius.github.io/hypothesize/reference/fisher_combine.html) |
+| [`flexhaz`](https://github.com/queelius/flexhaz) | — | Distributions via arbitrary hazard functions |
+| [`likelihood.model`](https://github.com/queelius/likelihood.model) | — | Fisherian likelihood framework; bridge via `mle_problem(model, data)` |
 
 The typical workflow:
 
@@ -362,9 +403,8 @@ The typical workflow:
     [`mle_problem()`](https://queelius.github.io/compositional.mle/reference/mle_problem.md)
 2.  **Solve** with a composed solver strategy from `compositional.mle` —
     get an `mle` object
-3.  **Combine** independent estimates with
-    [`mle_weighted()`](https://queelius.github.io/algebraic.mle/reference/mle_weighted.html)
-    from `algebraic.mle` — get a (better) `mle` object
+3.  **Combine** independent estimates with `mle_weighted()` from
+    `algebraic.mle` — get a (better) `mle` object
 4.  **Test** hypotheses with `hypothesize` — get a `hypothesis_test`
     object
 5.  **Combine** tests with

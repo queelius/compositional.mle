@@ -6,6 +6,9 @@ statistical specification from the optimization strategy.
 ## Usage
 
 ``` r
+mle_problem(loglike, ...)
+
+# Default S3 method
 mle_problem(
   loglike,
   score = NULL,
@@ -13,7 +16,18 @@ mle_problem(
   constraint = NULL,
   theta_names = NULL,
   n_obs = NULL,
-  cache_derivatives = FALSE
+  cache_derivatives = FALSE,
+  ...
+)
+
+# S3 method for class 'likelihood_model'
+mle_problem(
+  loglike,
+  data,
+  constraint = NULL,
+  theta_names = NULL,
+  cache_derivatives = FALSE,
+  ...
 )
 
 # S3 method for class 'mle_problem'
@@ -24,7 +38,12 @@ print(x, ...)
 
 - loglike:
 
-  Log-likelihood function taking parameter vector theta
+  Log-likelihood function taking parameter vector theta, or a
+  `likelihood_model` object.
+
+- ...:
+
+  Additional arguments (unused).
 
 - score:
 
@@ -55,13 +74,13 @@ print(x, ...)
   particularly useful during line search where the same point may be
   evaluated multiple times. Default is FALSE.
 
+- data:
+
+  Data frame (or matrix/vector) of observations
+
 - x:
 
   An mle_problem object.
-
-- ...:
-
-  Additional arguments (unused).
 
 ## Value
 
@@ -70,6 +89,10 @@ An mle_problem object
 The input object, invisibly (for method chaining).
 
 ## Details
+
+When passed a `likelihood_model` object (from the likelihood.model
+package), automatically extracts log-likelihood, score, and Fisher
+information functions.
 
 The problem object provides lazy evaluation of derivatives. If you don't
 provide analytic score or fisher functions, they will be computed
@@ -82,9 +105,19 @@ same point (e.g., during line search or convergence checking). Use
 [`clear_cache`](https://queelius.github.io/compositional.mle/reference/clear_cache.md)
 to manually clear the cache if needed.
 
+## See also
+
+[`mle_constraint`](https://queelius.github.io/compositional.mle/reference/mle_constraint.md)
+for constraint specification
+
 ## Examples
 
 ``` r
+# Direct specification
+problem <- mle_problem(
+  loglike = function(theta) -sum((theta - c(1, 2))^2)
+)
+
 # With analytic derivatives
 problem <- mle_problem(
   loglike = function(theta) sum(dnorm(data, theta[1], theta[2], log = TRUE)),

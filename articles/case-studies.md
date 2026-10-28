@@ -12,9 +12,10 @@ probability distributions to data. Each case study shows:
 
 ## Case Study 1: Exponential Distribution
 
-The exponential distribution has one parameter: rate $\lambda > 0$.
+The exponential distribution has one parameter: rate $`\lambda > 0`$.
 
 ``` r
+
 # Generate data
 n <- 100
 true_rate <- 2.5
@@ -48,6 +49,7 @@ cat("True rate:      ", true_rate, "\n")
 ```
 
 ``` r
+
 lambda_grid <- seq(0.1, 5, length.out = 100)
 ll_values <- sapply(lambda_grid, problem_exp$loglike)
 
@@ -63,9 +65,10 @@ legend("topright", c("MLE", "True"), col = c("red", "blue"), lty = c(2, 3), lwd 
 
 ## Case Study 2: Gamma Distribution
 
-Two parameters: shape $\alpha > 0$ and rate $\beta > 0$.
+Two parameters: shape $`\alpha > 0`$ and rate $`\beta > 0`$.
 
 ``` r
+
 # Generate data
 true_shape <- 3
 true_rate <- 2
@@ -97,6 +100,7 @@ problem_gamma <- mle_problem(
 ### Composing Solvers: Grid Search + Gradient Ascent
 
 ``` r
+
 # Coarse-to-fine strategy
 strategy <- grid_search(lower = c(0.5, 0.5), upper = c(10, 10), n = 10) %>>%
   gradient_ascent(max_iter = 100)
@@ -111,6 +115,7 @@ cat("True: shape =", true_shape, " rate =", true_rate, "\n")
 ```
 
 ``` r
+
 alpha_grid <- seq(1, 6, length.out = 50)
 beta_grid <- seq(0.5, 4, length.out = 50)
 ll_gamma <- outer(alpha_grid, beta_grid, function(a, b) {
@@ -131,10 +136,11 @@ legend("topright", c("MLE", "True"), pch = c(19, 4), col = c("red", "blue"))
 
 ## Case Study 3: Beta Distribution
 
-Shape parameters $\alpha > 0$ and $\beta > 0$ for data on
-$\lbrack 0,1\rbrack$.
+Shape parameters $`\alpha > 0`$ and $`\beta > 0`$ for data on
+$`[0, 1]`$.
 
 ``` r
+
 # Generate data
 true_alpha <- 2
 true_beta <- 5
@@ -180,6 +186,7 @@ cat("True: alpha =", true_alpha, " beta =", true_beta, "\n")
 ```
 
 ``` r
+
 hist(x_beta, breaks = 20, freq = FALSE, col = "lightgray",
      main = "Beta Distribution Fit", xlab = "x")
 curve(dbeta(x, result_beta$theta.hat[1], result_beta$theta.hat[2]),
@@ -192,9 +199,10 @@ legend("topright", c("Fitted", "True"), col = c("red", "blue"), lwd = 2, lty = c
 
 ## Case Study 4: Weibull Distribution
 
-Shape $k > 0$ and scale $\lambda > 0$, using Newton-Raphson.
+Shape $`k > 0`$ and scale $`\lambda > 0`$, using Newton-Raphson.
 
 ``` r
+
 # Generate data
 true_k <- 2; true_lambda <- 3
 x_weibull <- rweibull(100, shape = true_k, scale = true_lambda)
@@ -233,6 +241,7 @@ cat("True: shape =", true_k, " scale =", true_lambda, "\n")
 ```
 
 ``` r
+
 hist(x_weibull, breaks = 15, freq = FALSE, col = "lightgray",
      main = "Weibull Distribution Fit", xlab = "x")
 curve(dweibull(x, shape = result_weibull$theta.hat[1],
@@ -250,6 +259,7 @@ legend("topright", c("Fitted", "True"), col = c("red", "blue"), lwd = 2, lty = c
 Multimodal likelihood requires good initialization and restarts.
 
 ``` r
+
 # Generate mixture data
 n1 <- 60; n2 <- 40
 x_mix <- c(rnorm(n1, mean = 0, sd = 1), rnorm(n2, mean = 4, sd = 1.5))
@@ -299,6 +309,7 @@ cat("  Mixing proportion:", round(result_mix$theta.hat[5], 2), "\n")
 ```
 
 ``` r
+
 hist(x_mix, breaks = 25, freq = FALSE, col = "lightgray",
      main = "Gaussian Mixture Fit", xlab = "x")
 
@@ -318,13 +329,13 @@ legend("topright", c("Fitted", "True"), col = c("red", "blue"), lwd = 2, lty = c
 
 ## Summary
 
-| Distribution | Strategy                                                                                                                     | Key Considerations       |
-|--------------|------------------------------------------------------------------------------------------------------------------------------|--------------------------|
-| Exponential  | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md)                             | Simple, single parameter |
-| Gamma        | `grid_search() %>>% gradient_ascent()`                                                                                       | Coarse-to-fine for 2D    |
-| Beta         | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) with method of moments init | Good starting values     |
-| Weibull      | [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)                               | Second-order convergence |
-| Mixture      | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) with k-means init           | Multimodal likelihood    |
+| Distribution | Strategy | Key Considerations |
+|----|----|----|
+| Exponential | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Simple, single parameter |
+| Gamma | `grid_search() %>>% gradient_ascent()` | Coarse-to-fine for 2D |
+| Beta | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) with method of moments init | Good starting values |
+| Weibull | [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md) | Second-order convergence |
+| Mixture | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) with k-means init | Multimodal likelihood |
 
 Key takeaways:
 

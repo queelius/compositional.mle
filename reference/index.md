@@ -51,8 +51,6 @@ Create solver functions
 
 Combine solvers into strategies
 
-- [`compose()`](https://queelius.github.io/compositional.mle/reference/compose.md)
-  : Compose Multiple Solvers Sequentially
 - [`chain()`](https://queelius.github.io/compositional.mle/reference/chain.md)
   : Chain Solvers with Early Stopping
 - [`race()`](https://queelius.github.io/compositional.mle/reference/race.md)
@@ -108,13 +106,13 @@ Work with and visualize optimization results
 
 - [`is_converged()`](https://queelius.github.io/compositional.mle/reference/is_converged.md)
   : Check if solver converged
-- [`is_mle_numerical()`](https://queelius.github.io/compositional.mle/reference/is_mle_numerical.md)
-  : Check if object is an mle_numerical
+- [`is_solver_result()`](https://queelius.github.io/compositional.mle/reference/is_solver_result.md)
+  : Check if object is a solver result
 - [`num_iterations()`](https://queelius.github.io/compositional.mle/reference/num_iterations.md)
   : Get number of iterations
 - [`optimization_path()`](https://queelius.github.io/compositional.mle/reference/optimization_path.md)
   : Extract Optimization Path as Data Frame
-- [`plot(`*`<mle_numerical>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_numerical.md)
+- [`plot(`*`<solver_result>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.solver_result.md)
   : Plot Optimization Convergence
 - [`plot(`*`<mle_trace_data>`*`)`](https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.md)
   : Plot Trace Data Directly

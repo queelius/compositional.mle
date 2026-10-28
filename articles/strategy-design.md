@@ -16,6 +16,7 @@ Consider fitting a mixture of normals - a notoriously multi-modal
 problem:
 
 ``` r
+
 # Generate mixture data
 x_mix <- c(rnorm(70, mean = 0, sd = 1), rnorm(30, mean = 5, sd = 1.5))
 
@@ -48,6 +49,7 @@ problem_mix <- mle_problem(
 ### Single Solver: Often Fails
 
 ``` r
+
 # Random starting point
 theta0 <- c(-2, 1, 3, 1, 0.5)
 
@@ -70,6 +72,7 @@ at local optima.
 Start with a rough global search, then refine:
 
 ``` r
+
 # K-means for smart initialization
 km <- kmeans(x_mix, centers = 2)
 mu1_init <- min(km$centers)
@@ -104,6 +107,7 @@ cat("  Log-likelihood:", round(result_coarse$loglike, 2), "\n")
 Run gradient ascent from many starting points:
 
 ``` r
+
 # Custom sampler for mixture parameters
 mixture_sampler <- function() {
   c(runif(1, -5, 10),    # mu1
@@ -128,8 +132,8 @@ cat("  mu1 =", round(result_restarts$theta.hat[1], 2),
 #>   mu1 = 0.08  mu2 = 4.96
 cat("  Log-likelihood:", round(result_restarts$loglike, 2), "\n")
 #>   Log-likelihood: -215.73
-cat("  Best restart:", result_restarts$best_restart, "of", result_restarts$n_restarts, "\n")
-#>   Best restart: 1 of 20
+cat("  Best restart:", result_restarts$solver_info$composition$best_restart, "of", result_restarts$solver_info$composition$n_restarts, "\n")
+#>   Best restart: of 20
 ```
 
 ## Strategy 3: Racing Solvers
@@ -137,13 +141,14 @@ cat("  Best restart:", result_restarts$best_restart, "of", result_restarts$n_res
 When unsure which method works best, race them:
 
 ``` r
+
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 
 result_race <- strategy(problem_mix, theta_init)
 
 cat("Racing strategy:\n")
 #> Racing strategy:
-cat("  Winner:", result_race$solver, "\n")
+cat("  Winner:", result_race$solver_info$name, "\n")
 #>   Winner: gradient_ascent
 cat("  mu1 =", round(result_race$theta.hat[1], 2),
     " mu2 =", round(result_race$theta.hat[3], 2), "\n")
@@ -158,6 +163,7 @@ Combine simulated annealing for global exploration with gradient ascent
 for local refinement:
 
 ``` r
+
 strategy <- sim_anneal(temp_init = 10, cooling_rate = 0.95, max_iter = 500) %>>%
   gradient_ascent(max_iter = 100)
 
@@ -177,6 +183,7 @@ cat("  Log-likelihood:", round(result_global$loglike, 2), "\n")
 Use tracing to understand optimization behavior:
 
 ``` r
+
 # Enable full tracing
 trace_cfg <- mle_trace(values = TRUE, gradients = TRUE, path = TRUE)
 
@@ -200,6 +207,7 @@ plot(result_traced, which = c("loglike", "path"))
 ### Extracting Trace Data
 
 ``` r
+
 path_df <- optimization_path(result_traced)
 head(path_df)
 #>   iteration     loglike grad_norm    theta_1     theta_2
@@ -226,6 +234,7 @@ if (nrow(path_df) > 5) {
 Compare different strategies on the same problem:
 
 ``` r
+
 # Test problem: bimodal likelihood
 bimodal <- mle_problem(
   loglike = function(theta) {
@@ -281,6 +290,9 @@ for (name in names(strategies)) {
 library(dplyr)
 #> 
 #> Attaching package: 'dplyr'
+#> The following object is masked from 'package:algebraic.mle':
+#> 
+#>     combine
 #> The following objects are masked from 'package:stats':
 #> 
 #>     filter, lag
@@ -310,6 +322,7 @@ results %>%
 ### 1. Start Simple, Add Complexity
 
 ``` r
+
 # First try: simple gradient ascent
 result <- gradient_ascent()(problem, theta0)
 
@@ -323,6 +336,7 @@ result <- (sim_anneal() %>>% gradient_ascent())(problem, theta0)
 ### 2. Use Domain Knowledge for Initialization
 
 ``` r
+
 # Method of moments for mixture initialization
 m <- mean(data); v <- var(data)
 theta0 <- c(m - sqrt(v), sqrt(v), m + sqrt(v), sqrt(v), 0.5)
@@ -330,19 +344,20 @@ theta0 <- c(m - sqrt(v), sqrt(v), m + sqrt(v), sqrt(v), 0.5)
 
 ### 3. Match Solver to Problem
 
-| Problem Type     | Recommended Strategy                                                                                                                                                                   |
-|------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Smooth, unimodal | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) or [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)         |
-| Multi-modal      | [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md) or `sim_anneal() %>>% gradient_ascent()`                                                  |
+| Problem Type | Recommended Strategy |
+|----|----|
+| Smooth, unimodal | [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) or [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md) |
+| Multi-modal | [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md) or `sim_anneal() %>>% gradient_ascent()` |
 | High-dimensional | [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md) or [`coordinate_ascent()`](https://queelius.github.io/compositional.mle/reference/coordinate_ascent.md) |
-| Non-smooth       | [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)                                                                                               |
-| Unknown          | `gradient_ascent() %|% bfgs() %|% nelder_mead()`                                                                                                                                       |
+| Non-smooth | [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) |
+| Unknown | `gradient_ascent() %|% bfgs() %|% nelder_mead()` |
 
 ### 4. Monitor Convergence
 
 Always enable tracing during development:
 
 ``` r
+
 result <- solver(problem, theta0, trace = mle_trace(values = TRUE, gradients = TRUE))
 plot(result)
 ```

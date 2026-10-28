@@ -34,8 +34,8 @@
 <url><loc>https://queelius.github.io/compositional.mle/reference/index.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_converged.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_constraint.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_numerical.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_mle_problem.html</loc></url>
+<url><loc>https://queelius.github.io/compositional.mle/reference/is_solver_result.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/is_tracing.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/lbfgsb.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/merge_traces.html</loc></url>
@@ -51,8 +51,8 @@
 <url><loc>https://queelius.github.io/compositional.mle/reference/penalty_elastic_net.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/penalty_l1.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/penalty_l2.html</loc></url>
-<url><loc>https://queelius.github.io/compositional.mle/reference/plot.mle_numerical.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/plot.mle_trace_data.html</loc></url>
+<url><loc>https://queelius.github.io/compositional.mle/reference/plot.solver_result.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/print.mle_trace_data.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/race.html</loc></url>
 <url><loc>https://queelius.github.io/compositional.mle/reference/race_operator.html</loc></url>

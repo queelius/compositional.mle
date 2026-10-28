@@ -19,10 +19,12 @@ principles, it offers:
 ## Installation
 
 ``` r
+
 devtools::install_github("queelius/compositional.mle")
 ```
 
 ``` r
+
 library(compositional.mle)
 #> Loading required package: algebraic.mle
 ```
@@ -30,6 +32,7 @@ library(compositional.mle)
 ## Quick Start: Normal Distribution MLE
 
 ``` r
+
 # Generate sample data
 set.seed(123)
 data <- rnorm(100, mean = 5, sd = 2)
@@ -67,6 +70,7 @@ The key design principle is separating **what** you’re estimating from
 **how** you estimate it:
 
 ``` r
+
 # The problem encapsulates the statistical model
 print(problem)
 #> MLE Problem
@@ -100,6 +104,7 @@ cat("BFGS:", result3$theta.hat, "\n")
 Chain solvers for coarse-to-fine optimization:
 
 ``` r
+
 # Grid search finds a good region, then gradient ascent refines
 strategy <- grid_search(lower = c(-10, 0.5), upper = c(10, 5), n = 5) %>>%
   gradient_ascent(max_iter = 50)
@@ -112,6 +117,7 @@ cat("Result:", result$theta.hat, "\n")
 ### Three-Stage Refinement
 
 ``` r
+
 # Coarse grid -> gradient ascent -> Newton-Raphson polish
 strategy <- grid_search(lower = c(-10, 0.5), upper = c(10, 5), n = 5) %>>%
   gradient_ascent(max_iter = 30) %>>%
@@ -129,11 +135,12 @@ cat("Converged:", result$converged, "\n")
 Race multiple methods and keep the best result:
 
 ``` r
+
 # Try gradient-based and derivative-free methods
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 
 result <- strategy(problem, theta0 = c(0, 1))
-cat("Winner:", result$solver, "\n")
+cat("Winner:", result$solver_info$name, "\n")
 #> Winner: gradient_ascent
 cat("Result:", result$theta.hat, "\n")
 #> Result: 5.180812 1.816481
@@ -144,6 +151,7 @@ cat("Result:", result$theta.hat, "\n")
 Escape local optima with multiple starting points:
 
 ``` r
+
 strategy <- with_restarts(
   gradient_ascent(),
   n = 10,
@@ -151,8 +159,8 @@ strategy <- with_restarts(
 )
 
 result <- strategy(problem, theta0 = c(0, 1))
-cat("Best restart:", result$best_restart, "of", result$n_restarts, "\n")
-#> Best restart: 1 of 10
+cat("Best restart:", result$solver_info$composition$best_restart, "of", result$solver_info$composition$n_restarts, "\n")
+#> Best restart: of 10
 cat("Result:", result$theta.hat, "\n")
 #> Result: 5.180812 1.816481
 ```
@@ -162,6 +170,7 @@ cat("Result:", result$theta.hat, "\n")
 Only refine if the first solver didn’t converge:
 
 ``` r
+
 strategy <- unless_converged(
   gradient_ascent(max_iter = 10),  # Quick attempt
 
@@ -175,21 +184,22 @@ cat("Result:", result$theta.hat, "\n")
 
 ## Available Solvers
 
-| Factory                                                                                          | Method                           | Requires                     |
-|--------------------------------------------------------------------------------------------------|----------------------------------|------------------------------|
-| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Steepest ascent with line search | score (or numerical)         |
-| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)   | Second-order Newton              | score, fisher (or numerical) |
-| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)                       | Quasi-Newton BFGS                | score (or numerical)         |
-| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md)                   | L-BFGS-B with box constraints    | score (or numerical)         |
-| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)         | Simplex (derivative-free)        | \-                           |
-| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md)         | Exhaustive grid                  | \-                           |
-| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md)     | Random sampling                  | \-                           |
+| Factory | Method | Requires |
+|----|----|----|
+| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Steepest ascent with line search | score (or numerical) |
+| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md) | Second-order Newton | score, fisher (or numerical) |
+| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md) | Quasi-Newton BFGS | score (or numerical) |
+| [`lbfgsb()`](https://queelius.github.io/compositional.mle/reference/lbfgsb.md) | L-BFGS-B with box constraints | score (or numerical) |
+| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) | Simplex (derivative-free) | \- |
+| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md) | Exhaustive grid | \- |
+| [`random_search()`](https://queelius.github.io/compositional.mle/reference/random_search.md) | Random sampling | \- |
 
 ## Constraints
 
 Define domain constraints with support checking and projection:
 
 ``` r
+
 # Positive parameters
 pos_constraint <- mle_constraint(
   support = function(theta) all(theta > 0),
@@ -216,6 +226,7 @@ problem_constrained <- mle_problem(
 For large datasets, subsample observations:
 
 ``` r
+
 # Original log-likelihood uses all data
 loglike_full <- function(theta, obs = large_data) {
   sum(dnorm(obs, theta[1], theta[2], log = TRUE))
@@ -230,6 +241,7 @@ loglike_sgd <- with_subsampling(loglike_full, data = large_data, subsample_size 
 Add penalty terms for regularization:
 
 ``` r
+
 loglike <- function(theta) -sum(theta^2)
 
 # L1 (Lasso), L2 (Ridge), Elastic Net
@@ -251,6 +263,7 @@ cat("With L2:", loglike_l2(theta), "\n")
 Track the optimization path for diagnostics:
 
 ``` r
+
 trace_config <- mle_trace(values = TRUE, path = TRUE, gradients = TRUE)
 
 result <- gradient_ascent(max_iter = 20)(
@@ -259,9 +272,9 @@ result <- gradient_ascent(max_iter = 20)(
   trace = trace_config
 )
 
-if (!is.null(result$trace_data)) {
-  cat("Iterations:", result$trace_data$total_iterations, "\n")
-  cat("Final log-likelihood:", tail(result$trace_data$values, 1), "\n")
+if (!is.null(result$solver_info$trace_data)) {
+  cat("Iterations:", result$solver_info$trace_data$total_iterations, "\n")
+  cat("Final log-likelihood:", tail(result$solver_info$trace_data$values, 1), "\n")
 }
 #> Iterations: 20 
 #> Final log-likelihood: -201.5839
@@ -290,8 +303,8 @@ racing -
 Multiple starting points -
 [`unless_converged()`](https://queelius.github.io/compositional.mle/reference/unless_converged.md) -
 Conditional refinement -
-[`compose()`](https://queelius.github.io/compositional.mle/reference/compose.md) -
-Compose multiple solvers
+[`chain()`](https://queelius.github.io/compositional.mle/reference/chain.md) -
+Compose multiple solvers sequentially
 
 **Samplers:** -
 [`uniform_sampler()`](https://queelius.github.io/compositional.mle/reference/uniform_sampler.md),

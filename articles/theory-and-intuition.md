@@ -9,18 +9,22 @@ probable**.
 
 ### The Likelihood Function
 
-Suppose we observe data $x_{1},x_{2},\ldots,x_{n}$ and we believe it
-comes from a probability distribution with parameter(s) $\theta$. The
-**likelihood function** $L(\theta)$ measures how probable the observed
-data is, given parameter $\theta$:
+Suppose we observe data $`x_1, x_2, \ldots, x_n`$ and we believe it
+comes from a probability distribution with parameter(s) $`\theta`$. The
+**likelihood function** $`L(\theta)`$ measures how probable the observed
+data is, given parameter $`\theta`$:
 
-$$L(\theta) = P\left( X_{1} = x_{1},X_{2} = x_{2},\ldots,X_{n} = x_{n} \mid \theta \right)$$
+``` math
+L(\theta) = P(X_1 = x_1, X_2 = x_2, \ldots, X_n = x_n \mid \theta)
+```
 
 For independent observations:
 
-$$L(\theta) = \prod\limits_{i = 1}^{n}f\left( x_{i} \mid \theta \right)$$
+``` math
+L(\theta) = \prod_{i=1}^{n} f(x_i \mid \theta)
+```
 
-where $f( \cdot \mid \theta)$ is the probability density (or mass)
+where $`f(\cdot \mid \theta)`$ is the probability density (or mass)
 function.
 
 ### Why Log-Likelihood?
@@ -28,24 +32,27 @@ function.
 Working with products is numerically unstable and mathematically
 inconvenient. Taking the logarithm converts products to sums:
 
-$$\ell(\theta) = \log L(\theta) = \sum\limits_{i = 1}^{n}\log f\left( x_{i} \mid \theta \right)$$
+``` math
+\ell(\theta) = \log L(\theta) = \sum_{i=1}^{n} \log f(x_i \mid \theta)
+```
 
-Since $\log$ is monotonic, maximizing $\ell(\theta)$ is equivalent to
-maximizing $L(\theta)$. The log-likelihood has several advantages:
+Since $`\log`$ is monotonic, maximizing $`\ell(\theta)`$ is equivalent
+to maximizing $`L(\theta)`$. The log-likelihood has several advantages:
 
 1.  **Numerical stability**: Products of small probabilities can
     underflow to zero
 2.  **Computational efficiency**: Sums are faster than products
 3.  **Mathematical convenience**: Derivatives of sums are easier than
     derivatives of products
-4.  **Statistical properties**: The curvature of $\ell(\theta)$ relates
-    to estimation uncertainty
+4.  **Statistical properties**: The curvature of $`\ell(\theta)`$
+    relates to estimation uncertainty
 
 ### A Concrete Example
 
 Let’s see this with normal data:
 
 ``` r
+
 set.seed(42)
 x <- rnorm(50, mean = 3, sd = 1.5)
 
@@ -82,18 +89,20 @@ in the contour plot).
 The **score function** is the gradient (vector of partial derivatives)
 of the log-likelihood:
 
-$$s(\theta) = \nabla_{\theta}\ell(\theta) = \left( \frac{\partial\ell}{\partial\theta_{1}},\ldots,\frac{\partial\ell}{\partial\theta_{p}} \right)$$
+``` math
+s(\theta) = \nabla_\theta \ell(\theta) = \left( \frac{\partial \ell}{\partial \theta_1}, \ldots, \frac{\partial \ell}{\partial \theta_p} \right)
+```
 
-At the MLE $\widehat{\theta}$, the score is zero:
-$s\left( \widehat{\theta} \right) = 0$.
+At the MLE $`\hat{\theta}`$, the score is zero: $`s(\hat{\theta}) = 0`$.
 
 ### Intuition
 
 The score tells us the **direction of steepest ascent** on the
-log-likelihood surface. If $s(\theta) \neq 0$, we can increase the
-likelihood by moving in the direction of $s(\theta)$.
+log-likelihood surface. If $`s(\theta) \neq 0`$, we can increase the
+likelihood by moving in the direction of $`s(\theta)`$.
 
 ``` r
+
 # Score function for normal distribution
 score <- function(theta) {
   mu <- theta[1]
@@ -120,15 +129,17 @@ cat("Direction: move", ifelse(s[1] > 0, "right", "left"), "in mu,",
 **Gradient ascent** is the simplest optimization algorithm. It
 iteratively moves in the direction of the gradient:
 
-$$\theta^{(t + 1)} = \theta^{(t)} + \eta \cdot s\left( \theta^{(t)} \right)$$
+``` math
+\theta^{(t+1)} = \theta^{(t)} + \eta \cdot s(\theta^{(t)})
+```
 
-where $\eta > 0$ is the **learning rate** (step size).
+where $`\eta > 0`$ is the **learning rate** (step size).
 
 ### Why It Works
 
 The score points in the direction of steepest increase. Taking small
 steps in this direction guarantees improvement (for small enough
-$\eta$).
+$`\eta`$).
 
 ### The Challenge: Choosing the Step Size
 
@@ -136,6 +147,7 @@ $\eta$).
 - **Too small**: Convergence is painfully slow
 
 ``` r
+
 # Demonstrate gradient ascent with different step sizes
 run_gradient_ascent <- function(eta, max_iter = 50) {
   theta <- c(1, 0.8)
@@ -178,6 +190,7 @@ legend("topright", c("Small (0.001)", "Good (0.01)", "Large (0.05)"),
 3.  Repeat until we find an acceptable step
 
 ``` r
+
 # Define the problem
 problem <- mle_problem(
   loglike = loglike,
@@ -192,7 +205,7 @@ result <- gradient_ascent(max_iter = 50)(problem, theta0 = c(1, 0.8))
 
 cat("Final estimate:", round(result$theta.hat, 4), "\n")
 #> Final estimate: 2.9465 1.7099
-cat("Iterations:", result$iterations, "\n")
+cat("Iterations:", result$solver_info$iterations, "\n")
 #> Iterations: 19
 cat("Converged:", result$converged, "\n")
 #> Converged: FALSE
@@ -200,31 +213,31 @@ cat("Converged:", result$converged, "\n")
 
 ## The Fisher Information Matrix
 
-The **Fisher information matrix** $I(\theta)$ measures how much
-information the data carries about $\theta$. It can be defined
+The **Fisher information matrix** $`I(\theta)`$ measures how much
+information the data carries about $`\theta`$. It can be defined
 equivalently as:
 
-$$I(\theta) = - E\left\lbrack \frac{\partial^{2}\ell}{\partial\theta\partial\theta^{T}} \right\rbrack = E\left\lbrack s(\theta)s(\theta)^{T} \right\rbrack$$
+``` math
+I(\theta) = -E\left[ \frac{\partial^2 \ell}{\partial \theta \partial \theta^T} \right] = E\left[ s(\theta) s(\theta)^T \right]
+```
 
-The second form shows that $I(\theta)$ equals the covariance of the
-score (since $E\left\lbrack s(\theta) \right\rbrack = 0$ at the true
-parameter).
+The second form shows that $`I(\theta)`$ equals the covariance of the
+score (since $`E[s(\theta)] = 0`$ at the true parameter).
 
 ### Why It Matters
 
-1.  **Curvature**: $I(\theta)$ describes the curvature of the
+1.  **Curvature**: $`I(\theta)`$ describes the curvature of the
     log-likelihood surface
 2.  **Uncertainty**: The asymptotic variance of the MLE is
-    $\text{Var}\left( \widehat{\theta} \right) \approx I(\theta)^{- 1}$
-    (Cramér-Rao bound)
+    $`\text{Var}(\hat{\theta}) \approx I(\theta)^{-1}`$ (Cramér-Rao
+    bound)
 3.  **Natural scaling**: Different parameters may have different scales;
-    $I(\theta)$ accounts for this
+    $`I(\theta)`$ accounts for this
 
 ### Observed vs Expected Fisher Information
 
-- **Expected information**:
-  $I(\theta) = - E\left\lbrack \nabla^{2}\ell(\theta) \right\rbrack$
-- **Observed information**: $J(\theta) = - \nabla^{2}\ell(\theta)$
+- **Expected information**: $`I(\theta) = -E[\nabla^2 \ell(\theta)]`$
+- **Observed information**: $`J(\theta) = -\nabla^2 \ell(\theta)`$
   (evaluated at the data)
 
 In practice, we often use the observed information, which doesn’t
@@ -234,13 +247,15 @@ require computing expectations.
 
 **Newton-Raphson** uses the Fisher information to take smarter steps:
 
-$$\theta^{(t + 1)} = \theta^{(t)} + I\left( \theta^{(t)} \right)^{- 1}s\left( \theta^{(t)} \right)$$
+``` math
+\theta^{(t+1)} = \theta^{(t)} + I(\theta^{(t)})^{-1} s(\theta^{(t)})
+```
 
 ### Intuition
 
 Gradient ascent treats all directions equally, but some directions might
 be “easier” to move in than others. Newton-Raphson pre-multiplies by
-$I^{- 1}$, which:
+$`I^{-1}`$, which:
 
 - Takes larger steps in flat directions (low curvature)
 - Takes smaller steps in curved directions (high curvature)
@@ -249,6 +264,7 @@ $I^{- 1}$, which:
 ### Comparison
 
 ``` r
+
 # Fisher information for normal distribution
 fisher <- function(theta) {
   sigma <- theta[2]
@@ -277,9 +293,9 @@ result_ga <- gradient_ascent(max_iter = 100)(problem, theta0 = c(1, 0.8))
 result_nr <- newton_raphson(max_iter = 100)(problem_with_fisher, theta0 = c(1, 0.8))
 
 cat("Gradient Ascent: ", result_ga$iterations, "iterations\n")
-#> Gradient Ascent:  19 iterations
+#> Gradient Ascent:  iterations
 cat("Newton-Raphson:  ", result_nr$iterations, "iterations\n")
-#> Newton-Raphson:   20 iterations
+#> Newton-Raphson:   iterations
 ```
 
 Newton-Raphson typically converges much faster, especially near the
@@ -291,6 +307,7 @@ The `compositional.mle` package lets you **compose** optimization
 strategies:
 
 ``` r
+
 # Coarse-to-fine: grid search finds a good region, Newton polishes
 strategy <- grid_search(lower = c(0, 0.1), upper = c(6, 4), n = 5) %>>%
   newton_raphson(max_iter = 20)
@@ -302,28 +319,28 @@ cat("Result:", round(result$theta.hat, 4), "\n")
 # Race different methods, pick the best
 strategy <- gradient_ascent() %|% bfgs() %|% nelder_mead()
 result <- strategy(problem, theta0 = c(1, 0.8))
-cat("Winner:", result$solver, "\n")
+cat("Winner:", result$solver_info$name, "\n")
 #> Winner: gradient_ascent
 ```
 
 ## When to Use Which Method
 
-| Method                                                                                           | Information     | Best For                        |
-|--------------------------------------------------------------------------------------------------|-----------------|---------------------------------|
-| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Score only      | Large problems, rough estimates |
-| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md)   | Score + Fisher  | High precision, small problems  |
-| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md)                       | Score only      | Quasi-Newton, good balance      |
-| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md)         | Likelihood only | Derivative-free, robust         |
-| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md)         | Likelihood only | Finding starting points         |
-| [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md)     | Varies          | Multi-modal problems            |
+| Method | Information | Best For |
+|----|----|----|
+| [`gradient_ascent()`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md) | Score only | Large problems, rough estimates |
+| [`newton_raphson()`](https://queelius.github.io/compositional.mle/reference/newton_raphson.md) | Score + Fisher | High precision, small problems |
+| [`bfgs()`](https://queelius.github.io/compositional.mle/reference/bfgs.md) | Score only | Quasi-Newton, good balance |
+| [`nelder_mead()`](https://queelius.github.io/compositional.mle/reference/nelder_mead.md) | Likelihood only | Derivative-free, robust |
+| [`grid_search()`](https://queelius.github.io/compositional.mle/reference/grid_search.md) | Likelihood only | Finding starting points |
+| [`with_restarts()`](https://queelius.github.io/compositional.mle/reference/with_restarts.md) | Varies | Multi-modal problems |
 
 ## Constrained Optimization
 
 Real problems often have **constraints** on parameters:
 
-- Variance must be positive: $\sigma > 0$
-- Probabilities must be in $\lbrack 0,1\rbrack$
-- Correlation must satisfy $|\rho| < 1$
+- Variance must be positive: $`\sigma > 0`$
+- Probabilities must be in $`[0, 1]`$
+- Correlation must satisfy $`|\rho| < 1`$
 
 ### Projection Method
 
@@ -332,6 +349,7 @@ outside the feasible region, we project back to the nearest feasible
 point.
 
 ``` r
+
 # The constraint keeps sigma positive throughout optimization
 result <- gradient_ascent(max_iter = 100)(problem, theta0 = c(0, 0.1))
 
@@ -349,31 +367,34 @@ Sometimes we want to **penalize** certain parameter values to:
 
 ### Penalized Log-Likelihood
 
-$$\ell_{\lambda}(\theta) = \ell(\theta) - \lambda \cdot P(\theta)$$
+``` math
+\ell_\lambda(\theta) = \ell(\theta) - \lambda \cdot P(\theta)
+```
 
-where $P(\theta)$ is a penalty function and $\lambda > 0$ controls
+where $`P(\theta)`$ is a penalty function and $`\lambda > 0`$ controls
 regularization strength.
 
 ### Common Penalties
 
-**L1 (LASSO)**: $P(\theta) = \sum_{j}\left| \theta_{j} \right|$
+**L1 (LASSO)**: $`P(\theta) = \sum_j |\theta_j|`$
 
-- Encourages sparsity (some $\theta_{j} = 0$)
+- Encourages sparsity (some $`\theta_j = 0`$)
 - Useful for variable selection
 
-**L2 (Ridge)**: $P(\theta) = \sum_{j}\theta_{j}^{2}$
+**L2 (Ridge)**: $`P(\theta) = \sum_j \theta_j^2`$
 
 - Shrinks parameters toward zero
 - Prevents extreme values
 - Equivalent to Gaussian prior
 
 **Elastic Net**:
-$P(\theta) = \alpha\sum_{j}\left| \theta_{j} \right| + (1 - \alpha)\sum_{j}\theta_{j}^{2}$
+$`P(\theta) = \alpha \sum_j |\theta_j| + (1-\alpha) \sum_j \theta_j^2`$
 
 - Combines L1 and L2 benefits
-- $\alpha$ controls the mix
+- $`\alpha`$ controls the mix
 
 ``` r
+
 # Original log-likelihood (maximum at theta = (3,2))
 loglike_simple <- function(theta) -sum((theta - c(3, 2))^2)
 
@@ -394,13 +415,13 @@ cat("  The penalty shrinks the solution toward zero\n")
 
 ## Summary
 
-| Method          | Order     | Information Needed | Best For                        |
-|-----------------|-----------|--------------------|---------------------------------|
-| Gradient Ascent | 1st       | Score only         | Large problems, rough estimates |
-| Newton-Raphson  | 2nd       | Score + Fisher     | High precision, small problems  |
-| BFGS            | Quasi-2nd | Score only         | Good balance                    |
-| Nelder-Mead     | 0th       | Likelihood only    | Robust, derivative-free         |
-| Grid Search     | 0th       | Likelihood only    | Finding starting points         |
+| Method | Order | Information Needed | Best For |
+|----|----|----|----|
+| Gradient Ascent | 1st | Score only | Large problems, rough estimates |
+| Newton-Raphson | 2nd | Score + Fisher | High precision, small problems |
+| BFGS | Quasi-2nd | Score only | Good balance |
+| Nelder-Mead | 0th | Likelihood only | Robust, derivative-free |
+| Grid Search | 0th | Likelihood only | Finding starting points |
 
 The `compositional.mle` package provides composable solvers that can be
 chained (`%>>%`), raced (`%|%`), or restarted

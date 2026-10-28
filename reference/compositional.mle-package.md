@@ -21,7 +21,7 @@ to build sophisticated optimization strategies from simple primitives.
 [`mle_problem`](https://queelius.github.io/compositional.mle/reference/mle_problem.md)
 encapsulates a statistical estimation problem:
 
-- Log-likelihood function
+- Log-likelihood function (or a `likelihood_model` object)
 
 - Optional analytic score and Fisher information (computed numerically
   if not provided)
@@ -33,7 +33,7 @@ encapsulates a statistical estimation problem:
 ## Solver Factories
 
 Solver factories return solver functions with signature
-`(problem, theta0, trace) -> mle_result`:
+`(problem, theta0, trace) -> solver_result`:
 
 - [`gradient_ascent`](https://queelius.github.io/compositional.mle/reference/gradient_ascent.md):
   First-order gradient method
@@ -49,6 +49,19 @@ Solver factories return solver functions with signature
 
 - [`grid_search`](https://queelius.github.io/compositional.mle/reference/grid_search.md):
   Exhaustive grid search
+
+## Result Objects
+
+All solvers return `solver_result` objects (extending
+[`algebraic.mle::mle`](https://queelius.github.io/algebraic.mle/reference/mle.html))
+with:
+
+- `$theta.hat`: MLE estimate
+
+- `$loglike`: Log-likelihood at MLE
+
+- `$solver_info`: Nested list of solver metadata (convergence,
+  iterations, solver name, trace data)
 
 ## Composition Operators
 

@@ -51,8 +51,8 @@ loglike_stoch <- with_subsampling(
 
 # Each call uses different random subsample
 loglike_stoch(c(5, 2))
-#> [1] -218.2995
+#> [1] -196.4806
 loglike_stoch(c(5, 2))  # Different value
-#> [1] -213.796
+#> [1] -214.4539
 # }
 ```
